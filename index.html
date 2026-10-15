@@ -273,6 +273,10 @@ details.card[open]>summary{margin-bottom:10px}
 .seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stats3 .num{font-size:20px;font-weight:600}
+.helpq{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--muted);background:var(--surface);color:var(--muted);font-weight:800;font-size:15px;display:grid;place-items:center;padding:0;line-height:1}
+.helpbox{display:flex;flex-direction:column;gap:12px;padding-bottom:16px}
+.helpbox b{display:block;font-size:17px;margin-bottom:2px}
+.helpbox p{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
 .codebox{background:#fff;border-radius:10px;padding:10px;display:flex;justify-content:center;border:1px solid var(--line)}
 .codebox svg{max-width:100%;height:auto}
 #printArea{display:none}
@@ -306,6 +310,10 @@ details.card[open]>summary{margin-bottom:10px}
 .shutter:active{background:#fff}
 .capbtn{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:16px;min-width:96px}
 .capbtn[aria-pressed="true"]{background:var(--cam);color:var(--cam-ink)}
+.capbtn.vbtn{background:rgba(255,255,255,.14);color:#fff;display:inline-flex;align-items:center;gap:8px}
+.capbtn.vbtn::before{content:"";width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.4)}
+.capbtn.vbtn[aria-pressed="true"]{background:#1E9E55;color:#fff}
+.capbtn.vbtn[aria-pressed="true"]::before{background:#fff}
 .cap .capbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
 .cap .capbar>:first-child{justify-self:start}
 .cap .capbar>:last-child{justify-self:end}
@@ -408,7 +416,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
     <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
     <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar</button></div>
-    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn" id="vVarios" title="Escanear varios productos sin cerrar la cámara">Varios</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
+    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
   </div>
 </section>
 
@@ -1023,19 +1031,29 @@ function scanCode(titulo, opts = {}){
       <div class="captop"><span>${esc(titulo)}</span></div>
       <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
       <div class="scanmsg" id="scMsg" style="opacity:0"></div>
-      <div class="capbar scanbar"><button class="capbtn" id="scCancel">${opts.continuo ? 'Listo<span class="scancount" id="scCount">0</span>' : "Cancelar"}</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false">Luz</button></span></div></div>`;
+      <div class="capbar scanbar"><button class="capbtn" id="scCancel">Cancelar</button><span class="capmid">${opts.varios ? `<button class="capbtn vbtn" id="scVarios" aria-pressed="false">Varios</button>` : ""}${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false">Luz</button></span></div></div>`;
     let done = false, cuenta = 0, msgT = 0;
+    let cont = !!opts.continuo || (opts.varios && ls.get("variosVenta") === "1");
     const v = $("scVideo");
     const finish = (val) => { if (done) return; done = true; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
-    $("scCancel").onclick = () => finish(opts.continuo ? { continuo: true, cuenta } : null);
+    const pintarCancel = () => { const b = $("scCancel"); if (!b) return; b.innerHTML = cont ? `Listo<span class="scancount" id="scCount">${cuenta}</span>` : (cuenta ? `Listo<span class="scancount" id="scCount">${cuenta}</span>` : "Cancelar"); };
+    $("scCancel").onclick = () => finish(cuenta || cont ? { continuo: true, cuenta } : null);
+    const vb = $("scVarios");
+    if (vb){
+      vb.setAttribute("aria-pressed", cont);
+      vb.onclick = () => { cont = !cont; ls.set("variosVenta", cont ? "1" : "0"); vb.setAttribute("aria-pressed", cont); pintarCancel();
+        const m = $("scMsg"); if (m){ m.textContent = cont ? "Varios activado: lee seguido" : "Varios apagado: lee uno y cierra"; m.classList.remove("mal"); m.style.opacity = 1; clearTimeout(msgT); msgT = setTimeout(() => { m.style.opacity = 0; }, 1500); } };
+    }
+    pintarCancel();
     /* Modo varios: cada código se entrega a opts.onCode y la cámara sigue abierta */
     let ultCod = "", ultVisto = 0;
     const entregar = (code, escrito) => {
       const now = performance.now();
       if (code === ultCod && now - ultVisto < 900){ ultVisto = now; return false; }
       ultCod = code; ultVisto = now;
-      if (!opts.continuo){ beep(); setTimeout(() => finish(escrito ? { code, escrito: true } : { code }), 260); return true; }
+      if (!cont){ beep(); setTimeout(() => finish(escrito ? { code, escrito: true, cuenta } : { code, cuenta }), 260); return true; }
       const r = opts.onCode ? opts.onCode(code, escrito) : { ok: true, msg: code };
+      if (r.notFound){ try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} setTimeout(() => finish({ notFound: code, cuenta }), 150); return true; }
       if (r.ok){ cuenta++; beep(); const c = $("scCount"); if (c) c.textContent = cuenta; }
       else { try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} }
       const m = $("scMsg"); if (m){ m.textContent = r.msg; m.classList.toggle("mal", !r.ok); m.style.opacity = 1; clearTimeout(msgT); msgT = setTimeout(() => { if (m) m.style.opacity = 0; }, 1800); }
@@ -1093,8 +1111,8 @@ function scanCode(titulo, opts = {}){
               if (r.length && r[0].rawValue){
                 if (r[0].rawValue === ultCod) ultVisto = performance.now();
                 if (entregar(r[0].rawValue, false)){ marcar(r[0].cornerPoints); return; }
-                if (opts.continuo) marcar(r[0].cornerPoints);
-              } else if (opts.continuo){ const bc = $("scBox"); if (bc && performance.now() - ultVisto > 400) bc.getContext("2d").clearRect(0, 0, bc.width, bc.height); }
+                if (cont) marcar(r[0].cornerPoints);
+              } else if (cont){ const bc = $("scBox"); if (bc && performance.now() - ultVisto > 400) bc.getContext("2d").clearRect(0, 0, bc.width, bc.height); }
             } catch {}
           }
           // Código escrito a mano: se lee solo; se acepta cuando sale igual dos veces seguidas
@@ -1104,7 +1122,7 @@ function scanCode(titulo, opts = {}){
               ocrBusy = false; if (done) return;
               if (!t){ cand = ""; return; }
               if (t === cand){ cand = ""; const fr = $("scFrame"); if (fr) fr.style.borderColor = "#2BD46A"; if (!entregar(t, true) && fr) setTimeout(() => { fr.style.borderColor = ""; }, 600); }
-              else { cand = t; const h = $("scHint"); if (h && !opts.continuo) h.textContent = "Leyendo " + t + "…"; }
+              else { cand = t; const h = $("scHint"); if (h && !cont) h.textContent = "Leyendo " + t + "…"; }
             }).catch(() => { ocrBusy = false; ocrFails++; });
           }
         }
@@ -1372,7 +1390,8 @@ function webLinks(q){
 }
 function notFoundHTML(code, nombre){
   const q = nombre || code;
-  return `<div class="card missing" style="display:flex;flex-direction:column;gap:10px">
+  return `<div class="card missing" style="display:flex;flex-direction:column;gap:10px;position:relative">
+    <button type="button" class="helpq" data-help="nf" aria-label="¿Qué hace cada botón?">?</button>
     <div class="sect" style="color:var(--danger)">No está en el inventario</div>
     ${code?`<div class="num" style="font-size:18px">${esc(code)}</div>`:""}
     ${nombre?`<div style="font-weight:700;font-size:18px">${esc(nombre)}</div>`:""}
@@ -1386,6 +1405,13 @@ function wireNotFound(code, nombre, foto){
   if (p) p.onclick = () => { $("sheetHost").innerHTML = ""; pendFormSheet({ nombre, codigo: code, foto }); };
 }
 
+document.addEventListener("click", (e) => {
+  if (!e.target.closest('[data-help="nf"]')) return;
+  popup("¿Qué hace cada botón?", `<div class="helpbox">
+    <div><b>Agregar</b><p>Registra este producto en tu inventario con nombre, precio, cantidad y foto, para poder venderlo.</p></div>
+    <div><b>Por comprar</b><p>Lo anota en tu lista de compras para pedirlo al proveedor. No lo agrega al inventario.</p></div>
+  </div>`);
+});
 /* ---------- buscar con foto en Google ---------- */
 async function lensSearch(canvas){
   const blob = await canvasBlob(canvas, .85);
@@ -1598,24 +1624,21 @@ $("cart").addEventListener("change", e => {
   const k = e.target.dataset.qv; if (k===undefined) return;
   S.carrito[k].cant = Math.max(1, toNum(e.target.value)||1); saveCartDraft(); renderCart();
 });
-async function escanearVarios(){
-  const faltan = [];
-  const r = await scanCode("Escanear varios", { continuo: true, onCode: (code) => {
+$("vScan").onclick = async () => {
+  const r = await scanCode("Escanear", { varios: true, onCode: (code) => {
     const p = byCode(code);
-    if (!p){ if (!faltan.includes(code)) faltan.push(code); return { ok: false, msg: "No está en inventario: " + code }; }
+    if (!p) return { notFound: true };
     addToCart(p); const it = S.carrito.find(i => i.id === p.id);
     return { ok: true, msg: `+1 ${p.nombre}${it && it.cant > 1 ? ` (${miles(it.cant)})` : ""}` };
   } });
-  if (r && r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
-  if (faltan.length) setTimeout(() => notFoundSheet(faltan[0]), 300);
-}
-$("vVarios").onclick = escanearVarios;
-$("vScan").onclick = async () => {
-  const r = await scanCode("Escanear para la venta");
-  if (!r || !r.code) return;
-  const p = byCode(r.code);
-  if (p){ addToCart(p); toast("Agregado: " + p.nombre); }
-  else notFoundSheet(r.code);
+  if (!r) return;
+  if (r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
+  if (r.notFound){ notFoundSheet(r.notFound); return; }
+  if (r.code){
+    const p = byCode(r.code);
+    if (p){ addToCart(p); toast("Agregado: " + p.nombre); }
+    else notFoundSheet(r.code);
+  }
 };
 $("vQ").addEventListener("input", () => {
   const q = $("vQ").value, r = searchProducts(q, 12), d = $("vDrop");
@@ -2091,7 +2114,8 @@ function renderInv(){
   arr.sort((a,b)=>norm(a.nombre).localeCompare(norm(b.nombre)));
   const qt = q.trim();
   if (!arr.length && qt){
-    $("invList").innerHTML = `<div class="card missing" style="display:flex;flex-direction:column;gap:10px">
+    $("invList").innerHTML = `<div class="card missing" style="display:flex;flex-direction:column;gap:10px;position:relative">
+      <button type="button" class="helpq" data-help="nf" aria-label="¿Qué hace cada botón?">?</button>
       <div class="sect" style="color:var(--danger)">No está en el inventario</div>
       <div style="font-weight:700;font-size:18px;overflow-wrap:anywhere">${esc(qt)}</div>
       <div class="row"><button class="btn ingreso grow" id="sAdd">Agregar</button><button class="btn grow" id="sPend">Por comprar</button></div>
