@@ -208,7 +208,7 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:70
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end}
 .sheet{background:var(--bg);width:100%;border-radius:18px 18px 0 0;max-height:88%;overflow-y:auto;padding-top:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .sheet h2{font-family:var(--f-display);font-weight:800;font-size:24px;text-transform:uppercase;margin:0}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px}
 .tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
@@ -258,6 +258,15 @@ details.card[open]>summary{margin-bottom:10px}
 .iconbtn svg{width:20px;height:20px}
 .fchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .fchip{border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:6px 10px;font-size:14px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.vtog{padding-left:12px;padding-right:12px;gap:6px}
+.vtog::before{content:"";width:16px;height:16px;border-radius:4px;border:2px solid currentColor;flex-shrink:0;box-sizing:border-box}
+.vtog[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.vtog[aria-pressed="true"]::before{background:var(--cam);border-color:var(--cam)}
+.scanmsg{position:absolute;left:12px;right:12px;top:calc(56px + env(safe-area-inset-top,0px));background:rgba(20,120,60,.92);color:#fff;font-weight:700;font-size:17px;padding:12px 14px;border-radius:12px;text-align:center;transition:opacity .25s;pointer-events:none}
+.scanmsg.mal{background:rgba(179,38,30,.92)}
+.scancount{background:var(--cam);color:var(--cam-ink);border-radius:999px;padding:2px 9px;margin-left:6px;font-size:14px}
+#ajSave{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;padding:14px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);font-size:17px}
+#ajForm{padding-bottom:96px}
 .codebox{background:#fff;border-radius:10px;padding:10px;display:flex;justify-content:center;border:1px solid var(--line)}
 .codebox svg{max-width:100%;height:auto}
 #printArea{display:none}
@@ -394,7 +403,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
     <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
     <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar</button></div>
-    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
+    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn vtog" id="vVarios" aria-pressed="false" title="Escanear varios productos sin cerrar la cámara">Varios</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
   </div>
 </section>
 
@@ -510,12 +519,14 @@ details.card[open]>summary{margin-bottom:10px}
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
     <label class="f">Alerta de pocas unidades<input id="aBajo" class="inp num miles" inputmode="numeric"></label>
-    <button class="btn primary" type="submit">Guardar</button>
+    <button class="btn primary" type="submit" id="ajSave">Guardar</button>
     <div class="sect" style="margin-top:10px">Pantalla</div>
     <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
       <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
       <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
     </div>
+    <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
+    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app abre en pantalla completa sin el aviso del navegador.</p>
     <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
     <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:10px">Clave</div>
@@ -1000,11 +1011,25 @@ function scanCode(titulo, opts = {}){
       <div class="scanframe" id="scFrame"></div>
       <div class="captop"><span>${esc(titulo)}</span></div>
       <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
-      <div class="capbar scanbar"><button class="capbtn" id="scCancel">Cancelar</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" hidden aria-pressed="false">Luz</button></span></div></div>`;
-    let done = false;
+      <div class="scanmsg" id="scMsg" style="opacity:0"></div>
+      <div class="capbar scanbar"><button class="capbtn" id="scCancel">${opts.continuo ? 'Listo<span class="scancount" id="scCount">0</span>' : "Cancelar"}</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" hidden aria-pressed="false">Luz</button></span></div></div>`;
+    let done = false, cuenta = 0, msgT = 0;
     const v = $("scVideo");
     const finish = (val) => { if (done) return; done = true; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
-    $("scCancel").onclick = () => finish(null);
+    $("scCancel").onclick = () => finish(opts.continuo ? { continuo: true, cuenta } : null);
+    /* Modo varios: cada código se entrega a opts.onCode y la cámara sigue abierta */
+    let ultCod = "", ultVisto = 0;
+    const entregar = (code, escrito) => {
+      const now = performance.now();
+      if (code === ultCod && now - ultVisto < 900){ ultVisto = now; return false; }
+      ultCod = code; ultVisto = now;
+      if (!opts.continuo){ beep(); setTimeout(() => finish(escrito ? { code, escrito: true } : { code }), 260); return true; }
+      const r = opts.onCode ? opts.onCode(code, escrito) : { ok: true, msg: code };
+      if (r.ok){ cuenta++; beep(); const c = $("scCount"); if (c) c.textContent = cuenta; }
+      else { try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} }
+      const m = $("scMsg"); if (m){ m.textContent = r.msg; m.classList.toggle("mal", !r.ok); m.style.opacity = 1; clearTimeout(msgT); msgT = setTimeout(() => { if (m) m.style.opacity = 0; }, 1800); }
+      return false;
+    };
     const frameCrop = () => {
       const fr = $("scFrame").getBoundingClientRect(), vr = v.getBoundingClientRect();
       const sc = Math.max(vr.width / v.videoWidth, vr.height / v.videoHeight);
@@ -1054,7 +1079,11 @@ function scanCode(titulo, opts = {}){
             try {
               const r = await det.detect(v);
               if (done) return;
-              if (r.length && r[0].rawValue){ marcar(r[0].cornerPoints); beep(); const code = r[0].rawValue; setTimeout(() => finish({ code }), 260); return; }
+              if (r.length && r[0].rawValue){
+                if (r[0].rawValue === ultCod) ultVisto = performance.now();
+                if (entregar(r[0].rawValue, false)){ marcar(r[0].cornerPoints); return; }
+                if (opts.continuo) marcar(r[0].cornerPoints);
+              } else if (opts.continuo){ const bc = $("scBox"); if (bc && performance.now() - ultVisto > 400) bc.getContext("2d").clearRect(0, 0, bc.width, bc.height); }
             } catch {}
           }
           // Código escrito a mano: se lee solo; se acepta cuando sale igual dos veces seguidas
@@ -1063,8 +1092,8 @@ function scanCode(titulo, opts = {}){
             ocrQuick(frameCrop()).then((t) => {
               ocrBusy = false; if (done) return;
               if (!t){ cand = ""; return; }
-              if (t === cand){ beep(); const fr = $("scFrame"); if (fr) fr.style.borderColor = "#2BD46A"; setTimeout(() => finish({ code: t, escrito: true }), 260); }
-              else { cand = t; const h = $("scHint"); if (h) h.textContent = "Leyendo " + t + "…"; }
+              if (t === cand){ cand = ""; const fr = $("scFrame"); if (fr) fr.style.borderColor = "#2BD46A"; if (!entregar(t, true) && fr) setTimeout(() => { fr.style.borderColor = ""; }, 600); }
+              else { cand = t; const h = $("scHint"); if (h && !opts.continuo) h.textContent = "Leyendo " + t + "…"; }
             }).catch(() => { ocrBusy = false; ocrFails++; });
           }
         }
@@ -1557,7 +1586,22 @@ $("cart").addEventListener("change", e => {
   const k = e.target.dataset.qv; if (k===undefined) return;
   S.carrito[k].cant = Math.max(1, toNum(e.target.value)||1); saveCartDraft(); renderCart();
 });
+const variosOn = () => ls.get("variosVenta") === "1";
+$("vVarios").setAttribute("aria-pressed", variosOn());
+$("vVarios").onclick = () => { const on = !variosOn(); ls.set("variosVenta", on ? "1" : "0"); $("vVarios").setAttribute("aria-pressed", on); toast(on ? "Varios: la cámara queda abierta para escanear seguido" : "La cámara se cierra después de cada producto", 2200); };
 $("vScan").onclick = async () => {
+  if (variosOn()){
+    const faltan = [];
+    const r = await scanCode("Escanear productos", { continuo: true, onCode: (code) => {
+      const p = byCode(code);
+      if (!p){ if (!faltan.includes(code)) faltan.push(code); return { ok: false, msg: "No está en inventario: " + code }; }
+      addToCart(p); const it = S.carrito.find(i => i.id === p.id);
+      return { ok: true, msg: `+1 ${p.nombre}${it && it.cant > 1 ? ` (${miles(it.cant)})` : ""}` };
+    } });
+    if (r && r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
+    if (faltan.length) setTimeout(() => notFoundSheet(faltan[0]), 300);
+    return;
+  }
   const r = await scanCode("Escanear para la venta");
   if (!r || !r.code) return;
   const p = byCode(r.code);
@@ -2886,6 +2930,12 @@ fsUpdate();
   (vv || window).addEventListener("resize", check);
   window.addEventListener("orientationchange", () => { baseH = 0; setTimeout(() => { baseH = curH(); check(); }, 400); });
 })();
+
+/* ---------- instalar como app ---------- */
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; $("aInstalar").hidden = false; $("aInstNota").hidden = false; });
+window.addEventListener("appinstalled", () => { installEvt = null; $("aInstalar").hidden = true; toast("App instalada. Ábrela desde su ícono."); });
+$("aInstalar").onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch {} installEvt = null; $("aInstalar").hidden = true; };
 
 /* ---------- modo sin conexión ---------- */
 if ("serviceWorker" in navigator && location.protocol === "https:"){
