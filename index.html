@@ -460,6 +460,7 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Código propio
       <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off">
     </label>
+    <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
     <p class="note" style="margin:-6px 0 0">Si lo dejas vacío, al guardar se crea uno con la fecha y la categoría.</p>
     <div id="iExiste" hidden></div>
     <input id="iCodigo" type="hidden">
@@ -1155,7 +1156,7 @@ function scanCode(titulo, opts = {}){
             } catch {}
           }
           // Código escrito a mano: se lee solo; se acepta cuando sale igual dos veces seguidas
-          if (ocrOn && !ocrBusy && now - lastOcr > (soloEscrito ? 500 : 1000) && ocrFails < 3){
+          if (ocrOn && !ocrBusy && now - lastOcr > (soloEscrito ? 350 : 600) && ocrFails < 3){
             ocrBusy = true; lastOcr = now;
             ocrQuick(frameCrop()).then((t) => {
               ocrBusy = false; if (done) return;
@@ -1907,7 +1908,7 @@ function openIngreso(opts={}){
   $("iCantLbl").textContent = p ? "Existencias" : "Cantidad";
   $("iBorrar").hidden = !p;
   $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar";
-  $("iCodigo").value = ""; S.iOrigTipo = "";
+  $("iCodigo").value = ""; S.iOrigTipo = ""; $("iCosto").dataset.auto = ""; $("iPrecio").dataset.auto = ""; $("iCodInfo").hidden = true;
   if (p){
     let cod = p.codigo||"", cp = p.codigoPropio||"";
     if (!cp && /^FR\d+$/i.test(cod)){ cp = cod; cod = ""; }   /* códigos automáticos viejos pasan a ser el código propio */
@@ -1926,6 +1927,25 @@ function openIngreso(opts={}){
   }
   show("ingreso");
 }
+/* Código escrito a mano (ej. 9195x20):
+   9 = inicio · 1 = parte entera del margen · 95 = valor · x = 00 · 20 = decimales del margen
+   → costo 9.500, ganancia ×1,20 (20 %), precio 11.400 */
+function descifrarCodigo(c){
+  const m = String(c||"").trim().replace(/X/g,"x").match(/^9(\d)(\d+)x(\d{1,2})$/);
+  if (!m) return null;
+  const factor = Number(m[1] + "." + m[3]), costo = Number(m[2]) * 100;
+  if (!costo || !factor) return null;
+  return { costo, factor, ganancia: Math.round((factor - 1) * 100), precio: Math.round(costo * factor / 100) * 100 };
+}
+function aplicarCodigoPropio(){
+  const info = $("iCodInfo"), d = descifrarCodigo($("iCodP").value);
+  if (!d){ info.hidden = true; return; }
+  info.hidden = false;
+  info.innerHTML = `Costo <b>${fmt(d.costo)}</b> · Ganancia <b>${d.ganancia}%</b> · Precio <b>${fmt(d.precio)}</b>`;
+  const c = $("iCosto"), pr = $("iPrecio");
+  if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; }
+  if (!pr.value.trim() || pr.dataset.auto === "1"){ pr.value = miles(d.precio); pr.dataset.auto = "1"; }
+}
 /* Código escrito a mano (ej. 9585x56) */
 const esEscrito = (c) => /^\d{2,}\s*x\s*\d+$/i.test(String(c||"").trim());
 const tipoCodigo = (c, t) => t === "escrito" || esEscrito(c) ? "Escrito en el producto" : t === "qr" || !/^\d{6,14}$/.test(String(c||"")) ? "Código QR" : "Código de barras";
@@ -1939,6 +1959,7 @@ function setCodigoLeido(code, escrito){
   checkExiste();
 }
 function pintarOrig(){
+  aplicarCodigoPropio();
   const cod = $("iCodigo").value.trim(), cp = $("iCodP").value.trim(), box = $("iOrigTxt");
   if (cod){ box.innerHTML = `<span class="num">${esc(cod)}</span><span class="origtipo">${tipoCodigo(cod, S.iOrigTipo)}</span>`; $("iOrigQuitar").hidden = false; }
   else if (cp && (S.iOrigTipo === "escrito" || esEscrito(cp))){ box.innerHTML = `<span class="num">${esc(cp)}</span><span class="origtipo">Escrito en el producto</span><span class="note">Es el mismo código propio</span>`; $("iOrigQuitar").hidden = true; }
@@ -1978,6 +1999,7 @@ function sumarSheet(p){
 }
 $("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); });
 $("iCodP").addEventListener("change", checkExiste);
+["iCosto","iPrecio"].forEach(id => $(id).addEventListener("input", () => { $(id).dataset.auto = ""; }));
 $("iCodP").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
 $("iOrigQuitar").onclick = () => { $("iCodigo").value = ""; S.iOrigTipo = ""; checkExiste(); };
 $("iScan").onclick = async () => {
@@ -2514,6 +2536,7 @@ function prepOCR(src){
   return c;
 }
 async function readHandwritten(src){
+  try { const r = await leerEscritoIA(src); if (r && r.conf >= 0.6) return { text: r.code, ok: r.conf >= 0.8 }; } catch {}
   const w = await loadOCR(); w._psm7 = false;
   const img = prepOCR(src);
   const clean = (t) => String(t||"").replace(/\s+/g, "").replace(/X/g, "x");
@@ -2528,14 +2551,162 @@ async function readHandwritten(src){
   }
   return { text: best, ok: false };
 }
-const PATRON_PROPIO = /^\d{2,}x\d{1,}$/;
+/* ---------- lector de código escrito a mano: separa cada carácter y lo reconoce con un modelo pequeño (0-9 y x) ---------- */
+let digP = null;
+function loadDigitos(){
+  if (digP) return digP;
+  const abs = (f) => new URL(f, location.href).href;
+  digP = new Promise((res, rej) => {
+    if (window.ort) return res();
+    const sc = document.createElement("script"); sc.src = abs("ai/ort.wasm.min.js"); sc.onload = res; sc.onerror = () => rej(new Error("ia")); document.head.appendChild(sc);
+  }).then(() => {
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    return ort.InferenceSession.create(abs("ocr/digitos.onnx"), { executionProviders: ["wasm"] });
+  });
+  digP.catch(() => { digP = null; });
+  return digP;
+}
+/* Imagen → tinta (1) / fondo (0), con umbral automático */
+function tintaMask(src, H){
+  const k = H / src.height, W = Math.max(8, Math.min(1400, Math.round(src.width * k)));
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(src, 0, 0, W, H);
+  const d = x.getImageData(0, 0, W, H).data, g = new Float32Array(W*H);
+  for (let i = 0, j = 0; j < g.length; i += 4, j++) g[j] = d[i]*0.3 + d[i+1]*0.59 + d[i+2]*0.11;
+  /* fondo local (luz desigual): restar un promedio grande por columnas */
+  const R = Math.round(H*0.6), col = new Float32Array(W);
+  for (let xx = 0; xx < W; xx++){ let s = 0; for (let y = 0; y < H; y++) s += g[y*W+xx]; col[xx] = s / H; }
+  const bg = new Float32Array(W); let acc = 0; const pre = [0]; for (let xx = 0; xx < W; xx++){ acc += col[xx]; pre.push(acc); }
+  for (let xx = 0; xx < W; xx++){ const a = Math.max(0, xx-R), b = Math.min(W, xx+R+1); bg[xx] = (pre[b]-pre[a])/(b-a); }
+  const v = new Float32Array(W*H); let mn = 1e9, mx = -1e9;
+  for (let y = 0; y < H; y++) for (let xx = 0; xx < W; xx++){ const t = g[y*W+xx] - bg[xx]; v[y*W+xx] = t; if (t < mn) mn = t; if (t > mx) mx = t; }
+  const hist = new Array(256).fill(0), q = new Uint8Array(W*H), rg = Math.max(1, mx - mn);
+  for (let j = 0; j < v.length; j++){ q[j] = Math.round((v[j]-mn)*255/rg); hist[q[j]]++; }
+  let sum = 0; for (let t = 0; t < 256; t++) sum += t*hist[t];
+  let sB = 0, wB = 0, best = 0, th = 128;
+  for (let t = 0; t < 256; t++){ wB += hist[t]; if (!wB) continue; const wF = q.length - wB; if (!wF) break; sB += t*hist[t]; const mB = sB/wB, mF = (sum-sB)/wF, bt = wB*wF*(mB-mF)**2; if (bt > best){ best = bt; th = t; } }
+  let dark = 0; for (let j = 0; j < q.length; j++) if (q[j] < th) dark++;
+  const inv = dark > q.length/2, m = new Uint8Array(W*H);
+  for (let j = 0; j < q.length; j++){ const on = q[j] < th; m[j] = (inv ? !on : on) ? 1 : 0; }
+  return { m, W, H, contraste: rg };
+}
+/* Grupos de tinta conectados = caracteres */
+function componentes(m, W, H){
+  const lab = new Int32Array(W*H), comps = [], st = [];
+  for (let s = 0; s < W*H; s++){
+    if (!m[s] || lab[s]) continue;
+    const id = comps.length + 1; let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1, n = 0; lab[s] = id; st.push(s);
+    while (st.length){ const p = st.pop(), y = (p / W) | 0, x = p - y*W; n++;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++){ const yy = y+dy, xx = x+dx; if (yy < 0 || yy >= H || xx < 0 || xx >= W) continue; const q = yy*W+xx; if (m[q] && !lab[q]){ lab[q] = id; st.push(q); } } }
+    comps.push({ ids: [id], x0, y0, x1, y1, n });
+  }
+  return { lab, comps };
+}
+function caracteres(src){
+  const H = 96, { m, W, contraste } = tintaMask(src, H);
+  if (contraste < 25) return { lab: null, chars: [], W, H };
+  let { lab, comps } = componentes(m, W, H);
+  comps.forEach(c => { c.w = c.x1-c.x0+1; c.h = c.y1-c.y0+1; c.cy = (c.y0+c.y1)/2; });
+  /* fuera: puntos, rayas, bordes de la etiqueta */
+  comps = comps.filter(c => c.n >= 12 && c.h >= H*0.18 && !(c.h >= H*0.92) && !(c.w > c.h*3.2 && c.h < H*0.35) && !((c.x0 === 0 || c.x1 === W-1) && c.w < c.h*0.4));
+  if (!comps.length) return { lab, chars: [], W, H };
+  const altos = comps.map(c => c.h).sort((a,b) => b-a), hRef = altos[Math.min(2, altos.length-1)];
+  const lineaY = comps.filter(c => c.h >= hRef*0.7).map(c => c.cy).sort((a,b) => a-b); const cyM = lineaY[lineaY.length >> 1];
+  comps = comps.filter(c => c.h >= hRef*0.35 && Math.abs(c.cy - cyM) < hRef*0.6);
+  comps.sort((a,b) => a.x0 - b.x0);
+  /* unir partes del mismo carácter (ej. la raya del 5) */
+  const out = [];
+  for (const c of comps){
+    const p = out[out.length-1];
+    if (p){ const ov = Math.min(p.x1, c.x1) - Math.max(p.x0, c.x0); if (ov > Math.min(p.w, c.w)*0.55){ p.ids.push(...c.ids); p.x0 = Math.min(p.x0,c.x0); p.x1 = Math.max(p.x1,c.x1); p.y0 = Math.min(p.y0,c.y0); p.y1 = Math.max(p.y1,c.y1); p.w = p.x1-p.x0+1; p.h = p.y1-p.y0+1; p.n += c.n; continue; } }
+    out.push({ ...c, ids: [...c.ids] });
+  }
+  /* números pegados: para cada grupo ancho se prueban 1, 2 o 3 partes; luego gana la lectura más probable */
+  for (const c of out){
+    const proj = new Float32Array(c.w);
+    for (let y = c.y0; y <= c.y1; y++) for (let x = c.x0; x <= c.x1; x++){ const l = lab[y*W+x]; if (l && c.ids.includes(l)) proj[x-c.x0]++; }
+    const cortes = (k) => { const ps = []; let prev = 0;
+      for (let i = 1; i < k; i++){ const e = Math.round(c.w*i/k), r = Math.round(c.w/(k*2.5)); let bx = e, bv = 1e9;
+        for (let x = Math.max(prev+3, e-r); x <= Math.min(c.w-3, e+r); x++){ const v = proj[x] + Math.abs(x-e)*0.15; if (v < bv){ bv = v; bx = x; } }
+        ps.push({ ...c, x0: c.x0+prev, x1: c.x0+bx-1, w: bx-prev }); prev = bx; }
+      ps.push({ ...c, x0: c.x0+prev, x1: c.x1, w: c.w-prev }); return ps; };
+    c.hyps = [[c]];
+    const r = c.w / c.h;
+    if (r > 0.7) c.hyps.push(cortes(2));
+    if (r > 1.1) c.hyps.push(cortes(3));
+    if (r > 1.6) c.hyps.push(cortes(4));
+  }
+  return { lab, chars: out, W, H };
+}
+/* Cada carácter → 28x28 como los datos con que se entrenó (blanco sobre negro, centrado por masa) */
+function a28(lab, W, ch){
+  let y0 = 1e9, y1 = -1; const w = ch.x1-ch.x0+1;
+  for (let y = 0; y < (lab.length / W); y++) for (let x = ch.x0; x <= ch.x1; x++){ const l = lab[y*W+x]; if (l && ch.ids.includes(l)){ if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+  if (y1 < 0) return null;
+  const h = y1-y0+1, c = document.createElement("canvas"); c.width = w; c.height = h; const cx = c.getContext("2d"), im = cx.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const l = lab[(y+y0)*W + x + ch.x0]; const on = l && ch.ids.includes(l); const o = (y*w+x)*4; im.data[o] = im.data[o+1] = im.data[o+2] = on ? 255 : 0; im.data[o+3] = 255; }
+  cx.putImageData(im, 0, 0);
+  const k = 20 / Math.max(w, h), tw = Math.max(1, Math.round(w*k)), th = Math.max(1, Math.round(h*k));
+  const t = document.createElement("canvas"); t.width = 28; t.height = 28; const tx = t.getContext("2d", { willReadFrequently: true });
+  tx.fillStyle = "#000"; tx.fillRect(0,0,28,28); tx.imageSmoothingEnabled = true; tx.imageSmoothingQuality = "high";
+  tx.drawImage(c, (28-tw)/2, (28-th)/2, tw, th);
+  const d = tx.getImageData(0,0,28,28).data, f = new Float32Array(784); let s = 0, sx = 0, sy = 0;
+  for (let i = 0; i < 784; i++){ const v = d[i*4] / 255; f[i] = v; s += v; sx += v*(i%28); sy += v*((i/28)|0); }
+  if (!s) return null;
+  const dx = Math.round(14 - sx/s), dy = Math.round(14 - sy/s), g = new Float32Array(784);
+  for (let y = 0; y < 28; y++) for (let x = 0; x < 28; x++){ const xx = x-dx, yy = y-dy; if (xx >= 0 && xx < 28 && yy >= 0 && yy < 28) g[y*28+x] = f[yy*28+xx]; }
+  return g;
+}
+const ETIQ = ["0","1","2","3","4","5","6","7","8","9","x",""];
+const PATRON_CODIGO = /^9\d{2,}x\d{2}$/;
+/* Lee el código: devuelve { code, conf } solo si cumple la forma 9…x00 */
+async function leerEscritoIA(src){
+  const sess = await loadDigitos();
+  const { lab, chars, W } = caracteres(src);
+  if (chars.length < 3 || chars.length > 12) return null;
+  /* todas las piezas posibles, clasificadas de una vez */
+  const piezas = []; chars.forEach(c => c.hyps.forEach(h => h.forEach(p => { p.v = a28(lab, W, p); if (p.v) piezas.push(p); })));
+  if (!piezas.length) return null;
+  const inp = new Float32Array(piezas.length*784); piezas.forEach((p,i) => inp.set(p.v, i*784));
+  const r = await sess.run({ img: new ort.Tensor("float32", inp, [piezas.length, 1, 28, 28]) });
+  const o = r.out.data;
+  piezas.forEach((p,i) => { const z = Array.from(o.slice(i*12, i*12+12)), mx = Math.max(...z), e = z.map(v => Math.exp(v-mx)), s = e.reduce((a,b) => a+b, 0);
+    p.op = e.map((v,k) => [ETIQ[k], v/s]).sort((a,b) => b[1]-a[1]).slice(0,3).filter((t,j) => j === 0 || t[1] > 0.04); });
+  /* combinaciones de cortes × opciones por pieza; gana el promedio de probabilidad más alto que tenga la forma 9…x00 */
+  let best = null;
+  const combos = []; const rc = (i, acc) => { if (combos.length > 200) return; if (i === chars.length){ combos.push(acc); return; } chars[i].hyps.forEach(h => { if (h.every(p => p.v)) rc(i+1, acc.concat(h)); }); };
+  rc(0, []);
+  for (const ps of combos){
+    if (ps.length < 6 || ps.length > 12) continue;
+    let mejorLocal = null;
+    const rec = (i, str, lp) => {
+      if (i === ps.length){ if (PATRON_CODIGO.test(str) && (!mejorLocal || lp > mejorLocal.lp)) mejorLocal = { code: str, lp }; return; }
+      for (const [l, p] of ps[i].op) rec(i+1, str + l, lp + Math.log(Math.max(p, 1e-6)));
+    };
+    rec(0, "", 0);
+    if (mejorLocal){ const conf = Math.exp(mejorLocal.lp / ps.length); if (!best || conf > best.conf) best = { code: mejorLocal.code, conf, crudo: ps.map(p => p.op[0][0]).join("") }; }
+  }
+  return best;
+}
+
+/* Lectura rápida en vivo: primero el lector propio; si no carga, el de texto */
+let iaEscritoMal = 0;
 async function ocrQuick(src){
+  if (iaEscritoMal < 2){
+    try { const r = await leerEscritoIA(src); return r && r.conf >= 0.75 ? r.code : null; }
+    catch { iaEscritoMal++; }
+  }
+  return ocrQuickTess(src);
+}
+const PATRON_PROPIO = /^\d{2,}x\d{1,}$/;
+async function ocrQuickTess(src){
   const w = await loadOCR();
   if (!w._psm7){ await w.setParameters({ tessedit_pageseg_mode: "7" }); w._psm7 = true; }
   const { data } = await w.recognize(prepOCR(src));
   const t = String(data.text||"").replace(/\s+/g, "").replace(/X/g, "x");
-  const m = t.match(/\d{2,}x\d{1,}/);
-  return m && (data.confidence || 0) >= 40 ? m[0] : null;
+  const m = t.match(/9\d{2,}x\d{2}/);
+  return m && (data.confidence || 0) >= 30 ? m[0] : null;
 }
 function confirmCodeSheet(text, ok){
   return new Promise((resolve) => {
