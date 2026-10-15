@@ -590,6 +590,11 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Logo en la foto
       <select id="aLogoPos" class="inp"><option value="esquina">En la esquina</option><option value="fondo">Suave de fondo</option><option value="ninguno">No poner logo</option></select>
     </label>
+    <div class="sect" style="margin-top:10px">Etiqueta</div>
+    <p class="note" style="margin:0">Toca lo que quieres que salga en la etiqueta. El código de barras lleva el código propio.</p>
+    <div class="tabs" id="aEtqOpts"></div>
+    <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" placeholder="Ej: Garantía 3 meses" maxlength="40"></label>
+    <div class="recibo-wrap" id="aEtqPrev" style="align-self:stretch;flex-shrink:0"></div>
     <div class="sect" style="margin-top:10px">Copias de seguridad</div>
     <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Solo guarda si hubo ventas o cambios.</small></span><span class="tg"></span></button>
     <label class="f">Frecuencia
@@ -2107,7 +2112,7 @@ $("ingForm").onsubmit = async (e) => {
     if (S.editId) await S.db.doc("productos/"+S.editId).update(data);
     else await S.db.collection("productos").add({ ...data, creado: Date.now() });
     toast(S.editId ? "Cambios guardados" : "Guardado: "+nombre);
-    if (!S.editId && auto && !codigo) { etiqueta({ codigo: codigoPropio, nombre, precio }); }
+    if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
     else back();
   } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revisa la conexión."; }
   btn.disabled = false;
@@ -2115,29 +2120,69 @@ $("ingForm").onsubmit = async (e) => {
 $("iBorrar").onclick = () => confirmar("¿Eliminar “"+$("iNombre").value+"” del inventario?", "Eliminar", async () => {
   try { await S.db.doc("productos/"+S.editId).delete(); toast("Producto eliminado"); back(); } catch { toast("No se pudo eliminar."); }
 });
-$("iEtiqueta").onclick = () => etiqueta({ codigo:$("iCodP").value.trim() || $("iCodigo").value.trim(), nombre:$("iNombre").value.trim(), precio:toNum($("iPrecio").value) });
+$("iEtiqueta").onclick = () => { const pv = $("iProv").value, ed = S.editId ? S.productos.find(x => x.id === S.editId) : null;
+  etiqueta({ codigoPropio: $("iCodP").value.trim(), codigo: $("iCodigo").value.trim(), nombre: $("iNombre").value.trim(), precio: toNum($("iPrecio").value), proveedorId: pv && pv !== "__nuevo" ? pv : "", creado: ed?.creado || Date.now() }); };
 
-function etiquetaCanvas(p){
-  const W = Number(S.config?.papel)||384, c = document.createElement("canvas"), bc = document.createElement("canvas");
-  JsBarcode(bc, p.codigo, { format:"CODE128", width: W>=576?3:2, height:80, fontSize:20, margin:4, displayValue:true });
-  const H = 16 + 30 + 30 + bc.height + 16;
-  c.width=W; c.height=H; const x=c.getContext("2d");
-  x.fillStyle="#fff"; x.fillRect(0,0,W,H); x.fillStyle="#000"; x.textAlign="center"; x.textBaseline="top";
-  x.font='700 22px "IBM Plex Mono", monospace'; x.fillText((p.nombre||"").slice(0, Math.floor(W/13)), W/2, 12);
-  x.font='700 26px "IBM Plex Mono", monospace'; x.fillText(fmt(p.precio), W/2, 42);
-  x.drawImage(bc, Math.max(0,(W-bc.width)/2), 78, Math.min(bc.width,W), bc.height);
-  return c;
+/* ---------- etiqueta: se escoge en Ajustes qué sale ---------- */
+const ETQ_CAMPOS = [["tienda","Nombre de la ferretería"],["nombre","Nombre del producto"],["precio","Precio"],["barras","Código de barras"],["codigo","Código debajo de las barras"],["prov","Código del proveedor"],["fecha","Fecha"]];
+const ETQ_DEF = { tienda:true, nombre:true, precio:false, barras:true, codigo:true, prov:true, fecha:true };
+function etqOpts(){ return { ...ETQ_DEF, ...(S.config?.etq || {}) }; }
+function etqTexto(x, t, maxW){ if (x.measureText(t).width <= maxW) return [t];
+  const ws = String(t).split(/\s+/), ls = []; let cur = "";
+  for (const w of ws){ const n = cur ? cur + " " + w : w; if (x.measureText(n).width <= maxW) cur = n; else { if (cur) ls.push(cur); cur = w; } }
+  if (cur) ls.push(cur); return ls.slice(0, 2); }
+function etiquetaCanvas(p, o = etqOpts()){
+  const W = Number(S.config?.papel)||384, big = W >= 576 ? 1.4 : 1, pad = 10;
+  const c = document.createElement("canvas"); c.width = W; c.height = 900; const x = c.getContext("2d");
+  x.fillStyle = "#fff"; x.fillRect(0, 0, W, c.height); x.fillStyle = "#000"; x.textAlign = "center"; x.textBaseline = "top";
+  let y = pad; const linea = (txt, size, peso = 700, fam = '"Barlow Condensed", "IBM Plex Mono", sans-serif') => {
+    x.font = `${peso} ${Math.round(size*big)}px ${fam}`;
+    for (const l of etqTexto(x, txt, W - pad*2)){ x.fillText(l, W/2, y); y += Math.round(size*big*1.12); } y += 2; };
+  const cod = p.codigoPropio || p.codigo || "";
+  if (o.tienda && S.config?.nombre) linea(String(S.config.nombre).toUpperCase(), 20, 800);
+  if (o.nombre && p.nombre) linea(p.nombre, 24, 700);
+  if (o.precio && p.precio) linea(fmt(p.precio), 32, 800);
+  if (o.barras && cod && window.JsBarcode){
+    const bc = document.createElement("canvas");
+    try { JsBarcode(bc, cod, { format:"CODE128", width: W >= 576 ? 3 : 2, height: Math.round(70*big), margin: 0, displayValue: false });
+      const bw = Math.min(bc.width, W - pad*2); y += 4; x.drawImage(bc, (W - bw)/2, y, bw, bc.height); y += bc.height + 4; } catch {}
+  }
+  if (o.codigo && cod) linea(cod, 24, 600, '"IBM Plex Mono", monospace');
+  const pie = [];
+  if (o.prov){ const pv = provById(p.proveedorId); const t = pv ? (pv.codigo || pv.nombre) : ""; if (t) pie.push("Prov: " + t); }
+  if (o.fecha) pie.push(fFecha(p.creado || Date.now()));
+  if (pie.length) linea(pie.join("   "), 18, 600, '"IBM Plex Mono", monospace');
+  if (S.config?.etqExtra) linea(S.config.etqExtra, 18, 600);
+  const out = document.createElement("canvas"); out.width = W; out.height = y + pad;
+  out.getContext("2d").drawImage(c, 0, 0); return out;
 }
+function etqChips(box, o, alCambiar){
+  box.innerHTML = ETQ_CAMPOS.map(([k, t]) => `<button type="button" data-etqk="${k}" aria-pressed="${!!o[k]}">${t}</button>`).join("");
+  box.onclick = (e) => { const b = e.target.closest("[data-etqk]"); if (!b) return; o[b.dataset.etqk] = !o[b.dataset.etqk]; b.setAttribute("aria-pressed", o[b.dataset.etqk]); alCambiar(o); };
+}
+const ETQ_MUESTRA = () => ({ codigoPropio: "9195x20", nombre: "Martillo de uña 16 oz", precio: 9500, proveedorId: (S.provs||[])[0]?.id || "", creado: Date.now() });
+function pintarEtqAjustes(){
+  const box = $("aEtqOpts"); if (!box) return;
+  const o = etqOpts();
+  const prev = () => { const w = $("aEtqPrev"); w.innerHTML = ""; const c = etiquetaCanvas(ETQ_MUESTRA(), o); c.style.width = Math.min(c.width, 320) + "px"; c.style.maxWidth = "100%"; w.appendChild(c); };
+  etqChips(box, o, (n) => { prev(); cfgSet({ etq: { ...n } }); });
+  $("aEtqExtra").value = S.config?.etqExtra || "";
+  prev();
+}
+$("aEtqExtra").addEventListener("change", async () => { await cfgSet({ etqExtra: $("aEtqExtra").value.trim() }, "Listo"); S.config.etqExtra = $("aEtqExtra").value.trim(); pintarEtqAjustes(); });
 function etiqueta(p){
-  if (!p.codigo || !window.JsBarcode){ back(); return; }
-  sheet(`<h2>Etiqueta</h2><div class="recibo-wrap" id="etqWrap"></div>
+  if (!(p.codigoPropio || p.codigo) || !window.JsBarcode){ if (!$("ingreso").hidden) back(); return; }
+  const o = etqOpts();
+  sheet(`<h2>Etiqueta</h2><div class="tabs" id="etqOpts"></div><div class="recibo-wrap" id="etqWrap" style="flex-shrink:0"></div>
     <div class="row"><button class="btn grow" id="etqCerrar">Listo</button><button class="btn ingreso grow" id="etqPrint">Imprimir</button></div>
     <div class="row">${navigator.bluetooth?`<button class="btn grow" id="etqBT">Bluetooth</button>`:""}<button class="btn grow" id="etqSave">Compartir</button></div>`,
     (el, close) => {
-      const c = etiquetaCanvas(p); el.querySelector("#etqWrap").appendChild(c);
+      let c;
+      const pintar = () => { const w = el.querySelector("#etqWrap"); w.innerHTML = ""; c = etiquetaCanvas(p, o); c.style.maxWidth = "100%"; w.appendChild(c); };
+      etqChips(el.querySelector("#etqOpts"), o, (n) => { pintar(); cfgSet({ etq: { ...n } }); });
+      pintar();
       el.querySelector("#etqCerrar").onclick = () => { close(); if (!$("ingreso").hidden) back(); };
-      const s = el.querySelector("#etqSave");
-      s.onclick = async () => { const b = await new Promise(r=>c.toBlob(r,"image/png")); shareFile(b, `etiqueta-${p.codigo}.png`); };
+      el.querySelector("#etqSave").onclick = async () => { const b = await new Promise(r=>c.toBlob(r,"image/png")); shareFile(b, `etiqueta-${p.codigoPropio || p.codigo}.png`); };
       el.querySelector("#etqPrint").onclick = () => printCanvas(c);
       const bt = el.querySelector("#etqBT"); if (bt) bt.onclick = () => printBT(c, bt);
     });
@@ -2242,6 +2287,7 @@ function fillAjustes(){
   $("aAutoMin").value = String(c.autoMin || 10);
   $("aRecordar").value = String(c.recordarDias ?? 7);
   $("aArchivo").value = c.copiaArchivo || "hora";
+  try { pintarEtqAjustes(); } catch {}
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
   $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
 }
