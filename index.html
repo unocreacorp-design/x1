@@ -267,6 +267,12 @@ details.card[open]>summary{margin-bottom:10px}
 .scancount{background:var(--cam);color:var(--cam-ink);border-radius:999px;padding:2px 9px;margin-left:6px;font-size:14px}
 #ajSave{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;padding:14px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);font-size:17px}
 #ajForm{padding-bottom:96px}
+.tabsbar{background:var(--surface);border-bottom:1px solid var(--line);padding-block:8px}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
+.seg3 button{border:0;background:none;border-radius:9px;padding:10px 4px;font-weight:700;font-size:15px;color:var(--muted)}
+.seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats3 .num{font-size:20px;font-weight:600}
 .codebox{background:#fff;border-radius:10px;padding:10px;display:flex;justify-content:center;border:1px solid var(--line)}
 .codebox svg{max-width:100%;height:auto}
 #printArea{display:none}
@@ -300,6 +306,9 @@ details.card[open]>summary{margin-bottom:10px}
 .shutter:active{background:#fff}
 .capbtn{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:16px;min-width:96px}
 .capbtn[aria-pressed="true"]{background:var(--cam);color:var(--cam-ink)}
+.cap .capbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.cap .capbar>:first-child{justify-self:start}
+.cap .capbar>:last-child{justify-self:end}
 #camara #live{aspect-ratio:auto;height:min(64vh,620px)}
 #liveBox{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .engine{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
@@ -355,10 +364,6 @@ details.card[open]>summary{margin-bottom:10px}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></svg>
       <div class="t">Venta</div>
     </button>
-    <button class="big b-ingreso" id="goIngreso">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>
-      <div class="t">Ingresar</div>
-    </button>
   </div>
 </section>
 
@@ -394,7 +399,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="cart"></div>
     <details class="card" id="vCliBox"><summary>Cliente</summary>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <label class="f">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off"></label>
+        <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
         <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" placeholder="Opcional" autocomplete="off"></label>
       </div>
     </details>
@@ -403,7 +408,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
     <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
     <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar</button></div>
-    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn vtog" id="vVarios" aria-pressed="false" title="Escanear varios productos sin cerrar la cámara">Varios</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
+    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn" id="vVarios" title="Escanear varios productos sin cerrar la cámara">Varios</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
   </div>
 </section>
 
@@ -504,6 +509,15 @@ details.card[open]>summary{margin-bottom:10px}
 <!-- AJUSTES -->
 <section id="ajustes" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--muted)"></span><h1>Ajustes</h1></div>
+  <div class="tabsbar gut"><div class="seg3" id="ajTabs" role="tablist"><button type="button" data-tab="app" aria-pressed="true">Ajustes</button><button type="button" data-tab="cli" aria-pressed="false">Clientes</button><button type="button" data-tab="prov" aria-pressed="false">Proveedores</button></div></div>
+  <div class="body gut" id="tabCli" hidden>
+    <div class="row"><input id="cliQ" class="inp grow" placeholder="Nombre, NIT o teléfono" autocomplete="off"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
+    <div id="cliList"></div>
+  </div>
+  <div class="body gut" id="tabProv" hidden>
+    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre o teléfono" autocomplete="off"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
+    <div id="provList"></div>
+  </div>
   <form class="body gut" id="ajForm" autocomplete="off">
     <div class="sect">Empresa</div>
     <label class="f">Nombre<input id="aNombre" class="inp"></label>
@@ -551,9 +565,6 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Logo en la foto
       <select id="aLogoPos" class="inp"><option value="esquina">En la esquina</option><option value="fondo">Suave de fondo</option><option value="ninguno">No poner logo</option></select>
     </label>
-    <div class="sect" style="margin-top:10px">Proveedores</div>
-    <div id="provList"></div>
-    <button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button>
     <div class="sect" style="margin-top:10px">Copias de seguridad</div>
     <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Solo guarda si hubo ventas o cambios.</small></span><span class="tg"></span></button>
     <label class="f">Frecuencia
@@ -618,7 +629,7 @@ function show(name, push=true){
   if (name==="venta") renderCart();
   if (name==="inventario") renderInv();
   if (name==="pendientes") renderPend();
-  if (name==="ajustes") fillAjustes();
+  if (name==="ajustes"){ fillAjustes(); setAjTab(S.ajTab || "app"); }
   upgradeAll($(name));
 }
 function back(){
@@ -762,7 +773,7 @@ function setModo(m){
 }
 $("cCodigo").onclick = () => { setModo("codigo"); resetCam(); };
 $("cObjeto").onclick = () => { setModo("objeto"); resetCam(); };
-$("goIngreso").onclick = () => openIngreso();
+const goI = $("goIngreso"); if (goI) goI.onclick = () => openIngreso();
 
 function fitBig(){
   document.querySelectorAll(".big .t").forEach(t => {
@@ -930,7 +941,7 @@ function capturePhoto(titulo, fallbackInput){
     host.innerHTML = `<div class="cap" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
       <video id="capVideo" playsinline muted></video><canvas id="capBox" style="position:absolute;inset:0;width:100%;height:calc(100% - 118px);pointer-events:none"></canvas>
       <div class="captop"><span>${esc(titulo)}</span></div>
-      <div class="capbar"><button class="capbtn" id="capCancel">Cancelar</button><button class="shutter" id="capShot" aria-label="Tomar foto"></button><button class="capbtn" id="capTorch" hidden aria-pressed="false">Linterna</button><span id="capSpacer" style="min-width:96px"></span></div>
+      <div class="capbar"><button class="capbtn" id="capCancel">Cancelar</button><button class="shutter" id="capShot" aria-label="Tomar foto"></button><button class="capbtn" id="capTorch" aria-pressed="false">Luz</button></div>
       <div class="caphint" id="capHint">Si tiene código, la foto se toma sola</div></div>`;
     let done = false, loop = true;
     const v = $("capVideo");
@@ -941,6 +952,7 @@ function capturePhoto(titulo, fallbackInput){
       c.getContext("2d").drawImage(v, 0, 0, c.width, c.height); return c;
     };
     $("capCancel").onclick = () => finish(null);
+    const luz = torchCtl($("capTorch"));
     try {
       const stream = await getCam();
       if (done) return;
@@ -948,8 +960,7 @@ function capturePhoto(titulo, fallbackInput){
       const track = stream.getVideoTracks()[0];
       try {
         const caps = track.getCapabilities ? track.getCapabilities() : {};
-        if (caps.torch){ const tb = $("capTorch"); tb.hidden = false; $("capSpacer").hidden = true;
-          tb.onclick = async () => { const on = tb.getAttribute("aria-pressed") !== "true"; try { await track.applyConstraints({ advanced:[{ torch:on }] }); tb.setAttribute("aria-pressed", on); } catch {} }; }
+        luz.ready(track);
         if (caps.focusMode && caps.focusMode.includes("continuous")) await track.applyConstraints({ advanced:[{ focusMode:"continuous" }] });
       } catch {}
       $("capShot").onclick = () => { if (!v.videoWidth) return; beep(); finish({ canvas: snap(), code: null }); };
@@ -1012,7 +1023,7 @@ function scanCode(titulo, opts = {}){
       <div class="captop"><span>${esc(titulo)}</span></div>
       <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
       <div class="scanmsg" id="scMsg" style="opacity:0"></div>
-      <div class="capbar scanbar"><button class="capbtn" id="scCancel">${opts.continuo ? 'Listo<span class="scancount" id="scCount">0</span>' : "Cancelar"}</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" hidden aria-pressed="false">Luz</button></span></div></div>`;
+      <div class="capbar scanbar"><button class="capbtn" id="scCancel">${opts.continuo ? 'Listo<span class="scancount" id="scCount">0</span>' : "Cancelar"}</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false">Luz</button></span></div></div>`;
     let done = false, cuenta = 0, msgT = 0;
     const v = $("scVideo");
     const finish = (val) => { if (done) return; done = true; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
@@ -1039,6 +1050,7 @@ function scanCode(titulo, opts = {}){
       const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(sw)); c.height = Math.max(1, Math.round(sh));
       c.getContext("2d").drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height); return c;
     };
+    const luz = torchCtl($("scTorch"));
     const ph = $("scPhoto");
     if (ph) ph.onclick = () => {
       if (!v.videoWidth) return;
@@ -1060,8 +1072,7 @@ function scanCode(titulo, opts = {}){
       const track = stream.getVideoTracks()[0];
       try {
         const caps = track.getCapabilities ? track.getCapabilities() : {};
-        if (caps.torch){ const tb = $("scTorch"); tb.hidden = false;
-          tb.onclick = async () => { const on = tb.getAttribute("aria-pressed") !== "true"; try { await track.applyConstraints({ advanced:[{ torch:on }] }); tb.setAttribute("aria-pressed", on); } catch {} }; }
+        luz.ready(track);
         if (caps.focusMode && caps.focusMode.includes("continuous")) await track.applyConstraints({ advanced:[{ focusMode:"continuous" }] });
       } catch {}
       const { det } = await getDetector();
@@ -1442,7 +1453,8 @@ function provForm(prov, onSaved){
 }
 function renderProvs(){
   const box = $("provList"); if (!box) return;
-  const ps = [...(S.provs||[])].sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
+  const q = norm($("provQ")?.value || "");
+  const ps = [...(S.provs||[])].filter(p => !q || norm(p.nombre).includes(q) || norm(p.telefono).includes(q)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
   box.innerHTML = ps.length ? `<div class="plist">${ps.map(p => `<button type="button" class="provrow" data-prov="${esc(p.id)}"><span class="pinfo"><span class="pname">${esc(p.nombre)}</span><span class="pmeta">${p.telefono ? `<span class="num">${esc(p.telefono)}</span>` : "Sin teléfono"}${p.codigo ? `<span>Código: <b class="num">${esc(p.codigo)}</b></span>` : ""}</span></span></button>`).join("")}</div>`
     : `<div class="empty">Sin proveedores.</div>`;
 }
@@ -1586,22 +1598,19 @@ $("cart").addEventListener("change", e => {
   const k = e.target.dataset.qv; if (k===undefined) return;
   S.carrito[k].cant = Math.max(1, toNum(e.target.value)||1); saveCartDraft(); renderCart();
 });
-const variosOn = () => ls.get("variosVenta") === "1";
-$("vVarios").setAttribute("aria-pressed", variosOn());
-$("vVarios").onclick = () => { const on = !variosOn(); ls.set("variosVenta", on ? "1" : "0"); $("vVarios").setAttribute("aria-pressed", on); toast(on ? "Varios: la cámara queda abierta para escanear seguido" : "La cámara se cierra después de cada producto", 2200); };
+async function escanearVarios(){
+  const faltan = [];
+  const r = await scanCode("Escanear varios", { continuo: true, onCode: (code) => {
+    const p = byCode(code);
+    if (!p){ if (!faltan.includes(code)) faltan.push(code); return { ok: false, msg: "No está en inventario: " + code }; }
+    addToCart(p); const it = S.carrito.find(i => i.id === p.id);
+    return { ok: true, msg: `+1 ${p.nombre}${it && it.cant > 1 ? ` (${miles(it.cant)})` : ""}` };
+  } });
+  if (r && r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
+  if (faltan.length) setTimeout(() => notFoundSheet(faltan[0]), 300);
+}
+$("vVarios").onclick = escanearVarios;
 $("vScan").onclick = async () => {
-  if (variosOn()){
-    const faltan = [];
-    const r = await scanCode("Escanear productos", { continuo: true, onCode: (code) => {
-      const p = byCode(code);
-      if (!p){ if (!faltan.includes(code)) faltan.push(code); return { ok: false, msg: "No está en inventario: " + code }; }
-      addToCart(p); const it = S.carrito.find(i => i.id === p.id);
-      return { ok: true, msg: `+1 ${p.nombre}${it && it.cant > 1 ? ` (${miles(it.cant)})` : ""}` };
-    } });
-    if (r && r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
-    if (faltan.length) setTimeout(() => notFoundSheet(faltan[0]), 300);
-    return;
-  }
   const r = await scanCode("Escanear para la venta");
   if (!r || !r.code) return;
   const p = byCode(r.code);
@@ -1644,14 +1653,14 @@ $("vCobrar").onclick = async () => {
     await cfgRef.update({ sigFactura: num+1 });
     const total = cartTotal(), recibido = toNum($("vRecibido").value);
     const venta = { numero:num, fecha:Date.now(), items:S.carrito.map(i=>({...i})), total, recibido: recibido||total, cambio: recibido>total ? recibido-total : 0,
-      cliente: $("vCli").value.trim(), clienteDoc: $("vCliDoc").value.trim() };
+      cliente: $("vCli").value.trim(), clienteDoc: $("vCliDoc").value.trim(), clienteId: (await clienteParaVenta()) || "" };
     await S.db.collection("ventas").add(venta);
     for (const i of venta.items){
       if (!i.id) continue;
       const p = S.productos.find(x=>x.id===i.id); if (!p) continue;
       await S.db.doc("productos/"+i.id).update({ cantidad: (Number(p.cantidad)||0) - i.cant, actualizado: Date.now() });
     }
-    S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; $("vCli").value=""; $("vCliDoc").value=""; $("vCliBox").open = false; saveCartDraft();
+    S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; setVentaCliente(null); $("vCliBox").open = false; saveCartDraft();
     openRecibo(venta);
   } catch(e){ toast("No se pudo guardar la venta. Revisa la conexión e intenta de nuevo.", 3500); }
   btn.disabled=false; btn.textContent="Cobrar e imprimir";
@@ -2312,6 +2321,22 @@ async function aiCutout(src){
   return { canvas: o, bbox: { x: Math.max(0, (minx-pad)*sx), y: Math.max(0, (miny-pad)*sy), w: Math.min(W0, (maxx-minx+1+2*pad)*sx), h: Math.min(H0, (maxy-miny+1+2*pad)*sy) } };
 }
 
+/* ---------- linterna: el botón aparece de una vez y se aplica apenas la cámara está lista ---------- */
+function torchCtl(btn){
+  let track = null, want = false, sup = null;
+  if (!btn) return { ready(){} };
+  btn.hidden = false; btn.setAttribute("aria-pressed", "false");
+  const apply = async () => { if (!track || !sup) return; try { await track.applyConstraints({ advanced: [{ torch: want }] }); } catch {} };
+  btn.onclick = () => {
+    if (sup === false){ toast("Este celular no permite la luz aquí"); return; }
+    want = !want; btn.setAttribute("aria-pressed", want); apply();
+  };
+  return { ready(t){
+    track = t; let caps = {}; try { caps = t.getCapabilities ? t.getCapabilities() : {}; } catch {}
+    if (caps.torch){ sup = true; apply(); return; }
+    setTimeout(() => { try { if (t.getCapabilities && t.getCapabilities().torch){ sup = true; apply(); return; } } catch {} sup = false; btn.hidden = true; if (want) toast("Este celular no permite la luz aquí"); }, 800);
+  } };
+}
 /* ---------- linterna: se apaga al capturar ---------- */
 async function torchOff(){
   try {
@@ -2407,6 +2432,112 @@ async function ocrFlow(canvas){
     toast("No se pudo preparar el lector de letra. Revisa el internet la primera vez y vuelve a intentar.", 4500);
     return null;
   }
+}
+
+/* ---------- pestañas de Ajustes ---------- */
+S.ajTab = "app";
+function setAjTab(t){
+  S.ajTab = t;
+  [...$("ajTabs").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
+  $("ajForm").hidden = t !== "app"; $("tabCli").hidden = t !== "cli"; $("tabProv").hidden = t !== "prov";
+  if (t === "cli") renderClientes(); if (t === "prov") renderProvs();
+}
+$("ajTabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) setAjTab(b.dataset.tab); });
+$("provQ").addEventListener("input", () => renderProvs());
+
+/* ---------- clientes ---------- */
+S.clientes = [];
+const cliById = (id) => S.clientes.find(c => c.id === id) || null;
+function ventasDeCliente(c){
+  const d = norm(c.doc), n = norm(c.nombre);
+  return S.ventasCache.filter(v => v.clienteId ? v.clienteId === c.id : ((d && norm(v.clienteDoc) === d) || (!d && n && norm(v.cliente) === n)));
+}
+S.ventasCache = [];
+async function cargarVentas(){ try { const snap = await S.db.collection("ventas").orderBy("fecha","desc").get(); S.ventasCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); } catch {} }
+async function renderClientes(){
+  await cargarVentas();
+  const q = norm($("cliQ").value);
+  const cs = [...S.clientes].filter(c => !q || norm(c.nombre).includes(q) || norm(c.doc).includes(q) || norm(c.telefono).includes(q))
+    .map(c => { const vs = ventasDeCliente(c); return { c, n: vs.length, tot: vs.reduce((a,v) => a + (v.total||0), 0), ult: vs[0]?.fecha || 0 }; })
+    .sort((a,b) => (b.ult - a.ult) || norm(a.c.nombre).localeCompare(norm(b.c.nombre)));
+  $("cliList").innerHTML = cs.length ? `<div class="plist">${cs.map(x => `<button type="button" class="provrow" data-cli="${esc(x.c.id)}"><span class="pinfo"><span class="pname">${esc(x.c.nombre)}</span><span class="pmeta">${x.c.doc ? `<span class="num">${esc(x.c.doc)}</span>` : ""}<span>${miles(x.n)} compra${x.n === 1 ? "" : "s"}</span>${x.ult ? `<span>Última: ${fFecha(x.ult)}</span>` : ""}</span></span><span class="price">${fmt(x.tot)}</span></button>`).join("")}</div>`
+    : `<div class="empty">${S.clientes.length ? "Ningún cliente coincide." : "Sin clientes. Se agregan aquí o al poner el cliente en una venta."}</div>`;
+}
+$("cliQ").addEventListener("input", () => renderClientes());
+$("cliList").addEventListener("click", (e) => { const b = e.target.closest("[data-cli]"); if (!b) return; const c = cliById(b.dataset.cli); if (c) clienteSheet(c); });
+$("cliNuevo").onclick = () => clienteForm(null);
+function clienteForm(cli, onSaved){
+  const c = cli || {};
+  sheet(`<h2>${cli ? "Editar cliente" : "Nuevo cliente"}</h2>
+    <label class="f">Nombre<input id="clN" class="inp" value="${esc(c.nombre||"")}" autocomplete="off"></label>
+    <label class="f">NIT o cédula<input id="clD" class="inp num" value="${esc(c.doc||"")}" autocomplete="off"></label>
+    <label class="f">Teléfono<input id="clT" class="inp num" inputmode="tel" value="${esc(c.telefono||"")}" autocomplete="off"></label>
+    <label class="f">Correo<input id="clM" class="inp" inputmode="email" value="${esc(c.correo||"")}" autocomplete="off"></label>
+    <label class="f">Dirección<input id="clDir" class="inp" value="${esc(c.direccion||"")}" autocomplete="off"></label>
+    <label class="f">Nota<input id="clNota" class="inp" value="${esc(c.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
+    <div id="clErr" class="err"></div>
+    <div class="row">${cli ? `<button class="btn danger grow" id="clDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="clOk">Guardar</button></div>`,
+    (el, close) => {
+      setTimeout(() => el.querySelector("#clN").focus(), 60);
+      el.querySelector("#clOk").onclick = async () => {
+        const nombre = el.querySelector("#clN").value.trim();
+        if (!nombre){ el.querySelector("#clErr").textContent = "Falta el nombre."; return; }
+        const data = { nombre, doc: el.querySelector("#clD").value.trim(), telefono: el.querySelector("#clT").value.trim(), correo: el.querySelector("#clM").value.trim(), direccion: el.querySelector("#clDir").value.trim(), nota: el.querySelector("#clNota").value.trim(), actualizado: Date.now() };
+        try {
+          let id = cli?.id;
+          if (id) await S.db.doc("clientes/"+id).update(data);
+          else { const r = await S.db.collection("clientes").add({ ...data, creado: Date.now() }); id = r.id; }
+          close(); toast("Cliente guardado"); onSaved && onSaved(id);
+        } catch { el.querySelector("#clErr").textContent = "No se pudo guardar."; }
+      };
+      const del = el.querySelector("#clDel");
+      if (del) del.onclick = () => { close(); confirmar(`¿Eliminar a ${c.nombre}? Sus facturas no se borran.`, "Eliminar", async () => { try { await S.db.doc("clientes/"+c.id).delete(); toast("Cliente eliminado"); } catch { toast("No se pudo eliminar."); } }); };
+    });
+}
+async function clienteSheet(c){
+  await cargarVentas();
+  const vs = ventasDeCliente(c), tot = vs.reduce((a,v) => a + (v.total||0), 0);
+  sheet(`<h2 style="text-transform:none">${esc(c.nombre)}</h2>
+    <dl class="kv">${c.doc ? `<dt>NIT/CC</dt><dd class="num">${esc(c.doc)}</dd>` : ""}${c.telefono ? `<dt>Teléfono</dt><dd><span class="num">${esc(c.telefono)}</span> · ${telLinks(c.telefono)}</dd>` : ""}${c.correo ? `<dt>Correo</dt><dd>${esc(c.correo)}</dd>` : ""}${c.direccion ? `<dt>Dirección</dt><dd>${esc(c.direccion)}</dd>` : ""}${c.nota ? `<dt>Nota</dt><dd>${esc(c.nota)}</dd>` : ""}</dl>
+    <div class="card stats3"><div><div class="sect">Compras</div><div class="num">${miles(vs.length)}</div></div><div><div class="sect">Total</div><div class="num">${fmt(tot)}</div></div><div><div class="sect">Última</div><div class="num" style="font-size:15px">${vs[0] ? fFecha(vs[0].fecha) : "—"}</div></div></div>
+    ${vs.length ? `<div class="sect">Historial</div><div class="plist">${vs.slice(0, 200).map(v => `<button type="button" class="prow" data-vid="${esc(v.id)}"><span class="pinfo"><span class="pname num">N° ${String(v.numero).padStart(6,"0")}</span><span class="pmeta">${fFecha(v.fecha)} · ${hora12(new Date(v.fecha).getHours()*60 + new Date(v.fecha).getMinutes())} · ${miles((v.items||[]).reduce((a,i) => a + i.cant, 0))} art.</span></span><span class="price">${fmt(v.total)}</span></button>`).join("")}</div>` : `<div class="empty">Todavía no tiene compras.</div>`}
+    <div class="row"><button class="btn grow" id="csEdit">Editar</button><button class="btn venta grow" id="csVender">Nueva venta</button></div>`,
+    (el, close) => {
+      el.querySelector("#csEdit").onclick = () => { close(); clienteForm(c); };
+      el.querySelector("#csVender").onclick = () => { close(); setVentaCliente(c); show("venta"); $("vCliBox").open = true; };
+      el.addEventListener("click", (e) => { const r = e.target.closest("[data-vid]"); if (!r) return; const v = vs.find(x => x.id === r.dataset.vid); close(); openRecibo(v); });
+    });
+}
+function setVentaCliente(c){
+  S.ventaCliId = c ? c.id : null;
+  $("vCli").value = c ? c.nombre : ""; $("vCliDoc").value = c ? (c.doc || "") : "";
+}
+$("vCli").addEventListener("input", () => { S.ventaCliId = null; });
+$("vCliDoc").addEventListener("input", () => { S.ventaCliId = null; });
+$("vCliElegir").onclick = () => {
+  popup("Elegir cliente", `<input class="inp" id="ecQ" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px"><div class="poplist" id="ecList"></div>`, (el, close) => {
+    const draw = (q = "") => {
+      const t = norm(q);
+      const cs = [...S.clientes].filter(c => !t || norm(c.nombre).includes(t) || norm(c.doc).includes(t)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
+      el.querySelector("#ecList").innerHTML = `<button type="button" class="popopt" data-nuevo="1"><span>+ Nuevo cliente</span></button>` + cs.map(c => `<button type="button" class="popopt" data-c="${esc(c.id)}"><span>${esc(c.nombre)}</span><span class="ct">${esc(c.doc||"")}</span></button>`).join("");
+    };
+    draw();
+    el.querySelector("#ecQ").addEventListener("input", (e) => draw(e.target.value));
+    el.querySelector("#ecList").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-c]"), n = e.target.closest("[data-nuevo]");
+      if (b){ setVentaCliente(cliById(b.dataset.c)); close(); }
+      if (n){ close(); clienteForm(null, (id) => setTimeout(() => setVentaCliente(cliById(id)), 50)); }
+    });
+  });
+};
+/* Al cobrar: si el cliente es nuevo, se guarda solo */
+async function clienteParaVenta(){
+  const nombre = $("vCli").value.trim(), doc = $("vCliDoc").value.trim();
+  if (!nombre && !doc) return null;
+  if (S.ventaCliId && cliById(S.ventaCliId)) return S.ventaCliId;
+  let c = doc ? S.clientes.find(x => norm(x.doc) === norm(doc)) : S.clientes.find(x => norm(x.nombre) === norm(nombre));
+  if (c) return c.id;
+  try { const r = await S.db.collection("clientes").add({ nombre: nombre || ("Cliente " + doc), doc, telefono: "", correo: "", direccion: "", nota: "", creado: Date.now(), actualizado: Date.now() }); return r.id; } catch { return null; }
 }
 
 /* ---------- copias automáticas ---------- */
@@ -2593,8 +2724,11 @@ function resumenRows(ventas){
 function pendRows(){
   return [...S.pend].sort((a,b)=>a.creado-b.creado).map(p => { const pv = provById(p.proveedorId); return { "Producto": p.nombre, "Código": p.codigo||"", "Cantidad": Number(p.cantidad)||0, "Proveedor": pv?.nombre||"", "Teléfono": pv?.telefono||"", "Nota": p.nota||"", "Agregado": fFecha(p.creado), "Estado": p.hecho ? "Comprado" : "Pendiente" }; });
 }
-const MONEY = ["Precio","Costo","Valor en inventario","Precio unitario","Subtotal","Total factura","Total vendido"];
-const QTY = ["Cantidad","Facturas","Artículos"];
+function cliRows(){
+  return [...S.clientes].sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre))).map(c => { const vs = ventasDeCliente(c); return { "Cliente": c.nombre, "NIT/CC": c.doc||"", "Teléfono": c.telefono||"", "Correo": c.correo||"", "Dirección": c.direccion||"", "Compras": vs.length, "Total comprado": vs.reduce((a,v) => a + (v.total||0), 0), "Última compra": vs[0] ? fFecha(vs[0].fecha) : "" }; });
+}
+const MONEY = ["Total comprado","Precio","Costo","Valor en inventario","Precio unitario","Subtotal","Total factura","Total vendido"];
+const QTY = ["Cantidad","Facturas","Artículos","Compras"];
 function toSheet(rows, cols){
   const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [Object.fromEntries(cols.map(c=>[c,""]))], { header: cols });
   ws["!cols"] = cols.map(c => ({ wch: Math.min(48, Math.max(c.length+2, ...rows.map(r => String(r[c]??"").length+2))) }));
@@ -2606,7 +2740,8 @@ const COLS = {
   inv: ["Código","Código propio","Nombre","Categoría","Proveedor","Costo","Precio","Cantidad","Valor en inventario","Fecha de ingreso","Hora de ingreso","Última actualización"],
   ven: ["Factura","Fecha","Hora","Cliente","NIT/CC","Código","Producto","Cantidad","Precio unitario","Subtotal","Total factura"],
   res: ["Fecha","Facturas","Artículos","Total vendido"],
-  pen: ["Producto","Código","Cantidad","Proveedor","Teléfono","Nota","Agregado","Estado"]
+  pen: ["Producto","Código","Cantidad","Proveedor","Teléfono","Nota","Agregado","Estado"],
+  cli: ["Cliente","NIT/CC","Teléfono","Correo","Dirección","Compras","Total comprado","Última compra"]
 };
 function csvText(rows, cols){
   const q = (v) => { const t = String(v ?? ""); return /[;"\n\r]/.test(t) ? `"${t.replace(/"/g,'""')}"` : t; };
@@ -2650,6 +2785,8 @@ function exportSheet(){
             XLSX.utils.book_append_sheet(wb, toSheet(ventasRows(ventas), COLS.ven), "Ventas");
             XLSX.utils.book_append_sheet(wb, toSheet(resumenRows(ventas), COLS.res), "Resumen por día");
             XLSX.utils.book_append_sheet(wb, toSheet(pendRows(), COLS.pen), "Por comprar");
+            await cargarVentas();
+            XLSX.utils.book_append_sheet(wb, toSheet(cliRows(), COLS.cli), "Clientes");
             const buf = XLSX.write(wb, { type:"array", bookType:"xlsx" });
             await shareFile(new Blob([buf], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}), `ferreteria${sufR}-${stamp()}.xlsx`);
             ls.set("lastExport", String(Date.now())); renderUltimaExp();
@@ -2971,6 +3108,10 @@ setModo(S.modoCam); buildKeypad();
     S.pend = snap.docs.map(d => ({ id:d.id, ...d.data() }));
     if (!$("pendientes").hidden) renderPend();
     if (!$("home").hidden) renderHome();
+  });
+  db.collection("clientes").onSnapshot(snap => {
+    S.clientes = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    if (!$("ajustes").hidden && S.ajTab === "cli") renderClientes();
   });
   db.collection("proveedores").onSnapshot(snap => {
     S.provs = snap.docs.map(d => ({ id:d.id, ...d.data() }));
