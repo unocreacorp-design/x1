@@ -298,6 +298,13 @@ details.card[open]>summary{margin-bottom:10px}
 .cap .capbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));background:#000}
 .cap .captop{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cap .captop>span{background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.origbox{border:1px dashed var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.origtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.origtxt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
+.origtxt .num{font-size:18px;font-weight:700}
+.origtipo{font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--line)}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:14px;padding:4px}
+.pmeta .cod2{color:var(--muted);font-size:.9em}
 .capx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto}
 .capx svg{width:24px;height:24px}
 .capx:active{background:rgba(255,255,255,.3)}
@@ -450,15 +457,17 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="ingreso" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ingreso)"></span><h1 id="ingTitle">Ingresar producto</h1></div>
   <form class="body gut" id="ingForm" autocomplete="off">
-    <label class="f">Código
-      <div class="row">
-        <input id="iCodigo" class="inp num grow" placeholder="Lee o escribe el código" enterkeyhint="next">
-        <button type="button" class="btn" id="iGen">Crear</button>
-      </div>
+    <label class="f">Código propio
+      <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off">
     </label>
-    <p class="note" style="margin:-6px 0 0">Sin código: déjalo vacío y se crea uno al guardar.</p>
+    <p class="note" style="margin:-6px 0 0">Si lo dejas vacío, al guardar se crea uno con la fecha y la categoría.</p>
     <div id="iExiste" hidden></div>
-    <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
+    <input id="iCodigo" type="hidden">
+    <div class="origbox" id="iOrig">
+      <div class="origtop"><span class="sect">Código original del producto</span><button type="button" class="linkbtn" id="iOrigQuitar" hidden>Quitar</button></div>
+      <div id="iOrigTxt" class="origtxt"></div>
+      <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
+    </div>
     <label class="f">Nombre<input id="iNombre" class="inp" placeholder="Martillo de uña 16 oz mango fibra" enterkeyhint="next"></label>
     <div class="row" style="align-items:flex-start">
       <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric" placeholder="0"></label>
@@ -470,12 +479,6 @@ details.card[open]>summary{margin-bottom:10px}
     </div>
     <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden>
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
-    <label class="f">Código propio
-      <div class="row">
-        <input id="iCodP" class="inp num grow" placeholder="Ej: 9585x56" autocomplete="off">
-        <button type="button" class="btn" id="iCodPLeer">Leer</button>
-      </div>
-    </label>
     <label class="f">Foto
       <button type="button" class="shot" id="iFotoBtn" style="aspect-ratio:1/1;max-height:320px;width:100%;padding:0">
         <div class="ph" id="iFotoPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
@@ -900,7 +903,7 @@ function stockChip(p){
 }
 function thumb(p){ return `<span class="thumb">${p.foto ? `<img src="${esc(p.foto)}" alt="">` : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>`}</span>`; }
 function prowHTML(p, extra=""){
-  return `<button class="prow" data-pid="${esc(p.id)}">${thumb(p)}<span class="pinfo"><span class="pname">${esc(p.nombre)}</span><span class="pmeta"><span class="num">${esc(p.codigo||"sin código")}</span>${stockChip(p)}</span></span><span class="price">${fmt(p.precio)}</span>${extra}</button>`;
+  return `<button class="prow" data-pid="${esc(p.id)}">${thumb(p)}<span class="pinfo"><span class="pname">${esc(p.nombre)}</span><span class="pmeta"><span class="num">${esc(p.codigoPropio||p.codigo||"sin código")}</span>${p.codigoPropio && p.codigo ? `<span class="num cod2">${esc(p.codigo)}</span>` : ""}${stockChip(p)}</span></span><span class="price">${fmt(p.precio)}</span>${extra}</button>`;
 }
 function listHTML(arr){ return arr.length ? `<div class="plist">${arr.map(p=>prowHTML(p)).join("")}</div>` : ""; }
 
@@ -1618,7 +1621,7 @@ $("pendList").addEventListener("click", e => {
 const cartTotal = () => S.carrito.reduce((a,i)=>a+i.precio*i.cant,0);
 function addToCart(p, cant=1){
   const it = S.carrito.find(i=>i.id && i.id===p.id);
-  if (it) it.cant += cant; else S.carrito.push({ id:p.id||null, nombre:p.nombre, precio:Number(p.precio)||0, cant, codigo:p.codigo||"" });
+  if (it) it.cant += cant; else S.carrito.push({ id:p.id||null, nombre:p.nombre, precio:Number(p.precio)||0, cant, codigo:p.codigoPropio||p.codigo||"" });
   saveCartDraft(); renderCart();
 }
 function saveCartDraft(){ ls.set("carrito", JSON.stringify(S.carrito)); }
@@ -1904,37 +1907,60 @@ function openIngreso(opts={}){
   $("iCantLbl").textContent = p ? "Existencias" : "Cantidad";
   $("iBorrar").hidden = !p;
   $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar";
+  $("iCodigo").value = ""; S.iOrigTipo = "";
   if (p){
-    $("iCodigo").value = p.codigo||""; $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
-    $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = p.codigoPropio || "";
+    let cod = p.codigo||"", cp = p.codigoPropio||"";
+    if (!cp && /^FR\d+$/i.test(cod)){ cp = cod; cod = ""; }   /* códigos automáticos viejos pasan a ser el código propio */
+    $("iCodigo").value = cod; S.iOrigTipo = p.codigoTipo || "";
+    $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
+    $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = cp;
     if (p.creado){ $("iFechas").hidden = false; $("iFechas").textContent = `Ingresado el ${fFecha(p.creado)} a las ${fHora(p.creado)}` + (p.actualizado && p.actualizado !== p.creado ? ` · Actualizado el ${fFecha(p.actualizado)} a las ${fHora(p.actualizado)}` : ""); }
     if (p.foto){ S.iFotoData = p.foto; $("iFotoImg").src=p.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; }
-    showBarcode(p.codigo);
+    pintarOrig();
   } else {
     if (opts.codigo) setIngCodigo(opts.codigo);
     if (opts.nombre) $("iNombre").value = opts.nombre;
     if (opts.foto){ if (typeof opts.foto === "string"){ S.iFotoData = opts.foto; $("iFotoImg").src = opts.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; } else setIngFoto(opts.foto); }
-    if (opts.codigoPropio) $("iCodP").value = opts.codigoPropio;
+    if (opts.codigoPropio) setCodigoLeido(opts.codigoPropio, true);
+    pintarOrig();
   }
   show("ingreso");
 }
+/* Código escrito a mano (ej. 9585x56) */
+const esEscrito = (c) => /^\d{2,}\s*x\s*\d+$/i.test(String(c||"").trim());
+const tipoCodigo = (c, t) => t === "escrito" || esEscrito(c) ? "Escrito en el producto" : t === "qr" || !/^\d{6,14}$/.test(String(c||"")) ? "Código QR" : "Código de barras";
+/* Lo que se lee con la cámara: escrito a mano → código propio; barras o QR → código original */
+function setCodigoLeido(code, escrito){
+  code = String(code||"").trim(); if (!code) return;
+  if (escrito || esEscrito(code)){
+    $("iCodP").value = code; S.iOrigTipo = "escrito";
+    const p = byCode(code); if (p && p.id !== S.editId) toast("Ese código propio ya es de " + p.nombre, 3500);
+  } else { $("iCodigo").value = code; S.iOrigTipo = /^\d{6,14}$/.test(code) ? "barras" : "qr"; }
+  checkExiste();
+}
+function pintarOrig(){
+  const cod = $("iCodigo").value.trim(), cp = $("iCodP").value.trim(), box = $("iOrigTxt");
+  if (cod){ box.innerHTML = `<span class="num">${esc(cod)}</span><span class="origtipo">${tipoCodigo(cod, S.iOrigTipo)}</span>`; $("iOrigQuitar").hidden = false; }
+  else if (cp && (S.iOrigTipo === "escrito" || esEscrito(cp))){ box.innerHTML = `<span class="num">${esc(cp)}</span><span class="origtipo">Escrito en el producto</span><span class="note">Es el mismo código propio</span>`; $("iOrigQuitar").hidden = true; }
+  else { box.innerHTML = `<span class="note">No tiene. Escanea el código de barras o QR que trae el producto.</span>`; $("iOrigQuitar").hidden = true; }
+  showBarcode(cod);
+  $("iEtiqueta").hidden = !(cp || cod) || !window.JsBarcode;
+}
 function showBarcode(code){
-  $("iEtiqueta").hidden = !code || !window.JsBarcode;
   if (!code || !window.JsBarcode){ $("iCodeBox").hidden=true; return; }
   try { JsBarcode("#iBarcode", code, { format:"CODE128", height:60, fontSize:16, margin:6, lineColor:"#000", background:"#fff" }); $("iCodeBox").hidden=false; }
   catch { $("iCodeBox").hidden=true; }
 }
-function setIngCodigo(code){
-  $("iCodigo").value = code; checkExiste();
-}
+function setIngCodigo(code){ setCodigoLeido(code, false); }
 function checkExiste(){
-  const code = $("iCodigo").value.trim(), p = byCode(code);
+  const code = $("iCodigo").value.trim(), cp = $("iCodP").value.trim();
+  let p = code ? byCode(code) : null; if (!p || p.id === S.editId) p = cp ? byCode(cp) : null;
   if (p && p.id !== S.editId){
     $("iExiste").hidden=false;
     $("iExiste").innerHTML = `<div class="card found" style="display:flex;flex-direction:column;gap:8px"><div class="sect" style="color:var(--ok)">Este código ya está en inventario</div>${listHTML([p])}<button type="button" class="btn ingreso" id="iSumar">Sumar unidades a este producto</button></div>`;
     $("iSumar").onclick = () => sumarSheet(p);
   } else $("iExiste").hidden=true;
-  showBarcode(code);
+  pintarOrig();
 }
 function sumarSheet(p){
   sheet(`<h2 style="text-transform:none">${esc(p.nombre)}</h2><p class="note" style="margin:0">Hay <b>${miles(p.cantidad)}</b> unidades. ¿Cuántas llegaron?</p>
@@ -1950,21 +1976,26 @@ function sumarSheet(p){
         catch { toast("No se pudo guardar. Revisa la conexión."); }
       }; });
 }
-$("iCodigo").addEventListener("change", checkExiste);
-$("iCodigo").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
+$("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); });
+$("iCodP").addEventListener("change", checkExiste);
+$("iCodP").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
+$("iOrigQuitar").onclick = () => { $("iCodigo").value = ""; S.iOrigTipo = ""; checkExiste(); };
 $("iScan").onclick = async () => {
   const r = await scanCode("Escanear código");
   if (!r || !r.code) return;
-  if (r.escrito){ $("iCodP").value = r.code; toast("Código propio: " + r.code); const p = byCode(r.code); if (p && p.id !== S.editId) toast("Ese código propio ya es de " + p.nombre, 3500); }
-  else setIngCodigo(r.code);
+  setCodigoLeido(r.code, r.escrito);
+  toast((r.escrito || esEscrito(r.code) ? "Código propio: " : "Código original: ") + r.code);
 };
-async function nuevoCodigo(){
-  let n = Number(S.config?.sigCodigo)||1, code;
-  do { code = "FR" + String(n).padStart(6,"0"); n++; } while (byCode(code));
-  try { await S.db.doc("config/tienda").update({ sigCodigo:n }); } catch {}
+/* Código propio automático (13 números, sirve como código de barras EAN-13 de uso interno):
+   2 · AAMMDD (fecha) · CC (categoría) · NNN (consecutivo) · dígito de control */
+function ean13(d12){ let t = 0; for (let i = 0; i < 12; i++) t += Number(d12[i]) * (i % 2 ? 3 : 1); return d12 + ((10 - t % 10) % 10); }
+function nuevoCodigoPropio(cat){
+  const d = new Date(), f = String(d.getFullYear()).slice(2) + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0");
+  const i = cat ? allCats().indexOf(cat) + 1 : 0, cc = String(i > 0 && i < 100 ? i : (cat ? 99 : 0)).padStart(2,"0");
+  let n = 1, code;
+  do { code = ean13("2" + f + cc + String(n).padStart(3,"0")); n++; } while (byCode(code) && n < 1000);
   return code;
 }
-$("iGen").onclick = async () => { $("iCodigo").value = await nuevoCodigo(); checkExiste(); };
 /* Foto del producto: centrada y sin recortes; si está activo, sin fondo y sobre blanco con el logo */
 async function setIngFoto(c){
   const box = $("iFotoPh");
@@ -2013,16 +2044,12 @@ function fillProvSelect(sel, val){
     provForm(null, (id) => { fillProvSelect(sel, id); });
   };
 }
-$("iCodPLeer").onclick = async () => {
-  const r = await scanCode("Código escrito", { modo: "escrito" });
-  if (r && r.code) $("iCodP").value = r.code;
-};
 $("iFotoBtn").onclick = async () => {
   const r = await capturePhoto("Foto del producto", $("iFoto"));
   if (!r) return;
   await setIngFoto(r.canvas);
   if (r.code && !$("iCodigo").value.trim()){ setIngCodigo(r.code); toast("Código leído: " + r.code); }
-  if (r.codigoPropio && !$("iCodP").value.trim()){ $("iCodP").value = r.codigoPropio; toast("Código propio leído: " + r.codigoPropio); }
+  if (r.codigoPropio && !$("iCodP").value.trim()){ setCodigoLeido(r.codigoPropio, true); toast("Código propio leído: " + r.codigoPropio); }
 };
 $("iFoto").onchange = async (e) => {
   const f = e.target.files?.[0]; if (!f) return;
@@ -2033,27 +2060,31 @@ $("iFoto").onchange = async (e) => {
 };
 $("ingForm").onsubmit = async (e) => {
   e.preventDefault();
-  let codigo = $("iCodigo").value.trim();
+  const codigo = $("iCodigo").value.trim();
+  let codigoPropio = $("iCodP").value.trim();
   const nombre = $("iNombre").value.trim(), precio = toNum($("iPrecio").value), cant = toNum($("iCant").value);
   if (!nombre) return $("iErr").textContent = "Falta el nombre del producto.";
   if (!precio) return $("iErr").textContent = "Falta el precio de venta.";
-  if (!codigo){ codigo = await nuevoCodigo(); $("iCodigo").value = codigo; }
-  const dup = byCode(codigo);
-  if (codigo && dup && dup.id !== S.editId) return $("iErr").textContent = "Ese código ya es de “"+dup.nombre+"”. Usa “Sumar unidades” o cambia el código.";
+  const dup = codigo ? byCode(codigo) : null;
+  if (dup && dup.id !== S.editId) return $("iErr").textContent = "El código original ya es de “"+dup.nombre+"”. Usa “Sumar unidades” o quítalo.";
+  const dupP = codigoPropio ? byCode(codigoPropio) : null;
+  if (dupP && dupP.id !== S.editId) return $("iErr").textContent = "Ese código propio ya es de “"+dupP.nombre+"”. Cámbialo o déjalo vacío.";
   let categoria = $("iCat").value;
   if (categoria === "__otra"){
     categoria = $("iCatOtra").value.trim();
     if (categoria && !allCats().includes(categoria)){ try { await S.db.doc("config/tienda").update({ catsExtra: [...((S.config?.catsExtra)||[]), categoria] }); } catch {} }
   }
+  let auto = false;
+  if (!codigoPropio){ codigoPropio = nuevoCodigoPropio(categoria); auto = true; $("iCodP").value = codigoPropio; }
   const provSel = $("iProv").value;
-  const data = { codigo, nombre, precio, cantidad: cant, costo: toNum($("iCosto").value), categoria: categoria || "", proveedorId: provSel && provSel !== "__nuevo" ? provSel : "",
-    codigoPropio: $("iCodP").value.trim(), foto: S.iFotoData || null, actualizado: Date.now() };
+  const data = { codigo, codigoTipo: codigo ? (S.iOrigTipo === "qr" ? "qr" : tipoCodigo(codigo) === "Código QR" ? "qr" : "barras") : (S.iOrigTipo === "escrito" || esEscrito(codigoPropio) ? "escrito" : ""), nombre, precio, cantidad: cant, costo: toNum($("iCosto").value), categoria: categoria || "", proveedorId: provSel && provSel !== "__nuevo" ? provSel : "",
+    codigoPropio, foto: S.iFotoData || null, actualizado: Date.now() };
   const btn = $("iGuardar"); btn.disabled = true;
   try {
     if (S.editId) await S.db.doc("productos/"+S.editId).update(data);
     else await S.db.collection("productos").add({ ...data, creado: Date.now() });
     toast(S.editId ? "Cambios guardados" : "Guardado: "+nombre);
-    if (!S.editId && codigo && codigo.startsWith("FR")) { etiqueta({codigo, nombre, precio}); }
+    if (!S.editId && auto && !codigo) { etiqueta({ codigo: codigoPropio, nombre, precio }); }
     else back();
   } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revisa la conexión."; }
   btn.disabled = false;
@@ -2061,7 +2092,7 @@ $("ingForm").onsubmit = async (e) => {
 $("iBorrar").onclick = () => confirmar("¿Eliminar “"+$("iNombre").value+"” del inventario?", "Eliminar", async () => {
   try { await S.db.doc("productos/"+S.editId).delete(); toast("Producto eliminado"); back(); } catch { toast("No se pudo eliminar."); }
 });
-$("iEtiqueta").onclick = () => etiqueta({ codigo:$("iCodigo").value.trim(), nombre:$("iNombre").value.trim(), precio:toNum($("iPrecio").value) });
+$("iEtiqueta").onclick = () => etiqueta({ codigo:$("iCodP").value.trim() || $("iCodigo").value.trim(), nombre:$("iNombre").value.trim(), precio:toNum($("iPrecio").value) });
 
 function etiquetaCanvas(p){
   const W = Number(S.config?.papel)||384, c = document.createElement("canvas"), bc = document.createElement("canvas");
@@ -2831,7 +2862,7 @@ const fFecha = (t) => new Date(t).toLocaleDateString("es-CO",{day:"2-digit",mont
 const fHora = (t) => new Date(t).toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
 function invRows(){
   return [...S.productos].sort((a,b)=>norm(a.nombre).localeCompare(norm(b.nombre))).map(p => ({
-    "Código": p.codigo||"", "Código propio": p.codigoPropio||"", "Nombre": p.nombre||"", "Categoría": p.categoria||"", "Proveedor": provById(p.proveedorId)?.nombre||"",
+    "Código propio": p.codigoPropio||"", "Código original": p.codigo||"", "Nombre": p.nombre||"", "Categoría": p.categoria||"", "Proveedor": provById(p.proveedorId)?.nombre||"",
     "Costo": Number(p.costo)||0, "Precio": Number(p.precio)||0, "Cantidad": Number(p.cantidad)||0,
     "Valor en inventario": Math.max(0,Number(p.cantidad)||0)*(Number(p.precio)||0),
     "Fecha de ingreso": p.creado ? fFecha(p.creado) : "", "Hora de ingreso": p.creado ? fHora(p.creado) : "",
@@ -2872,7 +2903,7 @@ function toSheet(rows, cols){
   return ws;
 }
 const COLS = {
-  inv: ["Código","Código propio","Nombre","Categoría","Proveedor","Costo","Precio","Cantidad","Valor en inventario","Fecha de ingreso","Hora de ingreso","Última actualización"],
+  inv: ["Código propio","Código original","Nombre","Categoría","Proveedor","Costo","Precio","Cantidad","Valor en inventario","Fecha de ingreso","Hora de ingreso","Última actualización"],
   ven: ["Factura","Fecha","Hora","Cliente","NIT/CC","Código","Producto","Cantidad","Precio unitario","Subtotal","Total factura"],
   res: ["Fecha","Facturas","Artículos","Total vendido"],
   pen: ["Producto","Código","Cantidad","Proveedor","Teléfono","Nota","Agregado","Estado"],
