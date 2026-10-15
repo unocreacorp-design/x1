@@ -351,7 +351,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="setupForm" hidden>
       <div style="display:flex;flex-direction:column;gap:12px">
         <p class="note" style="margin:0">Primera vez. Pon el nombre del negocio y una clave de 4 a 6 números. Se pedirá cada vez que se abra la app.</p>
-        <label class="f">Nombre del negocio<input id="setNombre" class="inp" placeholder="Ferretería El Tornillo" autocomplete="off"></label>
+        <label class="f">Nombre del negocio<input id="setNombre" class="inp" placeholder="Ferretería El Tornillo" autocomplete="off" inputmode="text"></label>
         <label class="f">Clave nueva<input id="setPin" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <label class="f">Repite la clave<input id="setPin2" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <div id="setErr" class="err"></div>
@@ -421,14 +421,14 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--venta)"></span><h1>Venta</h1><button class="btn sm" id="ventasHist">Historial</button></div>
   <div class="body gut">
     <div class="drop">
-      <input id="vQ" class="inp" placeholder="Nombre o código" autocomplete="off" enterkeyhint="search">
+      <input id="vQ" class="inp" placeholder="Nombre o código" autocomplete="off" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
       <div id="vDrop" class="dropl plist" hidden></div>
     </div>
     <div id="cart"></div>
     <details class="card" id="vCliBox"><summary>Cliente</summary>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
-        <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" placeholder="Opcional" autocomplete="off"></label>
+        <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off" inputmode="text"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
+        <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" placeholder="Opcional" autocomplete="off" inputmode="tel"></label>
       </div>
     </details>
   </div>
@@ -458,7 +458,7 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ingreso)"></span><h1 id="ingTitle">Ingresar producto</h1></div>
   <form class="body gut" id="ingForm" autocomplete="off">
     <label class="f">Código propio
-      <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off">
+      <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
     </label>
     <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
     <p class="note" style="margin:-6px 0 0">Si lo dejas vacío, al guardar se crea uno con la fecha y la categoría.</p>
@@ -469,7 +469,7 @@ details.card[open]>summary{margin-bottom:10px}
       <div id="iOrigTxt" class="origtxt"></div>
       <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
     </div>
-    <label class="f">Nombre<input id="iNombre" class="inp" placeholder="Martillo de uña 16 oz mango fibra" enterkeyhint="next"></label>
+    <label class="f">Nombre<input id="iNombre" class="inp" placeholder="Martillo de uña 16 oz mango fibra" enterkeyhint="next" inputmode="text"></label>
     <div class="row" style="align-items:flex-start">
       <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric" placeholder="0"></label>
       <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric" placeholder="0"></label>
@@ -478,7 +478,7 @@ details.card[open]>summary{margin-bottom:10px}
       <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric" placeholder="0"></label>
       <label class="f grow">Categoría<select id="iCat" class="inp"></select></label>
     </div>
-    <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden>
+    <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden inputmode="text">
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
     <label class="f">Foto
       <button type="button" class="shot" id="iFotoBtn" style="aspect-ratio:1/1;max-height:320px;width:100%;padding:0">
@@ -509,7 +509,7 @@ details.card[open]>summary{margin-bottom:10px}
       <div><div class="sect">Valor</div><div class="num" style="font-size:22px;font-weight:600" id="invValor">$0</div></div>
     </div>
     <form id="invSearchForm" class="row" autocomplete="off">
-      <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search">
+      <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
       <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
       <button class="btn ico primary" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
     </form>
@@ -524,7 +524,7 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--danger)"></span><h1>Por comprar</h1></div>
   <div class="body gut">
     <div class="row"><button type="button" class="btn cam grow" id="pScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button type="button" class="btn ingreso grow" id="pFoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</button></div>
-    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Nombre del producto" autocomplete="off"><button class="btn primary" type="submit">Agregar</button></form>
+    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Nombre del producto" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button class="btn primary" type="submit">Agregar</button></form>
     <div class="sect" id="pendCount"></div>
     <div id="pendList"></div>
     <input id="pFotoFile" type="file" accept="image/*" capture="environment" hidden>
@@ -536,24 +536,24 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--muted)"></span><h1>Ajustes</h1></div>
   <div class="tabsbar gut"><div class="seg3" id="ajTabs" role="tablist"><button type="button" data-tab="app" aria-pressed="true">Ajustes</button><button type="button" data-tab="cli" aria-pressed="false">Clientes</button><button type="button" data-tab="prov" aria-pressed="false">Proveedores</button></div></div>
   <div class="body gut" id="tabCli" hidden>
-    <div class="row"><input id="cliQ" class="inp grow" placeholder="Nombre, NIT o teléfono" autocomplete="off"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
+    <div class="row"><input id="cliQ" class="inp grow" placeholder="Nombre, NIT o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
     <div id="cliList"></div>
   </div>
   <div class="body gut" id="tabProv" hidden>
-    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre o teléfono" autocomplete="off"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
+    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
     <div id="provList"></div>
   </div>
   <form class="body gut" id="ajForm" autocomplete="off">
     <div class="sect">Empresa</div>
-    <label class="f">Nombre<input id="aNombre" class="inp"></label>
-    <label class="f">NIT<input id="aNit" class="inp" placeholder="900.123.456-7"></label>
-    <label class="f">Dirección<input id="aDir" class="inp"></label>
-    <label class="f">Ciudad<input id="aCiudad" class="inp" placeholder="Chía, Cundinamarca"></label>
+    <label class="f">Nombre<input id="aNombre" class="inp" inputmode="text"></label>
+    <label class="f">NIT<input id="aNit" class="inp" placeholder="900.123.456-7" inputmode="tel" autocomplete="off"></label>
+    <label class="f">Dirección<input id="aDir" class="inp" inputmode="text"></label>
+    <label class="f">Ciudad<input id="aCiudad" class="inp" placeholder="Chía, Cundinamarca" inputmode="text"></label>
     <label class="f">Teléfono<input id="aTel" class="inp" inputmode="tel"></label>
     <label class="f">Celular / WhatsApp<input id="aCel" class="inp" inputmode="tel"></label>
-    <label class="f">Correo<input id="aMail" class="inp" inputmode="email" autocomplete="off"></label>
-    <label class="f">Régimen<input id="aReg" class="inp" placeholder="No responsable de IVA"></label>
-    <label class="f">Mensaje de la factura<input id="aPie" class="inp" placeholder="Gracias por su compra"></label>
+    <label class="f">Correo<input id="aMail" class="inp" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Régimen<input id="aReg" class="inp" placeholder="No responsable de IVA" inputmode="text"></label>
+    <label class="f">Mensaje de la factura<input id="aPie" class="inp" placeholder="Gracias por su compra" inputmode="text"></label>
     <label class="f">Ancho del papel
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
@@ -725,7 +725,7 @@ function popup(titulo, bodyHTML, onMount){
 function openPicker(sel){
   const opts = [...sel.options].filter(o => !o.hidden);
   const buscar = opts.length > 10;
-  popup(labelOf(sel), `${buscar ? `<input class="inp" id="pkQ" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px">` : ""}<div class="poplist" id="pkList"></div>`, (el, close) => {
+  popup(labelOf(sel), `${buscar ? `<input class="inp" id="pkQ" inputmode="search" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px">` : ""}<div class="poplist" id="pkList"></div>`, (el, close) => {
     const list = el.querySelector("#pkList");
     const draw = (q = "") => {
       const t = norm(q);
@@ -1494,10 +1494,10 @@ async function photoData(src){
 function provForm(prov, onSaved){
   const p = prov || {};
   sheet(`<h2>${prov ? "Editar proveedor" : "Nuevo proveedor"}</h2>
-    <label class="f">Nombre<input id="pvN" class="inp" value="${esc(p.nombre||"")}" placeholder="Distribuidora El Perno" autocomplete="off"></label>
+    <label class="f">Nombre<input id="pvN" class="inp" value="${esc(p.nombre||"")}" placeholder="Distribuidora El Perno" autocomplete="off" inputmode="text"></label>
     <label class="f">Teléfono<input id="pvT" class="inp num" inputmode="tel" value="${esc(p.telefono||"")}" autocomplete="off"></label>
-    <label class="f">Código del proveedor<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" placeholder="Opcional" autocomplete="off"></label>
-    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
+    <label class="f">Código del proveedor<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" placeholder="Opcional" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
     <div id="pvErr" class="err"></div>
     <div class="row">${prov ? `<button class="btn danger grow" id="pvDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="pvOk">Guardar</button></div>`,
     (el, close) => {
@@ -1540,12 +1540,12 @@ function pendFormSheet(pre = {}, item = null){
       <div class="ph" id="pfPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
       <img id="pfImg" alt="Foto" hidden style="object-fit:contain;background:#fff">
     </button>
-    <label class="f">Producto<input id="pfN" class="inp" value="${esc(nombre0)}" placeholder="Llave de paso 1/2" autocomplete="off"></label>
-    <label class="f">Código<div class="row"><input id="pfC" class="inp num grow" value="${esc(it.codigo || pre.codigo || "")}" autocomplete="off"><button type="button" class="btn" id="pfScan">Leer</button></div></label>
+    <label class="f">Producto<input id="pfN" class="inp" value="${esc(nombre0)}" placeholder="Llave de paso 1/2" autocomplete="off" inputmode="text"></label>
+    <label class="f">Código<div class="row"><input id="pfC" class="inp num grow" value="${esc(it.codigo || pre.codigo || "")}" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="btn" id="pfScan">Leer</button></div></label>
     <div class="row" style="align-items:flex-start"><label class="f grow">Cantidad<input id="pfCant" class="inp num miles" inputmode="numeric" value="${it.cantidad ? miles(it.cantidad) : ""}" placeholder="0"></label></div>
     <label class="f">Proveedor<select id="pfProv" class="inp"></select></label>
     <div id="pfProvTel" class="note"></div>
-    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
+    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
     <div id="pfErr" class="err"></div>
     <div class="row">${item ? `<button class="btn danger grow" id="pfDel">Quitar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn primary grow" id="pfOk">${item ? "Guardar" : "Agregar"}</button></div>`,
     (el, close) => {
@@ -1637,7 +1637,7 @@ function renderCart(){
       return `<div class="prow" style="cursor:default;flex-wrap:wrap">
         <span class="pinfo" style="flex-basis:60%"><span class="pname">${esc(i.nombre)}</span><span class="pmeta"><span class="num">${fmt(i.precio)} c/u</span>${warn}</span></span>
         <span class="price">${fmt(i.precio*i.cant)}</span>
-        <span class="qty" style="width:100%;justify-content:flex-end"><button class="btn sm danger" data-rm="${k}" style="margin-right:auto">Quitar</button><button class="qbtn" data-dec="${k}" aria-label="Menos">−</button><input class="qv" data-qv="${k}" inputmode="numeric" value="${i.cant}" aria-label="Cantidad"><button class="qbtn" data-inc="${k}" aria-label="Más">+</button></span></div>`;
+        <span class="qty" style="width:100%;justify-content:flex-end"><button class="btn sm danger" data-rm="${k}" style="margin-right:auto">Quitar</button><button class="qbtn" data-dec="${k}" aria-label="Menos">−</button><input class="qv" data-qv="${k}" inputmode="numeric" enterkeyhint="done" value="${i.cant}" aria-label="Cantidad"><button class="qbtn" data-inc="${k}" aria-label="Más">+</button></span></div>`;
     }).join("")}</div>`;
   }
   const t = cartTotal();
@@ -1698,7 +1698,7 @@ $("vDrop").addEventListener("click", e => {
 });
 document.addEventListener("click", e => { if (!e.target.closest(".drop")) $("vDrop").hidden = true; });
 $("vLibre").onclick = () => sheet(`<h2>Artículo sin código</h2>
-  <label class="f">Descripción<input id="lbN" class="inp" placeholder="Corte de varilla 1 m"></label>
+  <label class="f">Descripción<input id="lbN" class="inp" placeholder="Corte de varilla 1 m" inputmode="text"></label>
   <div class="row"><label class="f grow">Precio<input id="lbP" class="inp num miles" inputmode="numeric"></label><label class="f grow">Cantidad<input id="lbC" class="inp num miles" inputmode="numeric" value="1"></label></div>
   <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn venta grow" id="lbOk">Agregar</button></div>`,
   (el, close) => { el.querySelector("#lbOk").onclick = () => {
@@ -1845,7 +1845,7 @@ $("ventasHist").onclick = async () => {
       <label class="f grow">Desde<select id="hDesde" class="inp">${optHora("Cualquier hora")}</select></label>
       <label class="f grow">Hasta<select id="hHasta" class="inp">${optHora("Cualquier hora")}</select></label>
     </div>
-    <input id="hCli" class="inp" placeholder="Cliente o NIT" autocomplete="off">
+    <input id="hCli" class="inp" placeholder="Cliente o NIT" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false">
     <div id="hRes"></div>
     <div class="row"><button class="btn grow" data-close>Cerrar</button><button class="btn grow" id="hExcel">Exportar</button></div>`,
     (el, close) => {
@@ -2767,7 +2767,7 @@ function confirmCodeSheet(text, ok){
     let answered = false;
     sheet(`<h2>Código leído</h2>
       <p class="note" style="margin:0">${ok ? "Revisa que esté bien. Puedes corregirlo." : "No se leyó con claridad. Corrígelo o léelo otra vez con más luz y el código derecho."}</p>
-      <input id="ccTxt" class="inp num" style="font-size:24px;text-align:center" value="${esc(text)}" autocomplete="off">
+      <input id="ccTxt" class="inp num" style="font-size:24px;text-align:center" value="${esc(text)}" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
       <div class="row"><button class="btn grow" id="ccOtra">Leer otra vez</button><button class="btn primary grow" id="ccOk">Usar este código</button></div>`,
       (el, close) => {
         const fin = (v) => { answered = true; close(); resolve(v); };
@@ -2827,12 +2827,12 @@ $("cliNuevo").onclick = () => clienteForm(null);
 function clienteForm(cli, onSaved){
   const c = cli || {};
   sheet(`<h2>${cli ? "Editar cliente" : "Nuevo cliente"}</h2>
-    <label class="f">Nombre<input id="clN" class="inp" value="${esc(c.nombre||"")}" autocomplete="off"></label>
-    <label class="f">NIT o cédula<input id="clD" class="inp num" value="${esc(c.doc||"")}" autocomplete="off"></label>
+    <label class="f">Nombre<input id="clN" class="inp" value="${esc(c.nombre||"")}" autocomplete="off" inputmode="text"></label>
+    <label class="f">NIT o cédula<input id="clD" class="inp num" value="${esc(c.doc||"")}" autocomplete="off" inputmode="tel"></label>
     <label class="f">Teléfono<input id="clT" class="inp num" inputmode="tel" value="${esc(c.telefono||"")}" autocomplete="off"></label>
-    <label class="f">Correo<input id="clM" class="inp" inputmode="email" value="${esc(c.correo||"")}" autocomplete="off"></label>
-    <label class="f">Dirección<input id="clDir" class="inp" value="${esc(c.direccion||"")}" autocomplete="off"></label>
-    <label class="f">Nota<input id="clNota" class="inp" value="${esc(c.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
+    <label class="f">Correo<input id="clM" class="inp" inputmode="email" value="${esc(c.correo||"")}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Dirección<input id="clDir" class="inp" value="${esc(c.direccion||"")}" autocomplete="off" inputmode="text"></label>
+    <label class="f">Nota<input id="clNota" class="inp" value="${esc(c.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
     <div id="clErr" class="err"></div>
     <div class="row">${cli ? `<button class="btn danger grow" id="clDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="clOk">Guardar</button></div>`,
     (el, close) => {
@@ -2873,7 +2873,7 @@ function setVentaCliente(c){
 $("vCli").addEventListener("input", () => { S.ventaCliId = null; });
 $("vCliDoc").addEventListener("input", () => { S.ventaCliId = null; });
 $("vCliElegir").onclick = () => {
-  popup("Elegir cliente", `<input class="inp" id="ecQ" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px"><div class="poplist" id="ecList"></div>`, (el, close) => {
+  popup("Elegir cliente", `<input class="inp" id="ecQ" inputmode="search" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px"><div class="poplist" id="ecList"></div>`, (el, close) => {
     const draw = (q = "") => {
       const t = norm(q);
       const cs = [...S.clientes].filter(c => !t || norm(c.nombre).includes(t) || norm(c.doc).includes(t)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
