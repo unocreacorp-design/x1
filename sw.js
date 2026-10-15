@@ -1,6 +1,6 @@
 /* Guarda la app en el celular para que abra sin internet.
    Con internet, trae siempre la versión más nueva y la vuelve a guardar. */
-const CACHE = "caja-v2";
+const CACHE = "caja-v3";
 const ARCHIVOS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {

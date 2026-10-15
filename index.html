@@ -219,11 +219,11 @@ label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:70
 .exbtn b{font-size:18px;font-family:var(--f-display);text-transform:uppercase;letter-spacing:.02em}
 .exbtn span{font-size:13px;color:var(--muted);line-height:1.25}
 .exbtn .ext{font-family:var(--f-mono);font-size:12px;color:var(--accent)}
-/* Botones: el ícono va de fondo, detrás del nombre, y el nombre en una sola línea */
-.btn,.chip{position:relative;isolation:isolate;overflow:hidden;white-space:nowrap}
-.btn.ico>svg{position:static!important;transform:none!important;width:22px!important;height:22px!important;opacity:1!important;z-index:auto!important}
-.btn:not(.ico)>svg,.chip>svg{position:absolute!important;left:50%;top:50%;transform:translate(-50%,-50%);width:auto!important;height:175%!important;max-height:88px;opacity:.16;z-index:-1;pointer-events:none;margin:0}
+/* Botones: solo texto; los de escanear llevan un ícono pequeño al lado */
+.btn,.chip{white-space:nowrap}
+.btn>svg{width:20px;height:20px;flex-shrink:0}
 .chip{flex-direction:row!important;padding:14px 8px!important}
+.chip svg{display:none}
 .row>.btn.grow{padding-left:8px;padding-right:8px}
 .tabs.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-overflow-scrolling:touch}
 .tabs.scroll::-webkit-scrollbar{display:none}
@@ -242,6 +242,22 @@ details.card[open]>summary{margin-bottom:10px}
 .lnk{color:var(--accent);font-weight:700;text-decoration:none}
 .miniimg{width:100%;max-height:34vh;object-fit:contain;background:#fff;border-radius:12px;border:1px solid var(--line)}
 .logoprev{width:96px;height:96px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:10px}
+.picker{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;min-height:48px}
+.picker span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.picker svg{width:20px;height:20px;flex-shrink:0;color:var(--muted)}
+.pop{position:fixed;inset:0;z-index:28;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
+.popbox{background:var(--bg);width:100%;max-height:78%;border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.pophead{display:flex;align-items:center;gap:10px;padding-top:14px;padding-bottom:10px}
+.pophead h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:22px;text-transform:uppercase;flex:1;min-width:0}
+.poplist{overflow-y:auto;padding-bottom:14px;display:flex;flex-direction:column;gap:6px}
+.popopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:17px;font-weight:600;text-align:left;width:100%}
+.popopt[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.popopt .ct{color:var(--muted);font-weight:500;font-size:14px}
+.popsec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex-shrink:0;color:var(--ink)}
+.iconbtn svg{width:20px;height:20px}
+.fchips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fchip{border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:6px 10px;font-size:14px;font-weight:600;display:inline-flex;gap:6px;align-items:center}
 .codebox{background:#fff;border-radius:10px;padding:10px;display:flex;justify-content:center;border:1px solid var(--line)}
 .codebox svg{max-width:100%;height:auto}
 #printArea{display:none}
@@ -362,27 +378,23 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="venta" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--venta)"></span><h1>Venta</h1><button class="btn sm" id="ventasHist">Historial</button></div>
   <div class="body gut">
-    <div class="row">
-      <button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5v14M7 5v14M11 5v14M15 5v14M18 5v14M21 5v14"/></svg>Escanear</button>
-      <button class="btn" id="vLibre">+ Sin código</button>
-    </div>
     <div class="drop">
-      <input id="vQ" class="inp" placeholder="Buscar producto por nombre o código" autocomplete="off" enterkeyhint="search">
+      <input id="vQ" class="inp" placeholder="Nombre o código" autocomplete="off" enterkeyhint="search">
       <div id="vDrop" class="dropl plist" hidden></div>
     </div>
     <div id="cart"></div>
-    <details class="card" id="vCliBox"><summary>Factura a nombre de</summary>
+    <details class="card" id="vCliBox"><summary>Cliente</summary>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <label class="f">Nombre del cliente<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off"></label>
+        <label class="f">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off"></label>
         <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" placeholder="Opcional" autocomplete="off"></label>
       </div>
     </details>
   </div>
   <div class="foot gut">
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
-    <div class="row"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label></div>
-    <div class="cambio"><span class="note">Cambio</span><span class="num" id="vCambio">—</span></div>
-    <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar e imprimir</button></div>
+    <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
+    <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar</button></div>
+    <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
   </div>
 </section>
 
@@ -391,7 +403,7 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--venta)"></span><h1 id="recTitle">Factura</h1></div>
   <div class="body gut">
     <div class="recibo-wrap"><canvas id="recCanvas" width="384" height="400"></canvas></div>
-    <p class="note" style="margin:0" id="recNota">“Bluetooth” imprime directo en impresoras térmicas Bluetooth LE (Chrome en Android). “Imprimir” usa el servicio de impresión del celular; con la app RawBT instalada sirve para casi cualquier impresora térmica. “Compartir” manda la imagen a la app de tu impresora o por WhatsApp.</p>
+    <p class="note" style="margin:0" id="recNota">Bluetooth: impresoras térmicas BLE. Imprimir: servicio de impresión (RawBT). Compartir: envía la imagen.</p>
   </div>
   <div class="foot gut">
     <div class="row"><button class="btn venta grow" id="recBT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>Bluetooth</button><button class="btn venta grow" id="recPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/></svg>Imprimir</button></div>
@@ -403,14 +415,13 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="ingreso" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ingreso)"></span><h1 id="ingTitle">Ingresar producto</h1></div>
   <form class="body gut" id="ingForm" autocomplete="off">
-    <button type="button" class="btn cam block bigscan" id="iScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Leer código de barras o QR</button>
     <label class="f">Código
       <div class="row">
         <input id="iCodigo" class="inp num grow" placeholder="Lee o escribe el código" enterkeyhint="next">
         <button type="button" class="btn" id="iGen">Crear</button>
       </div>
     </label>
-    <p class="note" style="margin:-6px 0 0">Si el producto no tiene código, déjalo vacío: al guardar se crea uno y puedes imprimir su etiqueta.</p>
+    <p class="note" style="margin:-6px 0 0">Sin código: déjalo vacío y se crea uno al guardar.</p>
     <div id="iExiste" hidden></div>
     <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
     <label class="f">Nombre<input id="iNombre" class="inp" placeholder="Martillo de uña 16 oz mango fibra" enterkeyhint="next"></label>
@@ -419,12 +430,12 @@ details.card[open]>summary{margin-bottom:10px}
       <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric" placeholder="0"></label>
     </div>
     <div class="row" style="align-items:flex-start">
-      <label class="f grow">Costo (compra)<input id="iCosto" class="inp num miles" inputmode="numeric" placeholder="0"></label>
+      <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric" placeholder="0"></label>
       <label class="f grow">Categoría<select id="iCat" class="inp"></select></label>
     </div>
     <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden>
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
-    <label class="f">Código propio (escrito a mano)
+    <label class="f">Código propio
       <div class="row">
         <input id="iCodP" class="inp num grow" placeholder="Ej: 9585x56" autocomplete="off">
         <button type="button" class="btn" id="iCodPLeer">Leer</button>
@@ -432,18 +443,19 @@ details.card[open]>summary{margin-bottom:10px}
     </label>
     <label class="f">Foto
       <button type="button" class="shot" id="iFotoBtn" style="aspect-ratio:1/1;max-height:320px;width:100%;padding:0">
-        <div class="ph" id="iFotoPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Toca para tomar la foto</span></div>
+        <div class="ph" id="iFotoPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
         <img id="iFotoImg" alt="Foto del producto" hidden>
       </button>
     </label>
-    <div class="tabs" id="iFotoOpts" hidden><button type="button" data-fv="sinfondo" aria-pressed="true">Sin fondo</button><button type="button" data-fv="original" aria-pressed="false">Original</button></div>
+    <div class="tabs" id="iFotoOpts" hidden><button type="button" data-fv="sinfondo" aria-pressed="true">Recorte</button><button type="button" data-fv="original" aria-pressed="false">Original</button></div>
     <p class="note" id="iFechas" style="margin:0" hidden></p>
     <input id="iFoto" type="file" accept="image/*" capture="environment" hidden>
     <div id="iErr" class="err"></div>
-    <button type="button" class="btn danger" id="iBorrar" hidden>Eliminar del inventario</button>
+    <button type="button" class="btn danger" id="iBorrar" hidden>Eliminar producto</button>
   </form>
   <div class="foot gut">
-    <div class="row"><button type="button" class="btn" id="iEtiqueta" hidden>Etiqueta</button><button class="btn ingreso grow" id="iGuardar" form="ingForm" type="submit">Guardar en inventario</button></div>
+    <button type="button" class="btn cam block" id="iScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear código</button>
+    <div class="row"><button type="button" class="btn" id="iEtiqueta" hidden>Etiqueta</button><button class="btn ingreso grow" id="iGuardar" form="ingForm" type="submit">Guardar</button></div>
   </div>
 </section>
 
@@ -451,33 +463,29 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="inventario" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ink)"></span><h1>Inventario</h1></div>
   <div class="body gut">
-    <button type="button" class="btn cam block bigscan" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Buscar con la cámara</button>
+    <button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button>
     <div class="card row" style="justify-content:space-between;flex-wrap:wrap">
       <div><div class="sect">Productos</div><div class="num" style="font-size:22px;font-weight:600" id="invCount">0</div></div>
       <div><div class="sect">Unidades</div><div class="num" style="font-size:22px;font-weight:600" id="invUnits">0</div></div>
-      <div><div class="sect">Valor a precio venta</div><div class="num" style="font-size:22px;font-weight:600" id="invValor">$0</div></div>
+      <div><div class="sect">Valor</div><div class="num" style="font-size:22px;font-weight:600" id="invValor">$0</div></div>
     </div>
     <form id="invSearchForm" class="row" autocomplete="off">
-      <input id="invQ" class="inp grow" placeholder="Buscar por nombre o código" enterkeyhint="search">
+      <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search">
+      <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
       <button class="btn ico primary" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
     </form>
-    <div class="tabs" id="invTabs">
-      <button data-f="todos" aria-pressed="true">Todos</button>
-      <button data-f="bajo" aria-pressed="false">Pocas unidades</button>
-      <button data-f="agotado" aria-pressed="false">Agotados</button>
-    </div>
-    <div class="tabs scroll" id="invCats"></div>
+    <div class="fchips" id="invChips" hidden></div>
     <div id="invList"></div>
   </div>
-  <div class="foot gut"><div class="row"><button class="btn grow" id="invExport">Exportar</button><label class="btn grow" for="aImport">Cargar lista</label><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
+  <div class="foot gut"><div class="row"><button class="btn grow" id="invExport">Exportar</button><label class="btn grow" for="aImport">Importar</label><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
 </section>
 
 <!-- PENDIENTES -->
 <section id="pendientes" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--danger)"></span><h1>Por comprar</h1></div>
   <div class="body gut">
-    <div class="row"><button type="button" class="btn cam grow bigscan" id="pScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button type="button" class="btn ingreso grow bigscan" id="pFoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</button></div>
-    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="O escribe el nombre: llave de paso 1/2" autocomplete="off"><button class="btn primary" type="submit">Agregar</button></form>
+    <div class="row"><button type="button" class="btn cam grow" id="pScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button type="button" class="btn ingreso grow" id="pFoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</button></div>
+    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Nombre del producto" autocomplete="off"><button class="btn primary" type="submit">Agregar</button></form>
     <div class="sect" id="pendCount"></div>
     <div id="pendList"></div>
     <input id="pFotoFile" type="file" accept="image/*" capture="environment" hidden>
@@ -488,36 +496,36 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="ajustes" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--muted)"></span><h1>Ajustes</h1></div>
   <form class="body gut" id="ajForm" autocomplete="off">
-    <div class="sect">Datos en la factura</div>
-    <label class="f">Nombre del negocio<input id="aNombre" class="inp"></label>
+    <div class="sect">Empresa</div>
+    <label class="f">Nombre<input id="aNombre" class="inp"></label>
     <label class="f">NIT<input id="aNit" class="inp" placeholder="900.123.456-7"></label>
     <label class="f">Dirección<input id="aDir" class="inp"></label>
     <label class="f">Ciudad<input id="aCiudad" class="inp" placeholder="Chía, Cundinamarca"></label>
-    <label class="f">Teléfono de la ferretería<input id="aTel" class="inp" inputmode="tel"></label>
-    <label class="f">Celular o WhatsApp<input id="aCel" class="inp" inputmode="tel"></label>
+    <label class="f">Teléfono<input id="aTel" class="inp" inputmode="tel"></label>
+    <label class="f">Celular / WhatsApp<input id="aCel" class="inp" inputmode="tel"></label>
     <label class="f">Correo<input id="aMail" class="inp" inputmode="email" autocomplete="off"></label>
-    <label class="f">Régimen o nota legal<input id="aReg" class="inp" placeholder="No responsable de IVA"></label>
-    <label class="f">Mensaje al final<input id="aPie" class="inp" placeholder="Gracias por su compra"></label>
+    <label class="f">Régimen<input id="aReg" class="inp" placeholder="No responsable de IVA"></label>
+    <label class="f">Mensaje de la factura<input id="aPie" class="inp" placeholder="Gracias por su compra"></label>
     <label class="f">Ancho del papel
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
-    <label class="f">Avisar cuando queden pocas unidades (igual o menos de)<input id="aBajo" class="inp num miles" inputmode="numeric"></label>
-    <button class="btn primary" type="submit">Guardar ajustes</button>
+    <label class="f">Alerta de pocas unidades<input id="aBajo" class="inp num miles" inputmode="numeric"></label>
+    <button class="btn primary" type="submit">Guardar</button>
     <div class="sect" style="margin-top:10px">Pantalla</div>
     <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
       <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
-      <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Si se sale por error, vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
+      <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
     </div>
-    <p class="note" style="margin:0" id="fsNote">Ningún navegador deja bloquear del todo los botones del celular. Para que no se pueda salir de la app ni con el botón de inicio, activa <b>Fijar app</b> en Android (Ajustes › Seguridad › Fijar apps, y luego fija Chrome desde las apps recientes) o <b>Acceso guiado</b> en iPhone (Ajustes › Accesibilidad).</p>
+    <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
     <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:10px">Clave</div>
-    <label class="f">Clave nueva (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+    <label class="f">Nueva clave (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
     <button type="button" class="btn" id="aPinGo">Cambiar clave</button>
     <button type="button" class="btn" id="aLock">Bloquear ahora</button>
     <div class="sect" style="margin-top:10px">Cámara</div>
-    <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee el código sola, sin tomar foto. Necesita abrir la app desde un link en Chrome. Apagada, se usa la cámara normal del celular.</small></span><span class="tg"></span></button>
-    <div class="sect" style="margin-top:10px">Fotos de productos</div>
-    <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Quitar el fondo automáticamente<br><small class="note" style="font-weight:500">Deja el producto sobre fondo blanco. Funciona mejor con el producto sobre una superficie lisa.</small></span><span class="tg"></span></button>
+    <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee sola, sin tomar foto. Requiere abrir desde el link.</small></span><span class="tg"></span></button>
+    <div class="sect" style="margin-top:10px">Fotos</div>
+    <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Recortar producto con IA<br><small class="note" style="font-weight:500">Borra el fondo de la foto.</small></span><span class="tg"></span></button>
     <div class="row" style="align-items:center;gap:12px">
       <img id="aLogoImg" class="logoprev" alt="Logo" hidden>
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
@@ -526,28 +534,31 @@ details.card[open]>summary{margin-bottom:10px}
       </div>
     </div>
     <input id="aLogoFile" type="file" accept="image/*" hidden>
+    <label class="f">Fondo del recorte
+      <select id="aFondo" class="inp"><option value="blanco">Blanco</option><option value="transparente">Transparente</option></select>
+    </label>
     <label class="f">Logo en la foto
       <select id="aLogoPos" class="inp"><option value="esquina">En la esquina</option><option value="fondo">Suave de fondo</option><option value="ninguno">No poner logo</option></select>
     </label>
     <div class="sect" style="margin-top:10px">Proveedores</div>
     <div id="provList"></div>
-    <button type="button" class="btn ingreso" id="provNuevo">+ Agregar proveedor</button>
-    <div class="sect" style="margin-top:10px">Copias automáticas</div>
-    <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Guarda una copia cuando hay ventas o cambios. Si no se usa la app, no guarda nada.</small></span><span class="tg"></span></button>
-    <label class="f">Guardar cada
+    <button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button>
+    <div class="sect" style="margin-top:10px">Copias de seguridad</div>
+    <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Solo guarda si hubo ventas o cambios.</small></span><span class="tg"></span></button>
+    <label class="f">Frecuencia
       <select id="aAutoMin" class="inp"><option value="5">5 minutos</option><option value="10">10 minutos</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select>
     </label>
-    <p class="note" style="margin:0">La app guarda dos copias: una <b>reciente</b> que se reemplaza cada vez, y una <b>por día</b> que se conserva 7 días. Así, si algo sale mal, puedes volver a cómo estaba antes.</p>
+    <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 7 días).</p>
     <div id="copiasList"></div>
-    <button type="button" class="btn" id="aCopiaYa">Hacer copia ahora</button>
-    <label class="f">Recordarme guardar la copia en el celular cada
-      <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">No recordar</option></select>
+    <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
+    <label class="f">Recordar copia en el celular cada
+      <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">Nunca</option></select>
     </label>
-    <div class="sect" style="margin-top:10px">Exportar y guardar</div>
-    <p class="note" style="margin:0">Los datos viven en este celular. Exporta seguido y guarda el archivo en Drive, el correo o WhatsApp. Con “Cargar archivo” la app lee de nuevo una copia completa (.json) o una lista de productos en Excel, CSV o texto.</p>
+    <div class="sect" style="margin-top:10px">Exportar e importar</div>
+    <p class="note" style="margin:0">Los datos están solo en este celular. Exporta seguido y guarda el archivo en Drive o WhatsApp.</p>
     <p class="note" style="margin:0" id="aUltimaExp"></p>
-    <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar datos</button><label class="btn grow" for="aImport">Cargar archivo</label></div>
-    <p class="note">La clave de la app bloquea la pantalla en este celular.</p>
+    <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar</button><label class="btn grow" for="aImport">Importar</label></div>
+    
   </form>
 </section>
 
@@ -556,6 +567,7 @@ details.card[open]>summary{margin-bottom:10px}
 <div id="capHost"></div>
 <input id="scanFile" type="file" accept="image/*" capture="environment" hidden>
 <div id="sheetHost"></div>
+<div id="popHost"></div>
 <div id="toastHost"></div>
 <input id="aImport" type="file" accept=".json,.xlsx,.xls,.csv,.txt,application/json,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
 <div id="printArea"><img id="printImg" alt=""></div>
@@ -596,6 +608,7 @@ function show(name, push=true){
   if (name==="inventario") renderInv();
   if (name==="pendientes") renderPend();
   if (name==="ajustes") fillAjustes();
+  upgradeAll($(name));
 }
 function back(){
   S.hist.pop();
@@ -619,11 +632,62 @@ function sheet(html, onMount){
   const close = () => host.innerHTML = "";
   scrim.addEventListener("click", e => { if (e.target===scrim || e.target.closest("[data-close]")) close(); });
   onMount && onMount(scrim.firstElementChild, close);
+  upgradeAll(scrim);
   return close;
 }
 function confirmar(texto, okLabel, onOk, danger=true){
   sheet(`<h2>${esc(texto)}</h2><div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn ${danger?"":"primary"} grow" id="cfOk" style="${danger?"background:var(--danger);color:#fff;border-color:transparent":""}">${esc(okLabel)}</button></div>`,
     (el, close) => el.querySelector("#cfOk").onclick = () => { close(); onOk(); });
+}
+
+/* ---------- selector con flecha: abre una ventana con las opciones ---------- */
+const CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+function labelOf(el){
+  const l = el.closest("label.f"); if (!l) return el.getAttribute("aria-label") || "Elegir";
+  const t = [...l.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(" ").trim();
+  return t || l.querySelector("span")?.textContent || "Elegir";
+}
+function upgradeSelect(sel){
+  if (sel._pk) return refreshPicker(sel);
+  const b = document.createElement("button"); b.type = "button"; b.className = "inp picker"; b.setAttribute("aria-haspopup", "listbox");
+  sel.hidden = true; sel.after(b); sel._pk = b;
+  b.onclick = (e) => { e.preventDefault(); openPicker(sel); };
+  sel.addEventListener("change", () => refreshPicker(sel));
+  refreshPicker(sel);
+}
+function refreshPicker(sel){
+  const b = sel._pk; if (!b) return;
+  const o = sel.options[sel.selectedIndex];
+  b.innerHTML = `<span>${esc(o ? o.textContent : "")}</span>${CHEV}`;
+}
+function upgradeAll(root = document){ root.querySelectorAll("select.inp").forEach(upgradeSelect); }
+function popup(titulo, bodyHTML, onMount){
+  const host = $("popHost");
+  host.innerHTML = `<div class="pop"><div class="popbox gut" role="dialog" aria-modal="true"><div class="pophead"><h3>${esc(titulo)}</h3><button type="button" class="iconbtn" data-popclose aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>${bodyHTML}</div></div>`;
+  const ov = host.firstElementChild, close = () => host.innerHTML = "";
+  ov.addEventListener("click", (e) => { if (e.target === ov || e.target.closest("[data-popclose]")) close(); });
+  onMount && onMount(ov.firstElementChild, close);
+  return close;
+}
+function openPicker(sel){
+  const opts = [...sel.options].filter(o => !o.hidden);
+  const buscar = opts.length > 10;
+  popup(labelOf(sel), `${buscar ? `<input class="inp" id="pkQ" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px">` : ""}<div class="poplist" id="pkList"></div>`, (el, close) => {
+    const list = el.querySelector("#pkList");
+    const draw = (q = "") => {
+      const t = norm(q);
+      list.innerHTML = opts.filter(o => !t || norm(o.textContent).includes(t)).map(o => `<button type="button" class="popopt" role="option" data-v="${esc(o.value)}" aria-selected="${o.value === sel.value}"><span>${esc(o.textContent)}</span>${o.value === sel.value ? '<span class="ct">✓</span>' : ""}</button>`).join("") || `<div class="note">Sin resultados</div>`;
+    };
+    draw();
+    const q = el.querySelector("#pkQ"); if (q) q.addEventListener("input", () => draw(q.value));
+    list.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-v]"); if (!b) return;
+      sel.value = b.dataset.v; close();
+      sel.dispatchEvent(new Event("change", { bubbles: true })); sel.dispatchEvent(new Event("input", { bubbles: true }));
+      refreshPicker(sel);
+    });
+    const cur = list.querySelector('[aria-selected="true"]'); if (cur) cur.scrollIntoView({ block: "center" });
+  });
 }
 
 /* ---------- crypto / PIN ---------- */
@@ -780,8 +844,8 @@ function productSheet(p){
       <div class="grow"><h2 style="text-transform:none;font-size:24px;line-height:1.1">${esc(p.nombre)}</h2>
       <div class="price" style="font-size:24px;margin-top:6px">${fmt(p.precio)}</div></div></div>
     <dl class="kv"><dt>Código</dt><dd class="num">${esc(p.codigo||"—")}</dd>${p.codigoPropio?`<dt>Código propio</dt><dd class="num">${esc(p.codigoPropio)}</dd>`:""}<dt>Existencias</dt><dd>${stockChip(p)}</dd>${p.costo?`<dt>Costo</dt><dd class="num">${fmt(p.costo)}</dd>`:""}${p.categoria?`<dt>Categoría</dt><dd>${esc(p.categoria)}</dd>`:""}${(() => { const pv = provById(p.proveedorId); return pv ? `<dt>Proveedor</dt><dd>${esc(pv.nombre)}${pv.telefono?`<br><span class="num" style="font-weight:500">${esc(pv.telefono)}</span> · ${telLinks(pv.telefono)}`:""}</dd>` : ""; })()}${p.creado?`<dt>Ingresado</dt><dd>${fFecha(p.creado)} ${fHora(p.creado)}</dd>`:""}${p.actualizado && p.actualizado !== p.creado?`<dt>Actualizado</dt><dd>${fFecha(p.actualizado)} ${fHora(p.actualizado)}</dd>`:""}</dl>
-    <button class="btn venta block" id="psVender">Agregar a la venta</button>
-    <div class="row"><button class="btn grow" id="psEditar">Editar / sumar unidades</button><button class="btn grow" data-close>Cerrar</button></div>`,
+    <button class="btn venta block" id="psVender">Vender</button>
+    <div class="row"><button class="btn grow" id="psEditar">Editar</button><button class="btn grow" data-close>Cerrar</button></div>`,
     (el, close) => {
       el.querySelector("#psVender").onclick = () => { close(); addToCart(p); show("venta"); };
       el.querySelector("#psEditar").onclick = () => { close(); openIngreso({edit:p}); };
@@ -856,7 +920,7 @@ function capturePhoto(titulo, fallbackInput){
       <video id="capVideo" playsinline muted></video><canvas id="capBox" style="position:absolute;inset:0;width:100%;height:calc(100% - 118px);pointer-events:none"></canvas>
       <div class="captop"><span>${esc(titulo)}</span></div>
       <div class="capbar"><button class="capbtn" id="capCancel">Cancelar</button><button class="shutter" id="capShot" aria-label="Tomar foto"></button><button class="capbtn" id="capTorch" hidden aria-pressed="false">Linterna</button><span id="capSpacer" style="min-width:96px"></span></div>
-      <div class="caphint">Si el producto tiene código, apúntale y la foto se toma sola</div></div>`;
+      <div class="caphint" id="capHint">Si tiene código, la foto se toma sola</div></div>`;
     let done = false, loop = true;
     const v = $("capVideo");
     const finish = (val) => { if (done) return; done = true; loop = false; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
@@ -879,11 +943,21 @@ function capturePhoto(titulo, fallbackInput){
       } catch {}
       $("capShot").onclick = () => { if (!v.videoWidth) return; beep(); finish({ canvas: snap(), code: null }); };
       const { det } = await getDetector();
-      if (det){
-        let last = 0;
+      const ocrOn = ocrDisponible(); if (ocrOn) loadOCR().catch(() => {});
+      const centro = () => { const cw = v.videoWidth*0.84, ch = v.videoHeight*0.24, c = document.createElement("canvas"); c.width = Math.round(cw); c.height = Math.round(ch); c.getContext("2d").drawImage(v, (v.videoWidth-cw)/2, (v.videoHeight-ch)/2, cw, ch, 0, 0, c.width, c.height); return c; };
+      if (det || ocrOn){
+        let last = 0, lastOcr = 0, ocrBusy = false, cand = "", ocrFails = 0;
         const tick = async () => {
           if (!loop || done) return;
-          if (v.readyState >= 2 && v.videoWidth && performance.now() - last > 90){
+          if (ocrOn && !ocrBusy && v.readyState >= 2 && v.videoWidth && performance.now() - lastOcr > 1200 && ocrFails < 3){
+            ocrBusy = true; lastOcr = performance.now();
+            ocrQuick(centro()).then((t) => {
+              ocrBusy = false; if (done) return;
+              if (t && t === cand){ beep(); const c = snap(); setTimeout(() => finish({ canvas: c, code: null, codigoPropio: t }), 200); }
+              else cand = t || "";
+            }).catch(() => { ocrBusy = false; ocrFails++; });
+          }
+          if (det && v.readyState >= 2 && v.videoWidth && performance.now() - last > 90){
             last = performance.now();
             try {
               const r = await det.detect(v);
@@ -911,49 +985,34 @@ function capturePhoto(titulo, fallbackInput){
     }
   });
 }
-/* Escáner de pantalla completa: solo la cámara. Lee código de barras o QR solo, suena y se cierra.
-   Resuelve {code}, {photo: canvas} si se pidió buscar con foto, o null si se cancela. */
+/* Escáner de pantalla completa: solo la cámara. Lee solo, sin tocar nada, el código de barras o QR
+   y también el código escrito a mano (ej. 9585x56). Suena y se cierra.
+   Resuelve {code}, {code, escrito:true}, {photo: canvas} si se pidió buscar con foto, o null si se cancela.
+   opts.modo === "escrito": solo busca código escrito (para el campo Código propio). */
 function scanCode(titulo, opts = {}){
   stopLive();
-  const escrito = opts.modo === "escrito";
+  const soloEscrito = opts.modo === "escrito";
   if (!liveOK()) return scanFromPhoto(opts);
   return new Promise(async (resolve) => {
     const host = $("capHost");
     host.innerHTML = `<div class="cap" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
       <video id="scVideo" playsinline muted></video><canvas id="scBox" style="position:absolute;left:0;top:0;width:100%;pointer-events:none"></canvas>
-      <div class="scanframe${escrito ? " escrito" : ""}" id="scFrame"></div>
+      <div class="scanframe" id="scFrame"></div>
       <div class="captop"><span>${esc(titulo)}</span></div>
-      <div class="caphint">${escrito ? "Pon el código escrito dentro del recuadro y toca el botón redondo." : "Apunta al código de barras o QR. Se lee solo."}</div>
-      <div class="capbar scanbar"><button class="capbtn" id="scCancel">Cancelar</button><span class="capmid" id="scMid">${escrito ? `<button class="shutter" id="scLeer" aria-label="Leer código escrito"></button>` : `<button class="capbtn" id="scEscrito">Código escrito</button>${opts.photo ? `<button class="capbtn" id="scPhoto">Con foto</button>` : ""}`}</span><span class="capside"><button class="capbtn" id="scTorch" hidden aria-pressed="false">Linterna</button></span></div></div>`;
+      <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
+      <div class="capbar scanbar"><button class="capbtn" id="scCancel">Cancelar</button><span class="capmid">${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" hidden aria-pressed="false">Luz</button></span></div></div>`;
     let done = false;
     const v = $("scVideo");
     const finish = (val) => { if (done) return; done = true; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
     $("scCancel").onclick = () => finish(null);
-    let modoEscrito = escrito;
     const frameCrop = () => {
       const fr = $("scFrame").getBoundingClientRect(), vr = v.getBoundingClientRect();
       const sc = Math.max(vr.width / v.videoWidth, vr.height / v.videoHeight);
       const ox = vr.left + (vr.width - v.videoWidth*sc)/2, oy = vr.top + (vr.height - v.videoHeight*sc)/2;
       const sx = Math.max(0, (fr.left - ox)/sc), sy = Math.max(0, (fr.top - oy)/sc);
       const sw = Math.min(v.videoWidth - sx, fr.width/sc), sh = Math.min(v.videoHeight - sy, fr.height/sc);
-      const c = document.createElement("canvas"); c.width = Math.round(sw); c.height = Math.round(sh);
+      const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(sw)); c.height = Math.max(1, Math.round(sh));
       c.getContext("2d").drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height); return c;
-    };
-    const leerEscrito = async () => {
-      if (!v.videoWidth) return;
-      beep(); const c = frameCrop();
-      const host2 = host.firstElementChild; if (host2) host2.style.visibility = "hidden";
-      const r = await ocrFlow(c);
-      if (r && r.code){ finish({ code: r.code, escrito: true }); return; }
-      if (r && r.again){ if (host2) host2.style.visibility = ""; return; }
-      finish(null);
-    };
-    const lb = $("scLeer"); if (lb) lb.onclick = leerEscrito;
-    const eb = $("scEscrito");
-    if (eb) eb.onclick = () => {
-      modoEscrito = true; $("scMid").innerHTML = `<button class="shutter" id="scLeer" aria-label="Leer código escrito"></button>`;
-      $("scLeer").onclick = leerEscrito; $("scFrame").classList.add("escrito");
-      const hint = host.querySelector(".caphint"); if (hint) hint.textContent = "Pon el código escrito dentro del recuadro y toca el botón redondo.";
     };
     const ph = $("scPhoto");
     if (ph) ph.onclick = () => {
@@ -961,6 +1020,13 @@ function scanCode(titulo, opts = {}){
       const c = document.createElement("canvas"); const sc = Math.min(1, 1600 / Math.max(v.videoWidth, v.videoHeight));
       c.width = Math.round(v.videoWidth*sc); c.height = Math.round(v.videoHeight*sc); c.getContext("2d").drawImage(v, 0, 0, c.width, c.height);
       beep(); finish({ photo: c });
+    };
+    const marcar = (pts) => {
+      const bc = $("scBox"), vr = v.getBoundingClientRect(); if (!bc || !pts) return;
+      bc.style.height = vr.height + "px"; const cw = vr.width, ch = vr.height; bc.width = cw; bc.height = ch; const x = bc.getContext("2d");
+      const sc = Math.max(cw / v.videoWidth, ch / v.videoHeight), ox = (cw - v.videoWidth*sc)/2, oy = (ch - v.videoHeight*sc)/2;
+      x.beginPath(); pts.forEach((p,k) => { const px=p.x*sc+ox, py=p.y*sc+oy; k ? x.lineTo(px,py) : x.moveTo(px,py); });
+      x.closePath(); x.lineWidth = 5; x.strokeStyle = "#2BD46A"; x.fillStyle = "rgba(43,212,106,.22)"; x.fill(); x.stroke();
     };
     try {
       const stream = await getCam();
@@ -974,25 +1040,33 @@ function scanCode(titulo, opts = {}){
         if (caps.focusMode && caps.focusMode.includes("continuous")) await track.applyConstraints({ advanced:[{ focusMode:"continuous" }] });
       } catch {}
       const { det } = await getDetector();
-      if (!det && !escrito){ finish(await scanFromPhoto(opts)); return; }
-      let last = 0;
+      const ocrOn = ocrDisponible();
+      if (ocrOn) loadOCR().catch(() => {});
+      if (!det && !ocrOn){ finish(await scanFromPhoto(opts)); return; }
+      let last = 0, lastOcr = 0, ocrBusy = false, cand = "", ocrFails = 0;
       const tick = async () => {
         if (done) return;
-        if (modoEscrito || !det){ requestAnimationFrame(tick); return; }
-        if (v.readyState >= 2 && v.videoWidth && performance.now() - last > 80){
-          last = performance.now();
-          try {
-            const r = await det.detect(v);
-            if (r.length && r[0].rawValue && !done){
-              const bc = $("scBox"), vr = v.getBoundingClientRect();
-              if (bc){ bc.style.height = vr.height + "px"; const cw = vr.width, ch = vr.height; bc.width = cw; bc.height = ch; const x = bc.getContext("2d");
-                const sc = Math.max(cw / v.videoWidth, ch / v.videoHeight), ox = (cw - v.videoWidth*sc)/2, oy = (ch - v.videoHeight*sc)/2;
-                x.beginPath(); r[0].cornerPoints.forEach((p,k) => { const px=p.x*sc+ox, py=p.y*sc+oy; k ? x.lineTo(px,py) : x.moveTo(px,py); });
-                x.closePath(); x.lineWidth = 5; x.strokeStyle = "#2BD46A"; x.fillStyle = "rgba(43,212,106,.22)"; x.fill(); x.stroke(); }
-              beep(); const code = r[0].rawValue;
-              setTimeout(() => finish({ code }), 280); return;
-            }
-          } catch {}
+        const now = performance.now();
+        if (v.readyState >= 2 && v.videoWidth){
+          // Código de barras o QR
+          if (det && !soloEscrito && now - last > 80){
+            last = now;
+            try {
+              const r = await det.detect(v);
+              if (done) return;
+              if (r.length && r[0].rawValue){ marcar(r[0].cornerPoints); beep(); const code = r[0].rawValue; setTimeout(() => finish({ code }), 260); return; }
+            } catch {}
+          }
+          // Código escrito a mano: se lee solo; se acepta cuando sale igual dos veces seguidas
+          if (ocrOn && !ocrBusy && now - lastOcr > (soloEscrito ? 500 : 1000) && ocrFails < 3){
+            ocrBusy = true; lastOcr = now;
+            ocrQuick(frameCrop()).then((t) => {
+              ocrBusy = false; if (done) return;
+              if (!t){ cand = ""; return; }
+              if (t === cand){ beep(); const fr = $("scFrame"); if (fr) fr.style.borderColor = "#2BD46A"; setTimeout(() => finish({ code: t, escrito: true }), 260); }
+              else { cand = t; const h = $("scHint"); if (h) h.textContent = "Leyendo " + t + "…"; }
+            }).catch(() => { ocrBusy = false; ocrFails++; });
+          }
         }
         requestAnimationFrame(tick);
       };
@@ -1035,9 +1109,9 @@ function notFoundSheet(code, nombre, foto){
 function photoSheet(canvas){
   sheet(`<h2>Buscar este producto</h2>
     <img src="${canvas.toDataURL("image/jpeg", .7)}" alt="Foto tomada" style="border-radius:12px;max-height:38vh;object-fit:contain;background:#000">
-    <button class="btn primary block" id="lensGo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Buscar en Google con la foto</button>
-    <button class="btn block" id="lensShare">Enviar la foto a Google Lens u otra app</button>
-    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar al inventario</button><button class="btn grow" id="nfPend">A pendientes</button></div>`,
+    <button class="btn primary block" id="lensGo">Buscar en Google</button>
+    <button class="btn block" id="lensShare">Compartir foto</button>
+    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar</button><button class="btn grow" id="nfPend">Por comprar</button></div>`,
     () => {
       $("lensGo").onclick = () => lensSearch(canvas);
       $("lensShare").onclick = async () => shareFile(await canvasBlob(canvas, .85), "producto.jpg");
@@ -1074,11 +1148,11 @@ async function getCam(){
     }
   }
 }
-function releaseCamSoon(ms = 60000){
+function releaseCamSoon(ms = 300){
   clearTimeout(camRelease);
   camRelease = setTimeout(() => { if (camStream){ try { camStream.getTracks().forEach(t => t.stop()); } catch {} camStream = null; } }, ms);
 }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") releaseCamSoon(15000); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden"){ stopLive(); releaseCamSoon(0); } });
 let audioCtx = null;
 function unlockAudio(){ try { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch {} }
 document.addEventListener("pointerdown", unlockAudio, true);
@@ -1262,7 +1336,7 @@ function notFoundHTML(code, nombre){
     <div class="sect" style="color:var(--danger)">No está en el inventario</div>
     ${code?`<div class="num" style="font-size:18px">${esc(code)}</div>`:""}
     ${nombre?`<div style="font-weight:700;font-size:18px">${esc(nombre)}</div>`:""}
-    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar al inventario</button><button class="btn grow" id="nfPend">A pendientes</button></div>
+    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar</button><button class="btn grow" id="nfPend">Por comprar</button></div>
     ${q?`<div class="sect">Buscar en internet</div>${webLinks(q)}`:""}
   </div>`;
 }
@@ -1292,10 +1366,10 @@ function photoSearchResult(canvas){
   $("camStatus").hidden = true;
   $("camResult").innerHTML = `<div class="card" style="display:flex;flex-direction:column;gap:10px">
     <div class="sect">Buscar este producto</div>
-    <button class="btn primary block" id="lensGo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Buscar en Google con la foto</button>
-    <button class="btn block" id="lensShare">Enviar la foto a Google Lens u otra app</button>
+    <button class="btn primary block" id="lensGo">Buscar en Google</button>
+    <button class="btn block" id="lensShare">Compartir foto</button>
     <p class="note" style="margin:0">Para buscarlo por nombre en tu inventario, usa la casilla de búsqueda del Inventario.</p>
-    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar al inventario</button><button class="btn grow" id="nfPend">A pendientes</button></div>
+    <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar</button><button class="btn grow" id="nfPend">Por comprar</button></div>
   </div>`;
   $("lensGo").onclick = () => lensSearch(canvas);
   $("lensShare").onclick = async () => shareFile(await canvasBlob(canvas, .85), "producto.jpg");
@@ -1315,9 +1389,9 @@ function provForm(prov, onSaved){
   const p = prov || {};
   sheet(`<h2>${prov ? "Editar proveedor" : "Nuevo proveedor"}</h2>
     <label class="f">Nombre<input id="pvN" class="inp" value="${esc(p.nombre||"")}" placeholder="Distribuidora El Perno" autocomplete="off"></label>
-    <label class="f">Teléfono o celular<input id="pvT" class="inp num" inputmode="tel" value="${esc(p.telefono||"")}" autocomplete="off"></label>
-    <label class="f">Código del proveedor (para tu código propio)<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" placeholder="Opcional" autocomplete="off"></label>
-    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" placeholder="Días de visita, vendedor…" autocomplete="off"></label>
+    <label class="f">Teléfono<input id="pvT" class="inp num" inputmode="tel" value="${esc(p.telefono||"")}" autocomplete="off"></label>
+    <label class="f">Código del proveedor<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" placeholder="Opcional" autocomplete="off"></label>
+    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
     <div id="pvErr" class="err"></div>
     <div class="row">${prov ? `<button class="btn danger grow" id="pvDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="pvOk">Guardar</button></div>`,
     (el, close) => {
@@ -1341,7 +1415,7 @@ function renderProvs(){
   const box = $("provList"); if (!box) return;
   const ps = [...(S.provs||[])].sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
   box.innerHTML = ps.length ? `<div class="plist">${ps.map(p => `<button type="button" class="provrow" data-prov="${esc(p.id)}"><span class="pinfo"><span class="pname">${esc(p.nombre)}</span><span class="pmeta">${p.telefono ? `<span class="num">${esc(p.telefono)}</span>` : "Sin teléfono"}${p.codigo ? `<span>Código: <b class="num">${esc(p.codigo)}</b></span>` : ""}</span></span></button>`).join("")}</div>`
-    : `<div class="empty">Todavía no hay proveedores. Agrégalos con su nombre y teléfono para saber a quién comprarle cada producto.</div>`;
+    : `<div class="empty">Sin proveedores.</div>`;
 }
 $("provList").addEventListener("click", (e) => { const b = e.target.closest("[data-prov]"); if (!b) return; const p = provById(b.dataset.prov); if (p) provForm(p); });
 $("provNuevo").onclick = () => provForm(null);
@@ -1354,17 +1428,17 @@ function pendFormSheet(pre = {}, item = null){
   const prod = pre.codigo ? byCode(pre.codigo) : null;
   const nombre0 = it.nombre || pre.nombre || prod?.nombre || "";
   const prov0 = it.proveedorId || prod?.proveedorId || "";
-  sheet(`<h2>${item ? "Editar pendiente" : "Agregar a por comprar"}</h2>
+  sheet(`<h2>${item ? "Editar" : "Por comprar"}</h2>
     <button type="button" class="shot" id="pfFoto" style="aspect-ratio:16/10;max-height:220px;width:100%;padding:0;background:#fff">
-      <div class="ph" id="pfPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Toca para tomar la foto</span></div>
+      <div class="ph" id="pfPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
       <img id="pfImg" alt="Foto" hidden style="object-fit:contain;background:#fff">
     </button>
-    <label class="f">Nombre del producto<input id="pfN" class="inp" value="${esc(nombre0)}" placeholder="Llave de paso 1/2" autocomplete="off"></label>
+    <label class="f">Producto<input id="pfN" class="inp" value="${esc(nombre0)}" placeholder="Llave de paso 1/2" autocomplete="off"></label>
     <label class="f">Código<div class="row"><input id="pfC" class="inp num grow" value="${esc(it.codigo || pre.codigo || "")}" autocomplete="off"><button type="button" class="btn" id="pfScan">Leer</button></div></label>
-    <div class="row" style="align-items:flex-start"><label class="f grow">Cantidad a pedir<input id="pfCant" class="inp num miles" inputmode="numeric" value="${it.cantidad ? miles(it.cantidad) : ""}" placeholder="0"></label></div>
+    <div class="row" style="align-items:flex-start"><label class="f grow">Cantidad<input id="pfCant" class="inp num miles" inputmode="numeric" value="${it.cantidad ? miles(it.cantidad) : ""}" placeholder="0"></label></div>
     <label class="f">Proveedor<select id="pfProv" class="inp"></select></label>
     <div id="pfProvTel" class="note"></div>
-    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" placeholder="Marca, medida, color…" autocomplete="off"></label>
+    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" placeholder="Opcional" autocomplete="off"></label>
     <div id="pfErr" class="err"></div>
     <div class="row">${item ? `<button class="btn danger grow" id="pfDel">Quitar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn primary grow" id="pfOk">${item ? "Guardar" : "Agregar"}</button></div>`,
     (el, close) => {
@@ -1383,7 +1457,7 @@ function pendFormSheet(pre = {}, item = null){
       el.querySelector("#pfFoto").onclick = async () => {
         S.fotoCb = (c) => setFoto(c);
         const r = await capturePhoto("Foto del producto", $("pFotoFile"));
-        if (r){ setFoto(r.canvas); if (r.code && !el.querySelector("#pfC").value) el.querySelector("#pfC").value = r.code; }
+        if (r){ setFoto(r.canvas); const cc = r.code || r.codigoPropio; if (cc && !el.querySelector("#pfC").value) el.querySelector("#pfC").value = cc; }
       };
       el.querySelector("#pfScan").onclick = async () => {
         const r = await scanCode("Leer código");
@@ -1417,7 +1491,7 @@ $("pScan").onclick = async () => {
 $("pFoto").onclick = async () => {
   S.fotoCb = null;
   const r = await capturePhoto("Foto del producto por comprar", $("pFotoFile"));
-  if (r) pendFormSheet({ foto: r.canvas, codigo: r.code || "" });
+  if (r) pendFormSheet({ foto: r.canvas, codigo: r.code || r.codigoPropio || "" });
 };
 function renderPend(){
   const abiertos = S.pend.filter(p=>!p.hecho).sort((a,b)=>{ const pa = norm(provById(a.proveedorId)?.nombre||"zzz"), pb = norm(provById(b.proveedorId)?.nombre||"zzz"); return pa.localeCompare(pb) || b.creado - a.creado; });
@@ -1426,7 +1500,7 @@ function renderPend(){
   const row = (p) => { const pv = provById(p.proveedorId);
     return `<div class="prow" data-pend="${esc(p.id)}" style="cursor:pointer">${thumb(p)}<span class="pinfo"><span class="pname" style="${p.hecho?"text-decoration:line-through;color:var(--muted)":""}">${esc(p.nombre)}</span><span class="pmeta">${p.cantidad?`<span><b>${miles(p.cantidad)}</b> und</span>`:""}${p.codigo?`<span class="num">${esc(p.codigo)}</span>`:""}${pv?`<span>${esc(pv.nombre)}${pv.telefono?` · <span class="num">${esc(pv.telefono)}</span>`:""}</span>`:""}<span>${new Date(p.creado).toLocaleDateString("es-CO",{day:"numeric",month:"short"})}</span></span></span>
     <span class="row" style="flex-shrink:0">${p.hecho?"":`<button class="btn sm" data-pok="${esc(p.id)}" aria-label="Marcar comprado">✓</button>`}<button class="btn sm danger" data-pdel="${esc(p.id)}" aria-label="Quitar">✕</button></span></div>`; };
-  $("pendList").innerHTML = (abiertos.length ? `<div class="plist">${abiertos.map(row).join("")}</div>` : `<div class="empty">No hay nada pendiente por comprar. Escanea, toma una foto o escribe el nombre de lo que falta.</div>`)
+  $("pendList").innerHTML = (abiertos.length ? `<div class="plist">${abiertos.map(row).join("")}</div>` : `<div class="empty">Nada por comprar.</div>`)
     + (hechos.length ? `<div class="sect" style="margin-top:6px">Comprados</div><div class="plist">${hechos.map(row).join("")}</div>` : "");
 }
 $("pendList").addEventListener("click", e => {
@@ -1627,27 +1701,37 @@ $("recCopiar").onclick = async () => {
 };
 $("recNueva").onclick = () => { S.hist=["home","venta"]; show("venta",false); };
 
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const hora12 = (min) => { const h = Math.floor(min/60), m = min % 60; const h12 = h % 12 === 0 ? 12 : h % 12; return `${h12}:${String(m).padStart(2,"0")} ${h < 12 ? "a. m." : "p. m."}`; };
 $("ventasHist").onclick = async () => {
+  let todas = [];
+  try { const snap = await S.db.collection("ventas").orderBy("fecha","desc").get(); todas = snap.docs.map(d => ({ id: d.id, ...d.data() })); }
+  catch { toast("No se pudo cargar el historial."); return; }
   const hoy = new Date(), pad = (n) => String(n).padStart(2, "0");
-  const dHoy = `${hoy.getFullYear()}-${pad(hoy.getMonth()+1)}-${pad(hoy.getDate())}`, mHoy = `${hoy.getFullYear()}-${pad(hoy.getMonth()+1)}`;
-  sheet(`<h2>Historial de ventas</h2>
+  const keyDia = (t) => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+  const keyMes = (t) => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
+  const dias = [...new Set([keyDia(Date.now()), ...todas.map(v => keyDia(v.fecha))])].sort().reverse();
+  const meses = [...new Set([keyMes(Date.now()), ...todas.map(v => keyMes(v.fecha))])].sort().reverse();
+  const anios = [...new Set([hoy.getFullYear(), ...todas.map(v => new Date(v.fecha).getFullYear())])].sort((a,b) => b-a);
+  const optDia = dias.map(k => { const [y,m,d] = k.split("-").map(Number); const t = new Date(y, m-1, d); return `<option value="${k}">${t.toLocaleDateString("es-CO",{weekday:"short", day:"numeric", month:"short", year:"numeric"})}</option>`; }).join("");
+  const optMes = meses.map(k => { const [y,m] = k.split("-").map(Number); return `<option value="${k}">${MESES[m-1][0].toUpperCase()+MESES[m-1].slice(1)} ${y}</option>`; }).join("");
+  const optAnio = anios.map(y => `<option value="${y}">${y}</option>`).join("");
+  const optHora = (vacio) => `<option value="">${vacio}</option>` + Array.from({ length: 48 }, (_, k) => `<option value="${k*30}">${hora12(k*30)}</option>`).join("");
+  sheet(`<div class="row" style="align-items:center"><h2 class="grow">Historial</h2><button type="button" class="iconbtn" id="hReset" aria-label="Restablecer filtros" title="Restablecer">${RESET_ICO}</button></div>
     <div class="row" style="align-items:flex-end">
-      <label class="f grow">Ver<select id="hTipo" class="inp"><option value="hoy">Hoy</option><option value="dia">Un día</option><option value="mes">Un mes</option><option value="anio">Un año</option><option value="todo">Todo</option></select></label>
-      <label class="f grow" id="hDiaL" hidden>Día<input id="hDia" class="inp" type="date" value="${dHoy}"></label>
-      <label class="f grow" id="hMesL" hidden>Mes<input id="hMes" class="inp" type="month" value="${mHoy}"></label>
-      <label class="f grow" id="hAnioL" hidden>Año<input id="hAnio" class="inp num" inputmode="numeric" value="${hoy.getFullYear()}"></label>
+      <label class="f grow" style="flex-basis:40%">Periodo<select id="hTipo" class="inp"><option value="hoy">Hoy</option><option value="dia">Día</option><option value="mes">Mes</option><option value="anio">Año</option><option value="todo">Todo</option></select></label>
+      <label class="f grow" id="hDiaL" hidden style="flex-basis:60%">Día<select id="hDia" class="inp">${optDia}</select></label>
+      <label class="f grow" id="hMesL" hidden style="flex-basis:60%">Mes<select id="hMes" class="inp">${optMes}</select></label>
+      <label class="f grow" id="hAnioL" hidden style="flex-basis:60%">Año<select id="hAnio" class="inp">${optAnio}</select></label>
     </div>
     <div class="row">
-      <label class="f grow">Desde la hora<input id="hDesde" class="inp" type="time"></label>
-      <label class="f grow">Hasta la hora<input id="hHasta" class="inp" type="time"></label>
+      <label class="f grow">Desde<select id="hDesde" class="inp">${optHora("Cualquier hora")}</select></label>
+      <label class="f grow">Hasta<select id="hHasta" class="inp">${optHora("Cualquier hora")}</select></label>
     </div>
-    <input id="hCli" class="inp" placeholder="Buscar por cliente o NIT" autocomplete="off">
-    <div id="hRes"><div class="status"><div class="spin"></div><span>Cargando…</span></div></div>
-    <div class="row"><button class="btn grow" data-close>Cerrar</button><button class="btn grow" id="hExcel">Excel de estas ventas</button></div>`,
-    async (el, close) => {
-      let todas = [];
-      try { const snap = await S.db.collection("ventas").orderBy("fecha","desc").get(); todas = snap.docs.map(d => ({ id: d.id, ...d.data() })); }
-      catch { el.querySelector("#hRes").innerHTML = "<span>No se pudo cargar el historial.</span>"; return; }
+    <input id="hCli" class="inp" placeholder="Cliente o NIT" autocomplete="off">
+    <div id="hRes"></div>
+    <div class="row"><button class="btn grow" data-close>Cerrar</button><button class="btn grow" id="hExcel">Exportar</button></div>`,
+    (el, close) => {
       let filtradas = [];
       const q = (id) => el.querySelector(id);
       const aplicar = () => {
@@ -1658,8 +1742,7 @@ $("ventasHist").onclick = async () => {
         if (tipo === "dia" && q("#hDia").value){ const [y,m,d] = q("#hDia").value.split("-").map(Number); ini = new Date(y, m-1, d).getTime(); fin = new Date(y, m-1, d+1).getTime(); }
         if (tipo === "mes" && q("#hMes").value){ const [y,m] = q("#hMes").value.split("-").map(Number); ini = new Date(y, m-1, 1).getTime(); fin = new Date(y, m, 1).getTime(); }
         if (tipo === "anio"){ const y = toNum(q("#hAnio").value); if (y){ ini = new Date(y, 0, 1).getTime(); fin = new Date(y+1, 0, 1).getTime(); } }
-        const toMin = (v) => { if (!v) return null; const [h, m] = v.split(":").map(Number); return h*60 + m; };
-        const hd = toMin(q("#hDesde").value), hh = toMin(q("#hHasta").value);
+        const hd = q("#hDesde").value === "" ? null : Number(q("#hDesde").value), hh = q("#hHasta").value === "" ? null : Number(q("#hHasta").value) + 29;
         const cli = norm(q("#hCli").value);
         filtradas = todas.filter(v => {
           if (!(v.fecha >= ini && v.fecha < fin)) return false;
@@ -1673,11 +1756,16 @@ $("ventasHist").onclick = async () => {
         });
         const tot = filtradas.reduce((a,v) => a + (v.total||0), 0);
         const arts = filtradas.reduce((a,v) => a + (v.items||[]).reduce((b,i) => b + i.cant, 0), 0);
-        q("#hRes").innerHTML = `<div class="card row" style="justify-content:space-between;flex-wrap:wrap;gap:10px"><div><div class="sect">Vendido</div><div class="num" style="font-size:24px;font-weight:600">${fmt(tot)}</div></div><div><div class="sect">Facturas</div><div class="num" style="font-size:24px;font-weight:600">${miles(filtradas.length)}</div></div><div><div class="sect">Artículos</div><div class="num" style="font-size:24px;font-weight:600">${miles(arts)}</div></div></div>`
-          + (filtradas.length ? `<div class="plist" style="margin-top:10px">${filtradas.slice(0, 300).map(v => `<button class="prow" data-vid="${esc(v.id)}"><span class="pinfo"><span class="pname num">N° ${String(v.numero).padStart(6,"0")}${v.cliente ? ` · <span style="font-family:var(--f-body)">${esc(v.cliente)}</span>` : ""}</span><span class="pmeta">${new Date(v.fecha).toLocaleString("es-CO",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})} · ${miles((v.items||[]).reduce((a,i)=>a+i.cant,0))} art.${v.clienteDoc ? ` · ${esc(v.clienteDoc)}` : ""}</span></span><span class="price">${fmt(v.total)}</span></button>`).join("")}</div>${filtradas.length > 300 ? `<p class="note">Mostrando 300 de ${miles(filtradas.length)}.</p>` : ""}`
+        q("#hRes").innerHTML = `<div class="card row" style="justify-content:space-between;flex-wrap:wrap;gap:10px"><div><div class="sect">Vendido</div><div class="num" style="font-size:22px;font-weight:600">${fmt(tot)}</div></div><div><div class="sect">Facturas</div><div class="num" style="font-size:22px;font-weight:600">${miles(filtradas.length)}</div></div><div><div class="sect">Artículos</div><div class="num" style="font-size:22px;font-weight:600">${miles(arts)}</div></div></div>`
+          + (filtradas.length ? `<div class="plist" style="margin-top:10px">${filtradas.slice(0, 300).map(v => `<button class="prow" data-vid="${esc(v.id)}"><span class="pinfo"><span class="pname num">N° ${String(v.numero).padStart(6,"0")}${v.cliente ? ` · <span style="font-family:var(--f-body)">${esc(v.cliente)}</span>` : ""}</span><span class="pmeta">${new Date(v.fecha).toLocaleString("es-CO",{day:"numeric",month:"short",year:"numeric"})} · ${hora12(new Date(v.fecha).getHours()*60 + new Date(v.fecha).getMinutes())} · ${miles((v.items||[]).reduce((a,i)=>a+i.cant,0))} art.</span></span><span class="price">${fmt(v.total)}</span></button>`).join("")}</div>${filtradas.length > 300 ? `<p class="note">Mostrando 300 de ${miles(filtradas.length)}.</p>` : ""}`
             : `<div class="empty" style="margin-top:10px">No hay ventas con estos filtros.</div>`);
       };
       ["#hTipo","#hDia","#hMes","#hAnio","#hDesde","#hHasta","#hCli"].forEach(id => { q(id).addEventListener("input", aplicar); q(id).addEventListener("change", aplicar); });
+      q("#hReset").onclick = () => {
+        q("#hTipo").value = "hoy"; q("#hDesde").value = ""; q("#hHasta").value = ""; q("#hCli").value = "";
+        if (q("#hDia").options.length) q("#hDia").selectedIndex = 0; if (q("#hMes").options.length) q("#hMes").selectedIndex = 0; if (q("#hAnio").options.length) q("#hAnio").selectedIndex = 0;
+        el.querySelectorAll("select.inp").forEach(refreshPicker); aplicar(); toast("Filtros restablecidos", 1500);
+      };
       q("#hRes").addEventListener("click", e => { const r = e.target.closest("[data-vid]"); if (!r) return; const v = todas.find(x => x.id === r.dataset.vid); close(); openRecibo(v); });
       q("#hExcel").onclick = async () => {
         try {
@@ -1702,7 +1790,7 @@ function openIngreso(opts={}){
   $("ingTitle").textContent = p ? "Editar producto" : "Ingresar producto";
   $("iCantLbl").textContent = p ? "Existencias" : "Cantidad";
   $("iBorrar").hidden = !p;
-  $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar en inventario";
+  $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar";
   if (p){
     $("iCodigo").value = p.codigo||""; $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
     $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = p.codigoPropio || "";
@@ -1752,8 +1840,10 @@ function sumarSheet(p){
 $("iCodigo").addEventListener("change", checkExiste);
 $("iCodigo").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
 $("iScan").onclick = async () => {
-  const r = await scanCode("Leer código del producto");
-  if (r && r.code) setIngCodigo(r.code);
+  const r = await scanCode("Escanear código");
+  if (!r || !r.code) return;
+  if (r.escrito){ $("iCodP").value = r.code; toast("Código propio: " + r.code); const p = byCode(r.code); if (p && p.id !== S.editId) toast("Ese código propio ya es de " + p.nombre, 3500); }
+  else setIngCodigo(r.code);
 };
 async function nuevoCodigo(){
   let n = Number(S.config?.sigCodigo)||1, code;
@@ -1767,10 +1857,10 @@ async function setIngFoto(c){
   const box = $("iFotoPh");
   $("iFotoImg").hidden = true; box.hidden = false;
   const span = box.querySelector("span"); const prev = span ? span.textContent : "";
-  if (span) span.textContent = "Preparando la foto…";
+  if (span) span.textContent = "Recortando…";
   await new Promise(r => setTimeout(r, 30));
   try {
-    const opts = await processPhoto(c);
+    const opts = await processPhoto(c, (t) => { if (span) span.textContent = t; });
     S.iFotoOpts = opts;
     const quitar = S.config?.quitarFondo !== false;
     const elegido = quitar && opts.sinfondo ? "sinfondo" : "original";
@@ -1795,22 +1885,23 @@ $("iFotoOpts").addEventListener("click", (e) => { const b = e.target.closest("[d
 function fillCatSelect(val){
   const sel = $("iCat"); const cats = allCats();
   if (val && !cats.includes(val)) cats.push(val);
-  sel.innerHTML = `<option value="">Sin categoría</option>` + cats.map(c => `<option${c===val?" selected":""}>${esc(c)}</option>`).join("") + `<option value="__otra">Otra (escribir)…</option>`;
-  $("iCatOtra").hidden = true;
+  sel.innerHTML = `<option value="">Sin categoría</option>` + cats.map(c => `<option${c===val?" selected":""}>${esc(c)}</option>`).join("") + `<option value="__otra">Otra…</option>`;
+  $("iCatOtra").hidden = true; upgradeSelect(sel);
 }
 $("iCat").addEventListener("change", () => { const o = $("iCat").value === "__otra"; $("iCatOtra").hidden = !o; if (o) setTimeout(() => $("iCatOtra").focus(), 50); });
 function fillProvSelect(sel, val){
   const ps = [...(S.provs||[])].sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
   sel.innerHTML = `<option value="">Sin proveedor</option>` + ps.map(p => `<option value="${esc(p.id)}"${p.id===val?" selected":""}>${esc(p.nombre)}</option>`).join("") + `<option value="__nuevo">+ Nuevo proveedor…</option>`;
   sel.dataset.prev = val || "";
+  upgradeSelect(sel);
   sel.onchange = () => {
     if (sel.value !== "__nuevo"){ sel.dataset.prev = sel.value; return; }
-    sel.value = sel.dataset.prev || "";
+    sel.value = sel.dataset.prev || ""; refreshPicker(sel);
     provForm(null, (id) => { fillProvSelect(sel, id); });
   };
 }
 $("iCodPLeer").onclick = async () => {
-  const r = await scanCode("Leer código escrito", { modo: "escrito" });
+  const r = await scanCode("Código escrito", { modo: "escrito" });
   if (r && r.code) $("iCodP").value = r.code;
 };
 $("iFotoBtn").onclick = async () => {
@@ -1818,6 +1909,7 @@ $("iFotoBtn").onclick = async () => {
   if (!r) return;
   await setIngFoto(r.canvas);
   if (r.code && !$("iCodigo").value.trim()){ setIngCodigo(r.code); toast("Código leído: " + r.code); }
+  if (r.codigoPropio && !$("iCodP").value.trim()){ $("iCodP").value = r.codigoPropio; toast("Código propio leído: " + r.codigoPropio); }
 };
 $("iFoto").onchange = async (e) => {
   const f = e.target.files?.[0]; if (!f) return;
@@ -1871,7 +1963,7 @@ function etiquetaCanvas(p){
 }
 function etiqueta(p){
   if (!p.codigo || !window.JsBarcode){ back(); return; }
-  sheet(`<h2>Etiqueta del producto</h2><p class="note" style="margin:0">Imprímela y pégala en el producto o en el estante para escanearlo en la venta.</p><div class="recibo-wrap" id="etqWrap"></div>
+  sheet(`<h2>Etiqueta</h2><div class="recibo-wrap" id="etqWrap"></div>
     <div class="row"><button class="btn grow" id="etqCerrar">Listo</button><button class="btn ingreso grow" id="etqPrint">Imprimir</button></div>
     <div class="row">${navigator.bluetooth?`<button class="btn grow" id="etqBT">Bluetooth</button>`:""}<button class="btn grow" id="etqSave">Compartir</button></div>`,
     (el, close) => {
@@ -1895,7 +1987,35 @@ $("invSearchForm").onsubmit = (e) => {
   if (r.length === 1) productSheet(r[0]);
   try { document.activeElement.blur(); } catch {}
 };
-$("invTabs").addEventListener("click", e => { const b=e.target.closest("[data-f]"); if(!b) return; S.invFiltro=b.dataset.f; [...$("invTabs").children].forEach(x=>x.setAttribute("aria-pressed", x===b)); renderInv(); });
+const ESTADOS = { todos: "Todos", bajo: "Pocas unidades", agotado: "Agotados" };
+function invFiltrosPopup(){
+  popup("Filtros", `<div class="poplist" id="fiList"></div><div class="row" style="padding-bottom:14px"><button type="button" class="btn grow" id="fiReset">Restablecer</button><button type="button" class="btn primary grow" data-popclose>Listo</button></div>`, (el) => {
+    const draw = () => {
+      const cnt = {}; let sin = 0; S.productos.forEach(p => { if (p.categoria) cnt[p.categoria] = (cnt[p.categoria]||0) + 1; else sin++; });
+      const cats = allCats(); Object.keys(cnt).forEach(c => { if (!cats.includes(c)) cats.push(c); });
+      const est = S.invFiltro || "todos", cat = S.invCat || "__todas";
+      const o = (attr, val, label, sel, n) => `<button type="button" class="popopt" ${attr}="${esc(val)}" aria-selected="${sel}"><span>${esc(label)}</span><span class="ct">${n != null ? miles(n) : ""}${sel ? " ✓" : ""}</span></button>`;
+      el.querySelector("#fiList").innerHTML = `<div class="popsec">Estado</div>` + Object.entries(ESTADOS).map(([k, l]) => o("data-est", k, l, est === k)).join("")
+        + `<div class="popsec">Categoría</div>` + o("data-cat", "__todas", "Todas", cat === "__todas", S.productos.length)
+        + cats.map(c => o("data-cat", c, c, cat === c, cnt[c] || 0)).join("") + (sin ? o("data-cat", "__sin", "Sin categoría", cat === "__sin", sin) : "");
+    };
+    draw();
+    el.querySelector("#fiList").addEventListener("click", (e) => {
+      const a = e.target.closest("[data-est]"), b = e.target.closest("[data-cat]");
+      if (a) S.invFiltro = a.dataset.est; else if (b) S.invCat = b.dataset.cat; else return;
+      draw(); renderInv();
+    });
+    el.querySelector("#fiReset").onclick = () => { S.invFiltro = "todos"; S.invCat = "__todas"; draw(); renderInv(); };
+  });
+}
+$("invFiltros").onclick = invFiltrosPopup;
+$("invChips").addEventListener("click", (e) => {
+  if (e.target.closest("[data-x=est]")) S.invFiltro = "todos";
+  else if (e.target.closest("[data-x=cat]")) S.invCat = "__todas";
+  else if (e.target.closest("[data-x=all]")){ S.invFiltro = "todos"; S.invCat = "__todas"; }
+  else return;
+  renderInv();
+});
 $("invNuevo").onclick = () => openIngreso();
 $("invCam").onclick = async () => {
   const r = await scanCode("Buscar producto", { photo: true });
@@ -1913,7 +2033,7 @@ function renderInv(){
   let arr = q.trim() ? searchProducts(q, 1000) : [...S.productos];
   if (S.invFiltro==="bajo") arr = arr.filter(p => (Number(p.cantidad)||0) > 0 && (Number(p.cantidad)||0) <= low);
   if (S.invFiltro==="agotado") arr = arr.filter(p => (Number(p.cantidad)||0) <= 0);
-  renderInvCats();
+  renderInvChips();
   if (S.invCat && S.invCat !== "__todas") arr = arr.filter(p => S.invCat === "__sin" ? !p.categoria : p.categoria === S.invCat);
   arr.sort((a,b)=>norm(a.nombre).localeCompare(norm(b.nombre)));
   const qt = q.trim();
@@ -1921,7 +2041,7 @@ function renderInv(){
     $("invList").innerHTML = `<div class="card missing" style="display:flex;flex-direction:column;gap:10px">
       <div class="sect" style="color:var(--danger)">No está en el inventario</div>
       <div style="font-weight:700;font-size:18px;overflow-wrap:anywhere">${esc(qt)}</div>
-      <div class="row"><button class="btn ingreso grow" id="sAdd">Agregar al inventario</button><button class="btn grow" id="sPend">A pendientes</button></div>
+      <div class="row"><button class="btn ingreso grow" id="sAdd">Agregar</button><button class="btn grow" id="sPend">Por comprar</button></div>
       <div class="sect">Buscar en internet</div>${webLinks(qt)}</div>`;
     $("sAdd").onclick = () => openIngreso(/^\d{6,}$|^FR\d+$/i.test(qt) ? { codigo: qt } : { nombre: qt });
     $("sPend").onclick = () => addPend(qt, "", null);
@@ -1931,15 +2051,16 @@ function renderInv(){
     : `<div class="empty">${S.productos.length ? "Nada coincide con este filtro." : "El inventario está vacío.<br>Toca “Ingresar” para registrar la primera mercancía."}</div>`;
 }
 
-function renderInvCats(){
-  const cnt = {}; let sin = 0;
-  S.productos.forEach(p => { if (p.categoria) cnt[p.categoria] = (cnt[p.categoria]||0) + 1; else sin++; });
-  const cats = allCats(); Object.keys(cnt).forEach(c => { if (!cats.includes(c)) cats.push(c); });
-  const cur = S.invCat || "__todas";
-  const b = (val, label, n) => `<button type="button" data-cat="${esc(val)}" aria-pressed="${cur===val}">${esc(label)}${n!=null?`<span class="ct">${miles(n)}</span>`:""}</button>`;
-  $("invCats").innerHTML = b("__todas", "Todas las categorías", null) + cats.map(c => b(c, c, cnt[c]||0)).join("") + (sin ? b("__sin", "Sin categoría", sin) : "");
+function renderInvChips(){
+  const est = S.invFiltro || "todos", cat = S.invCat || "__todas", box = $("invChips");
+  const parts = [];
+  if (est !== "todos") parts.push(`<button type="button" class="fchip" data-x="est">${esc(ESTADOS[est])} ✕</button>`);
+  if (cat !== "__todas") parts.push(`<button type="button" class="fchip" data-x="cat">${esc(cat === "__sin" ? "Sin categoría" : cat)} ✕</button>`);
+  if (parts.length > 1) parts.push(`<button type="button" class="iconbtn" data-x="all" aria-label="Restablecer filtros" style="width:34px;height:34px">${RESET_ICO}</button>`);
+  box.innerHTML = parts.join(""); box.hidden = !parts.length;
+  $("invFiltros").classList.toggle("primary", parts.length > 0);
 }
-$("invCats").addEventListener("click", (e) => { const t = e.target.closest("[data-cat]"); if (!t) return; S.invCat = t.dataset.cat; const sl = $("invCats").scrollLeft; renderInv(); $("invCats").scrollLeft = sl; });
+const RESET_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
 
 /* ---------- ajustes ---------- */
 function fillAjustes(){
@@ -1947,12 +2068,12 @@ function fillAjustes(){
   $("aNombre").value=c.nombre||""; $("aNit").value=c.nit||""; $("aDir").value=c.direccion||""; $("aTel").value=c.telefono||""; $("aPie").value=c.pie||"";
   $("aCiudad").value=c.ciudad||""; $("aCel").value=c.celular||""; $("aMail").value=c.correo||""; $("aReg").value=c.regimen||"";
   $("aQuitarFondo").setAttribute("aria-checked", c.quitarFondo !== false);
-  $("aLogoPos").value = c.logoPos || "esquina";
+  $("aLogoPos").value = c.logoPos || "esquina"; $("aFondo").value = c.fondoFoto || "blanco";
   if (c.logo){ $("aLogoImg").src = c.logo; $("aLogoImg").hidden = false; $("aLogoDel").hidden = false; } else { $("aLogoImg").hidden = true; $("aLogoDel").hidden = true; }
   $("aAuto").setAttribute("aria-checked", c.autoGuardado !== false);
   $("aAutoMin").value = String(c.autoMin || 10);
   $("aRecordar").value = String(c.recordarDias ?? 7);
-  renderProvs(); renderCopias(); renderUltimaExp();
+  renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
   $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
 }
 $("ajForm").onsubmit = async (e) => {
@@ -1970,6 +2091,7 @@ $("aLock").onclick = lockNow;
 const cfgSet = async (data, msg) => { try { await S.db.doc("config/tienda").update(data); if (msg) toast(msg); } catch { toast("No se pudo guardar."); } };
 $("aQuitarFondo").onclick = () => { const on = S.config?.quitarFondo === false; $("aQuitarFondo").setAttribute("aria-checked", on); cfgSet({ quitarFondo: on }, on ? "Se quitará el fondo de las fotos" : "Las fotos quedarán con su fondo original"); };
 $("aLogoPos").onchange = () => cfgSet({ logoPos: $("aLogoPos").value }, "Listo");
+$("aFondo").onchange = () => cfgSet({ fondoFoto: $("aFondo").value }, "Listo");
 $("aAuto").onclick = () => { const on = S.config?.autoGuardado === false; $("aAuto").setAttribute("aria-checked", on); cfgSet({ autoGuardado: on }, on ? "Autoguardado activado" : "Autoguardado apagado"); };
 $("aAutoMin").onchange = () => cfgSet({ autoMin: Number($("aAutoMin").value) }, "Listo");
 $("aRecordar").onchange = () => cfgSet({ recordarDias: Number($("aRecordar").value) }, "Listo");
@@ -2061,11 +2183,11 @@ function getLogoImg(){
   if (src !== logoSrc){ logoSrc = src; logoImgP = loadImg(src).catch(() => null); }
   return logoImgP;
 }
-async function composePhoto(img, bbox, margin){
+async function composePhoto(img, bbox, margin, transparente){
   const N = 600, c = document.createElement("canvas"); c.width = N; c.height = N;
-  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, N, N);
+  const x = c.getContext("2d"); if (!transparente){ x.fillStyle = "#fff"; x.fillRect(0, 0, N, N); }
   const logo = await getLogoImg(), pos = S.config?.logoPos || "esquina";
-  if (logo && pos === "fondo"){
+  if (logo && pos === "fondo" && !transparente){
     const k = Math.min(N*0.7/logo.width, N*0.7/logo.height); const lw = logo.width*k, lh = logo.height*k;
     x.globalAlpha = 0.09; x.drawImage(logo, (N-lw)/2, (N-lh)/2, lw, lh); x.globalAlpha = 1;
   }
@@ -2078,13 +2200,72 @@ async function composePhoto(img, bbox, margin){
     const lw = N*0.18, lh = lw * logo.height / logo.width;
     x.globalAlpha = 0.92; x.drawImage(logo, N - lw - 14, N - lh - 14, lw, lh); x.globalAlpha = 1;
   }
-  return c.toDataURL("image/jpeg", 0.82);
+  return transparente ? c.toDataURL("image/webp", 0.85) : c.toDataURL("image/jpeg", 0.82);
 }
-async function processPhoto(c){
-  const original = await composePhoto(c, { x:0, y:0, w:c.width, h:c.height }, 0.02);
+async function processPhoto(c, onStage){
+  const transparente = S.config?.fondoFoto === "transparente";
+  const original = await composePhoto(c, { x:0, y:0, w:c.width, h:c.height }, 0.02, false);
   let sinfondo = null;
-  try { const r = removeBackground(c); if (r) sinfondo = await composePhoto(r.canvas, r.bbox, 0.08); } catch {}
+  if (S.config?.quitarFondo !== false){
+    if (ocrDisponible()){
+      try {
+        onStage && onStage(aiP ? "Recortando…" : "Preparando la IA (solo la primera vez)…");
+        const r = await aiCutout(c);
+        if (r) sinfondo = await composePhoto(r.canvas, r.bbox, 0.08, transparente);
+      } catch {}
+    }
+    if (!sinfondo){ try { const r = removeBackground(c); if (r) sinfondo = await composePhoto(r.canvas, r.bbox, 0.08, transparente); } catch {} }
+  }
   return { original, sinfondo };
+}
+
+/* ---------- recorte con IA (modelo pequeño U2-Netp, corre en el celular) ---------- */
+let aiP = null;
+function loadAI(){
+  if (aiP) return aiP;
+  const abs = (f) => new URL(f, location.href).href;
+  aiP = new Promise((res, rej) => {
+    if (window.ort) return res();
+    const sc = document.createElement("script"); sc.src = abs("ai/ort.wasm.min.js"); sc.onload = res; sc.onerror = () => rej(new Error("ia")); document.head.appendChild(sc);
+  }).then(async () => {
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    return ort.InferenceSession.create(abs("ai/u2netp.onnx"), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
+  });
+  aiP.catch(() => { aiP = null; });
+  return aiP;
+}
+async function aiCutout(src){
+  const sess = await loadAI();
+  const N = 320, W0 = src.width, H0 = src.height;
+  const c = document.createElement("canvas"); c.width = N; c.height = N;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, N, N);
+  const d = x.getImageData(0, 0, N, N).data;
+  let mx = 1; for (let i = 0; i < d.length; i += 4){ if (d[i] > mx) mx = d[i]; if (d[i+1] > mx) mx = d[i+1]; if (d[i+2] > mx) mx = d[i+2]; }
+  const P = N*N, f = new Float32Array(3*P);
+  for (let i = 0, k = 0; k < P; i += 4, k++){ f[k] = (d[i]/mx - 0.485)/0.229; f[P+k] = (d[i+1]/mx - 0.456)/0.224; f[2*P+k] = (d[i+2]/mx - 0.406)/0.225; }
+  const out = await sess.run({ [sess.inputNames[0]]: new ort.Tensor("float32", f, [1, 3, N, N]) });
+  const pr = out[sess.outputNames[0]].data;
+  let lo = Infinity, hi = -Infinity; for (let k = 0; k < P; k++){ if (pr[k] < lo) lo = pr[k]; if (pr[k] > hi) hi = pr[k]; }
+  const rg = Math.max(1e-6, hi - lo);
+  const m = document.createElement("canvas"); m.width = N; m.height = N;
+  const mxc = m.getContext("2d"), id = mxc.createImageData(N, N);
+  let area = 0, minx = N, miny = N, maxx = -1, maxy = -1;
+  for (let k = 0; k < P; k++){
+    const v = (pr[k] - lo) / rg;
+    const a = Math.max(0, Math.min(1, (v - 0.25) / 0.5));
+    id.data[k*4+3] = Math.round(a * 255);
+    if (v > 0.5){ area++; const xx = k % N, yy = (k / N) | 0; if (xx < minx) minx = xx; if (xx > maxx) maxx = xx; if (yy < miny) miny = yy; if (yy > maxy) maxy = yy; }
+  }
+  if (area / P < 0.01 || area / P > 0.97) return null;
+  mxc.putImageData(id, 0, 0);
+  const o = document.createElement("canvas"); o.width = W0; o.height = H0;
+  const ox = o.getContext("2d");
+  ox.drawImage(src, 0, 0);
+  ox.globalCompositeOperation = "destination-in"; ox.imageSmoothingEnabled = true; ox.imageSmoothingQuality = "high";
+  ox.drawImage(m, 0, 0, W0, H0);
+  ox.globalCompositeOperation = "source-over";
+  const sx = W0 / N, sy = H0 / N, pad = 2;
+  return { canvas: o, bbox: { x: Math.max(0, (minx-pad)*sx), y: Math.max(0, (miny-pad)*sy), w: Math.min(W0, (maxx-minx+1+2*pad)*sx), h: Math.min(H0, (maxy-miny+1+2*pad)*sy) } };
 }
 
 /* ---------- linterna: se apaga al capturar ---------- */
@@ -2131,7 +2312,7 @@ function prepOCR(src){
   return c;
 }
 async function readHandwritten(src){
-  const w = await loadOCR();
+  const w = await loadOCR(); w._psm7 = false;
   const img = prepOCR(src);
   const clean = (t) => String(t||"").replace(/\s+/g, "").replace(/X/g, "x");
   let best = "", conf = 0;
@@ -2144,6 +2325,15 @@ async function readHandwritten(src){
     if (t.length > best.length){ best = t; conf = data.confidence; }
   }
   return { text: best, ok: false };
+}
+const PATRON_PROPIO = /^\d{2,}x\d{1,}$/;
+async function ocrQuick(src){
+  const w = await loadOCR();
+  if (!w._psm7){ await w.setParameters({ tessedit_pageseg_mode: "7" }); w._psm7 = true; }
+  const { data } = await w.recognize(prepOCR(src));
+  const t = String(data.text||"").replace(/\s+/g, "").replace(/X/g, "x");
+  const m = t.match(/\d{2,}x\d{1,}/);
+  return m && (data.confidence || 0) >= 40 ? m[0] : null;
 }
 function confirmCodeSheet(text, ok){
   return new Promise((resolve) => {
@@ -2230,7 +2420,7 @@ async function renderCopias(){
   const box = $("copiasList"); if (!box) return;
   let cs = []; try { cs = await listarCopias(); } catch {}
   box.innerHTML = cs.length ? `<div class="plist">${cs.map(c => `<div class="prow" style="cursor:default"><span class="pinfo"><span class="pname">${esc(nombreCopia(c.clave))}</span><span class="pmeta"><span>${fFecha(c.t)} ${fHora(c.t)}</span><span>${miles(c.productos)} productos · ${miles(c.ventas)} ventas</span></span></span><button type="button" class="btn sm" data-restaurar="${esc(c.clave)}">Restaurar</button></div>`).join("")}</div>`
-    : `<div class="empty">Todavía no hay copias. Se hacen solas cuando registras ventas o cambias el inventario.</div>`;
+    : `<div class="empty">Aún no hay copias.</div>`;
 }
 $("copiasList").addEventListener("click", (e) => {
   const b = e.target.closest("[data-restaurar]"); if (!b) return;
