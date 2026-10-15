@@ -297,7 +297,10 @@ details.card[open]>summary{margin-bottom:10px}
 .cap video{flex:1;min-height:0;width:100%;object-fit:cover}
 .cap .capbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));background:#000}
 .cap .captop{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:10px}
-.cap .captop span{background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.cap .captop>span{background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.capx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto}
+.capx svg{width:24px;height:24px}
+.capx:active{background:rgba(255,255,255,.3)}
 .scanframe{position:absolute;left:12%;right:12%;top:26%;height:26%;border:3px solid rgba(255,255,255,.85);border-radius:14px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,.25)}
 .scanbar{display:grid!important;grid-template-columns:1fr auto 1fr;align-items:center}
 .scanbar>:first-child{justify-self:start}
@@ -591,6 +594,8 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 7 días).</p>
     <div id="copiasList"></div>
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
+    <button type="button" class="btn" id="aNube">Subir copia a TeraBox</button>
+    <p class="note" style="margin:0">Se abre el menú <b>Compartir</b> del celular: elige <b>TeraBox</b> (o Drive, WhatsApp…). Para recuperar, descarga el archivo desde TeraBox y usa <b>Importar</b> o <b>Recuperar desde una copia</b>.</p>
     <label class="f">Guardar copia en Descargas
       <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="no">Nunca</option></select>
     </label>
@@ -1059,15 +1064,15 @@ function scanCode(titulo, opts = {}){
     host.innerHTML = `<div class="cap" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
       <video id="scVideo" playsinline muted></video><canvas id="scBox" style="position:absolute;left:0;top:0;width:100%;pointer-events:none"></canvas>
       <div class="scanframe" id="scFrame"></div>
-      <div class="captop"><span>${esc(titulo)}</span></div>
+      <div class="captop"><span>${esc(titulo)}<span class="scancount" id="scCount" hidden>0</span></span><button type="button" class="capx" id="scCancel" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
       <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
       <div class="scanmsg" id="scMsg" style="opacity:0"></div>
-      <div class="capbar scanbar"><button class="capbtn" id="scCancel">Cancelar</button><span class="capmid">${opts.varios ? `<button class="capbtn vbtn" id="scVarios" aria-pressed="false">Varios</button>` : ""}${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false" aria-label="Luz"></button></span></div></div>`;
+      <div class="capbar scanbar"><span></span><span class="capmid">${opts.varios ? `<button class="capbtn vbtn" id="scVarios" aria-pressed="false">Varios</button>` : ""}${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false" aria-label="Luz"></button></span></div></div>`;
     let done = false, cuenta = 0, msgT = 0;
     let cont = !!opts.continuo || (opts.varios && ls.get("variosVenta") === "1");
     const v = $("scVideo");
     const finish = (val) => { if (done) return; done = true; torchOff(); try { v.pause(); } catch {} v.srcObject = null; host.innerHTML = ""; releaseCamSoon(); resolve(val); };
-    const pintarCancel = () => { const b = $("scCancel"); if (!b) return; b.innerHTML = cont ? `Listo<span class="scancount" id="scCount">${cuenta}</span>` : (cuenta ? `Listo<span class="scancount" id="scCount">${cuenta}</span>` : "Cancelar"); };
+    const pintarCancel = () => { const c = $("scCount"); if (!c) return; c.textContent = cuenta; c.hidden = !(cont || cuenta); };
     $("scCancel").onclick = () => finish(cuenta || cont ? { continuo: true, cuenta } : null);
     const vb = $("scVarios");
     if (vb){
@@ -1085,7 +1090,7 @@ function scanCode(titulo, opts = {}){
       if (!cont){ beep(); setTimeout(() => finish(escrito ? { code, escrito: true, cuenta } : { code, cuenta }), 260); return true; }
       const r = opts.onCode ? opts.onCode(code, escrito) : { ok: true, msg: code };
       if (r.notFound){ try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} setTimeout(() => finish({ notFound: code, cuenta }), 150); return true; }
-      if (r.ok){ cuenta++; beep(); const c = $("scCount"); if (c) c.textContent = cuenta; }
+      if (r.ok){ cuenta++; beep(); pintarCancel(); }
       else { try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} }
       const m = $("scMsg"); if (m){ m.textContent = r.msg; m.classList.toggle("mal", !r.ok); m.style.opacity = 1; clearTimeout(msgT); msgT = setTimeout(() => { if (m) m.style.opacity = 0; }, 1800); }
       return false;
@@ -2730,6 +2735,14 @@ $("copiasList").addEventListener("click", (e) => {
     } catch { toast("No se pudo restaurar."); }
   }, false);
 });
+$("aNube").onclick = async () => {
+  try {
+    const data = { app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), docs:S.db.exportAll() };
+    const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
+    await shareFile(new Blob([JSON.stringify(data)], { type:"application/json" }), `copia-ferreteria-${stamp()}-${hm}.json`);
+    ls.set("lastExport", String(Date.now())); S.fileDirty = false; renderUltimaExp();
+  } catch { toast("No se pudo preparar la copia."); }
+};
 $("aCopiaYa").onclick = async () => { try { await hacerCopia(); toast("Copia guardada"); renderCopias(); } catch { toast("No se pudo guardar la copia."); } };
 function renderUltimaExp(){
   const el = $("aUltimaExp"); if (!el) return;
@@ -3159,7 +3172,7 @@ $("aKiosco").onclick = () => {
 try { history.pushState({ caja: 1 }, ""); } catch {}
 window.addEventListener("popstate", () => {
   try { history.pushState({ caja: 1 }, ""); } catch {}
-  const cap = $("capCancel"); if (cap){ cap.click(); return; }
+  const cap = $("capCancel") || $("scCancel"); if (cap){ cap.click(); return; }
   const host = $("sheetHost");
   if (host.innerHTML){ host.innerHTML = ""; return; }
   if ($("home").hidden && $("lock").hidden) back();
