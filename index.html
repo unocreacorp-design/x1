@@ -1929,19 +1929,20 @@ function openIngreso(opts={}){
 }
 /* Código escrito a mano (ej. 9195x20):
    9 = inicio · 1 = parte entera del margen · 95 = valor · x = 00 · 20 = decimales del margen
-   → costo 9.500, ganancia ×1,20 (20 %), precio 11.400 */
+   → precio de venta 9.500 (ya trae la ganancia), margen 1,20, costo = 9.500 ÷ 1,20 ≈ 7.920 */
 function descifrarCodigo(c){
   const m = String(c||"").trim().replace(/X/g,"x").match(/^9(\d)(\d+)x(\d{1,2})$/);
   if (!m) return null;
   const factor = Number(m[1] + "." + m[3]), costo = Number(m[2]) * 100;
   if (!costo || !factor) return null;
-  return { costo, factor, ganancia: Math.round((factor - 1) * 100), precio: Math.round(costo * factor / 100) * 100 };
+  const precio = costo;   /* el valor del código ya es el precio de venta */
+  return { precio, factor, ganancia: Math.round((factor - 1) * 100), costo: Math.round(precio / factor / 10) * 10 };
 }
 function aplicarCodigoPropio(){
   const info = $("iCodInfo"), d = descifrarCodigo($("iCodP").value);
   if (!d){ info.hidden = true; return; }
   info.hidden = false;
-  info.innerHTML = `Costo <b>${fmt(d.costo)}</b> · Margen <b>${d.factor.toFixed(2).replace(".", ",")}</b> (${d.ganancia}%) · Precio <b>${fmt(d.precio)}</b>`;
+  info.innerHTML = `Precio <b>${fmt(d.precio)}</b> · Margen <b>${d.factor.toFixed(2).replace(".", ",")}</b> (${d.ganancia}%) · Costo aprox. <b>${fmt(d.costo)}</b>`;
   const c = $("iCosto"), pr = $("iPrecio");
   if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; }
   if (!pr.value.trim() || pr.dataset.auto === "1"){ pr.value = miles(d.precio); pr.dataset.auto = "1"; }
