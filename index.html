@@ -346,6 +346,10 @@ details.card[open]>summary{margin-bottom:10px}
         <label class="f">Repite la clave<input id="setPin2" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <div id="setErr" class="err"></div>
         <button id="setGo" class="btn primary block">Crear inventario</button>
+        <div class="sect" style="margin-top:6px">¿Ya tenías datos?</div>
+        <label class="btn block" for="setRestore">Recuperar desde una copia</label>
+        <input id="setRestore" type="file" accept=".json,application/json" hidden>
+        <p class="note" style="margin:0">Busca en <b>Descargas</b> el archivo más nuevo que empiece por <b>copia-ferreteria</b>.</p>
       </div>
     </div>
     <div id="pinForm" hidden>
@@ -587,6 +591,10 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 7 días).</p>
     <div id="copiasList"></div>
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
+    <label class="f">Guardar copia en Descargas
+      <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="no">Nunca</option></select>
+    </label>
+    <p class="note" style="margin:0">Solo guarda si hubo cambios. Ese archivo no se borra aunque el navegador borre sus datos, y sirve para recuperar todo en este u otro celular.</p>
     <label class="f">Recordar copia en el celular cada
       <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">Nunca</option></select>
     </label>
@@ -761,10 +769,27 @@ function unlock(){ S.unlocked=true; S.hist=["home"]; show("home",false); try { r
 function lockNow(){ ss.del("unlock"); S.unlocked=false; S.hist=["lock"]; pinBuf=""; $("pinDots").textContent="····"; showLockState(); show("lock",false); }
 
 function showLockState(){
+  if (S.restaurando) return;
   $("lockMsg").hidden = true;
+  const rec = ss.get("recuperado");
+  if (rec != null){ ss.del("recuperado"); setTimeout(() => toast(`Datos recuperados: ${miles(Number(rec)||0)} productos. Entra con tu clave.`, 3500), 300); }
   if (!S.config || !S.config.pinHash){ $("setupForm").hidden=false; $("pinForm").hidden=true; $("lockTitle").textContent="Configurar la caja"; }
   else { $("setupForm").hidden=true; $("pinForm").hidden=false; $("lockTitle").textContent=S.config.nombre||"Caja Ferretería"; }
 }
+$("setRestore").onchange = async (e) => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
+  let data; try { data = JSON.parse(await f.text()); } catch { $("setErr").textContent = "Ese archivo no es una copia válida."; return; }
+  if (data?.app !== "caja-ferreteria" || !data.docs){ $("setErr").textContent = "Ese archivo no es una copia de esta app."; return; }
+  if (!data.docs["config/tienda"]){ $("setErr").textContent = "A esa copia le falta la configuración de la caja."; return; }
+  try {
+    S.restaurando = true; $("setupForm").hidden = true; $("pinForm").hidden = true;
+    $("lockMsg").hidden = false; $("lockMsg").innerHTML = `<div class="spin"></div><span>Recuperando tus datos…</span>`;
+    await S.db.importAll(data.docs);
+    const n = Object.keys(data.docs).filter(k => k.startsWith("productos/")).length;
+    ss.set("recuperado", String(n));
+    setTimeout(() => location.reload(), 300);
+  } catch { $("setErr").textContent = "No se pudo cargar la copia."; }
+};
 $("setGo").onclick = async () => {
   const nombre = $("setNombre").value.trim(), p1=$("setPin").value.trim(), p2=$("setPin2").value.trim();
   if (!nombre) return $("setErr").textContent="Escribe el nombre del negocio.";
@@ -1691,6 +1716,7 @@ $("vCobrar").onclick = async () => {
     }
     S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; setVentaCliente(null); $("vCliBox").open = false; saveCartDraft();
     openRecibo(venta);
+    if (archivoPendiente(true)) setTimeout(guardarArchivo, 600);
   } catch(e){ toast("No se pudo guardar la venta. Revisa la conexión e intenta de nuevo.", 3500); }
   btn.disabled=false; btn.textContent="Cobrar e imprimir";
 };
@@ -2156,6 +2182,7 @@ function fillAjustes(){
   $("aAuto").setAttribute("aria-checked", c.autoGuardado !== false);
   $("aAutoMin").value = String(c.autoMin || 10);
   $("aRecordar").value = String(c.recordarDias ?? 7);
+  $("aArchivo").value = c.copiaArchivo || "hora";
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
   $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
 }
@@ -2178,6 +2205,7 @@ $("aFondo").onchange = () => cfgSet({ fondoFoto: $("aFondo").value }, "Listo");
 $("aAuto").onclick = () => { const on = S.config?.autoGuardado === false; $("aAuto").setAttribute("aria-checked", on); cfgSet({ autoGuardado: on }, on ? "Autoguardado activado" : "Autoguardado apagado"); };
 $("aAutoMin").onchange = () => cfgSet({ autoMin: Number($("aAutoMin").value) }, "Listo");
 $("aRecordar").onchange = () => cfgSet({ recordarDias: Number($("aRecordar").value) }, "Listo");
+$("aArchivo").onchange = () => cfgSet({ copiaArchivo: $("aArchivo").value }, "Listo");
 $("aLogoFile").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
   try {
@@ -2611,7 +2639,31 @@ async function clienteParaVenta(){
 
 /* ---------- copias automáticas ---------- */
 S.dirty = false;
-function dbChanged(path){ if (!String(path).startsWith("config/")) S.dirty = true; else if (!S.dirtyCfg) S.dirtyCfg = true; }
+function dbChanged(path){ if (!String(path).startsWith("config/")) { S.dirty = true; S.fileDirty = true; } else if (!S.dirtyCfg) S.dirtyCfg = true; }
+/* copia en archivo (Descargas): sobrevive aunque el navegador borre sus datos al cerrarse */
+function guardarArchivo(){
+  try {
+    const data = { app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), docs:S.db.exportAll() };
+    const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type:"application/json" }));
+    a.download = `copia-ferreteria-${stamp()}-${hm}.json`; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    ls.set("lastExport", String(Date.now())); S.fileDirty = false; renderUltimaExp();
+    toast("Copia guardada en Descargas", 1800);
+  } catch {}
+}
+function archivoPendiente(trasVenta){
+  if (!S.db || !S.unlocked || !S.fileDirty) return false;
+  const modo = S.config?.copiaArchivo || "hora", last = Number(ls.get("lastExport")) || 0;
+  if (modo === "no") return false;
+  if (modo === "venta") return !!trasVenta;
+  if (modo === "hora") return Date.now() - last >= 3600e3;
+  const dia = (t) => { const x = new Date(t); return x.getFullYear()*1e4 + x.getMonth()*100 + x.getDate(); };
+  return !last || dia(last) !== dia(Date.now());
+}
+/* se revisa al tocar la pantalla (las descargas necesitan un toque del usuario) */
+let archivoT = 0;
+document.addEventListener("click", () => { clearTimeout(archivoT); archivoT = setTimeout(() => { if (archivoPendiente(false)) guardarArchivo(); }, 1500); }, true);
 let respaldoDbP = null;
 function respaldoDb(){
   if (!respaldoDbP) respaldoDbP = new Promise((res, rej) => {
@@ -2686,6 +2738,7 @@ function renderUltimaExp(){
 }
 function recordarExport(){
   const dias = S.config?.recordarDias ?? 7; if (!dias) return;
+  if ((S.config?.copiaArchivo || "hora") !== "no") return;
   const t = Number(ls.get("lastExport")) || 0, hoyK = stamp();
   if (ls.get("lastRemind") === hoyK) return;
   if (t && Date.now() - t < dias * 864e5) return;
