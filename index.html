@@ -702,8 +702,6 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 7 días).</p>
     <div id="copiasList"></div>
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
-    <button type="button" class="btn" id="aNube">Subir copia a TeraBox</button>
-    <p class="note" style="margin:0">Se abre el menú <b>Compartir</b> del celular: elige <b>TeraBox</b> (o Drive, WhatsApp…). Para recuperar, descarga el archivo desde TeraBox y usa <b>Importar</b> o <b>Recuperar desde una copia</b>.</p>
     <div hidden id="copiasArchivoViejas">
     <label class="f">Guardar copia en el celular
       <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="horafija">Todos los días a una hora</option><option value="no">Nunca</option></select>
@@ -3485,7 +3483,7 @@ $("copiasList").addEventListener("click", (e) => {
     } catch { toast("No se pudo restaurar."); }
   }, false);
 });
-$("aNube").onclick = async () => {
+if ($("aNube")) $("aNube").onclick = async () => {
   try {
     const data = { app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), docs:S.db.exportAll() };
     const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
