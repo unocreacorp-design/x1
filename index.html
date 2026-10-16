@@ -4131,14 +4131,23 @@ async function nubeSubir(){
   N.sub = 1;
   try {
     const db = firebase.firestore(), col = db.collection("tiendas").doc(N.uid).collection("docs"), mios = S.db.exportAll();
-    const rutas = [...N.cola];
-    for (let i = 0; i < rutas.length; i += 400){
+    /* se sube en tandas de máx. 400 documentos y ~4 MB (las fotos pesan), para no pasar el límite de Firebase */
+    const rutas = [...N.cola]; let tanda = [], peso = 0;
+    const enviar = async () => {
+      if (!tanda.length) return;
       const b = db.batch();
-      rutas.slice(i, i + 400).forEach(p => { const v = mios[p]; b.set(col.doc(idNube(p)), { p, j: v === undefined ? null : JSON.stringify(v), dev: nubeDev, t: firebase.firestore.FieldValue.serverTimestamp() }); });
+      tanda.forEach(([p, j]) => b.set(col.doc(idNube(p)), { p, j, dev: nubeDev, t: firebase.firestore.FieldValue.serverTimestamp() }));
       await b.commit();
-      rutas.slice(i, i + 400).forEach(p => N.cola.delete(p));
-      ls.set("nubeCola", JSON.stringify([...N.cola]));
+      tanda.forEach(([p]) => N.cola.delete(p)); ls.set("nubeCola", JSON.stringify([...N.cola]));
+      tanda = []; peso = 0;
+    };
+    for (const p of rutas){
+      const v = mios[p], j = v === undefined ? null : JSON.stringify(v), n = j ? j.length : 50;
+      if (n > 1000000){ N.cola.delete(p); continue; }   /* un solo producto no puede pasar de 1 MB */
+      if (tanda.length && (tanda.length >= 400 || peso + n > 4000000)) await enviar();
+      tanda.push([p, j]); peso += n;
     }
+    await enviar();
     N.ult = Date.now(); N.err = "";
   } catch (e) { N.err = "No se pudo subir: " + (e?.code || e?.message || "sin internet"); }
   N.sub = 0; pintarNube();
