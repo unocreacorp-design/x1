@@ -86,7 +86,7 @@ button{cursor:pointer}
 .fsbtn{width:58px;height:58px;border-radius:14px;border:2px solid var(--ink);background:var(--surface);display:grid;place-items:center;flex-shrink:0}
 .fsbtn svg{width:30px;height:30px}
 .fsbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.toplinks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.toplinks{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .chip{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 6px;font-size:19px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;line-height:1.1;text-align:center}
 .chip svg{width:28px;height:28px}
 .chip .badge{position:absolute;top:6px;right:8px;background:var(--danger);color:#fff;border-radius:999px;font-size:15px;font-weight:700;padding:2px 8px}
@@ -403,7 +403,6 @@ details.card[open]>summary{margin-bottom:10px}
         <button type="button" class="btn primary block" id="setNubeGo">Entrar</button>
         <div class="ordiv"><span>o</span></div>
         <button type="button" class="btn block" id="crearCajaBtn">Crear caja</button>
-        <button type="button" class="linkbtn" id="guiaInicio" style="align-self:center">¿Cómo funciona la app?</button>
       </div>
     </div>
     <div class="pop" id="crearCajaPop" hidden><div class="popbox gut" role="dialog" aria-modal="true">
@@ -440,7 +439,6 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="toplinks">
     <button class="chip" data-go="pendientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>Por comprar</button>
     <button class="chip" data-go="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Ajustes</button>
-    <button class="chip" id="homeGuia">Guía</button>
   </div>
   <div class="bigbtns">
     <button class="big b-cam" data-go="inventario">
@@ -889,12 +887,21 @@ async function tryPin(){
   else { $("pinErr").textContent="Clave incorrecta. Intenta de nuevo."; }
   pinBuf=""; $("pinDots").textContent="····";
 }
+/* al abrir una sección desplegable, mover la vista para que el título quede arriba */
+function irArriba(d){
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    let sc = d.parentElement; while (sc && sc !== document.body){ const o = getComputedStyle(sc).overflowY; if ((o === "auto" || o === "scroll") && sc.scrollHeight > sc.clientHeight) break; sc = sc.parentElement; }
+    if (!sc || sc === document.body){ d.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    const top = d.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 8;
+    sc.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }));
+}
 function abrirGuia(){
   sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>Cuando un producto queda con pocas unidades aparece en <b>Por comprar</b>.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
-    const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open) ds.forEach(o => { if (o !== d) o.open = false; }); }));
+    const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
-$("homeGuia").onclick = abrirGuia; $("aGuia").onclick = abrirGuia; $("guiaInicio").onclick = abrirGuia;
+$("aGuia").onclick = abrirGuia;
 $("crearCajaBtn").onclick = () => { $("crearCajaPop").hidden = false; setTimeout(() => $("setNombre").focus(), 80); };
 $("crearCajaX").onclick = () => { $("crearCajaPop").hidden = true; };
 $("crearCajaPop").addEventListener("click", (e) => { if (e.target === $("crearCajaPop")) $("crearCajaPop").hidden = true; });
@@ -3227,11 +3234,12 @@ function setAjTab(t){
   $("aGuia").hidden = t !== "gen";
   $("ajSave").hidden = !(t === "gen" && document.querySelector('.ajsec[data-sec="neg"]').open);
   if (t === "cuenta"){ pintarNube(); try { renderCopias(); } catch {} }
+  try { const f = $("ajForm"); let sc = f; while (sc && sc !== document.body && !/auto|scroll/.test(getComputedStyle(sc).overflowY)) sc = sc.parentElement; if (sc && sc !== document.body) sc.scrollTop = 0; else window.scrollTo(0, 0); } catch {}
   try { document.querySelector("#ajustes .body:not([hidden]), #ajForm:not([hidden])").scrollTop = 0; } catch {}
   if (t === "cli") renderClientes(); if (t === "prov") renderProvs();
 }
 document.querySelectorAll("#ajForm details.acc").forEach(d => d.addEventListener("toggle", () => {
-  if (d.open) document.querySelectorAll("#ajForm details.acc").forEach(o => { if (o !== d) o.open = false; });
+  if (d.open){ document.querySelectorAll("#ajForm details.acc").forEach(o => { if (o !== d) o.open = false; }); irArriba(d); }
   $("ajSave").hidden = !(S.ajTab === "gen" && document.querySelector('.ajsec[data-sec="neg"]').open);
 }));
 $("ajTabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) setAjTab(b.dataset.tab); });
