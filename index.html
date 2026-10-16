@@ -209,6 +209,8 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end}
 .sheet{background:var(--bg);width:100%;border-radius:18px 18px 0 0;max-height:88%;overflow-y:auto;padding-top:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
 .sheet h2{font-family:var(--f-display);font-weight:800;font-size:24px;text-transform:uppercase;margin:0}
+.sheetfoot{position:sticky;bottom:calc(-16px - env(safe-area-inset-bottom,0px));margin-bottom:calc(-16px - env(safe-area-inset-bottom,0px));background:var(--bg);padding:10px 0 calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;gap:8px;z-index:2}
+.sheetfoot>.btn{flex:1}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:10px;font-weight:600;z-index:30;max-width:calc(100% - 32px);text-align:center}
 .tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px}
@@ -306,7 +308,10 @@ details.card[open]>summary{margin-bottom:10px}
 .qx[hidden]{display:none}
 .ganbox{position:relative}
 .ganwrap{position:relative;display:flex}
-.ganwrap .inp{width:100%;padding-right:78px}
+.ganwrap .inp{width:100%;padding-right:104px}
+.ganx{position:absolute;right:76px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:0;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+.ganx svg{width:13px;height:13px}
+.ganx[hidden]{display:none}
 .gansuf{position:absolute;right:54px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
 .ganbtn{position:absolute;right:4px;top:4px;bottom:4px;width:44px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;border-radius:0 10px 10px 0}
 .ganbtn svg{width:22px;height:22px}
@@ -439,17 +444,17 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="venta" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--venta)"></span><h1>Venta</h1><button class="btn sm" id="ventasHist">Historial</button></div>
   <div class="body gut">
-    <div class="drop">
-      <input id="vQ" class="inp" placeholder="Nombre o código" autocomplete="off" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
-      <div id="vDrop" class="dropl plist" hidden></div>
-    </div>
-    <div id="cart"></div>
     <details class="card" id="vCliBox"><summary>Cliente</summary>
       <div style="display:flex;flex-direction:column;gap:10px">
         <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" autocomplete="off" inputmode="text"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
         <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" autocomplete="off" inputmode="tel"></label>
       </div>
     </details>
+    <div class="drop">
+      <input id="vQ" class="inp" placeholder="Nombre o código" autocomplete="off" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
+      <div id="vDrop" class="dropl plist" hidden></div>
+    </div>
+    <div id="cart"></div>
   </div>
   <div class="foot gut">
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
@@ -491,14 +496,14 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Nombre<input id="iNombre" class="inp" enterkeyhint="done" inputmode="text"></label>
     <div class="row" style="align-items:flex-start">
       <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric"></label>
-      <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric"></label>
+      <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric"></label>
     </div>
     <div class="row" style="align-items:flex-start">
       <div class="f grow ganbox"><span>% Ganancia</span>
-        <div class="ganwrap"><input id="iGan" class="inp num" inputmode="decimal" autocomplete="off" enterkeyhint="done"><span class="gansuf">%</span><button type="button" class="ganbtn" id="iGanMenu" aria-label="Porcentajes guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+        <div class="ganwrap"><input id="iGan" class="inp num" inputmode="decimal" autocomplete="off" enterkeyhint="done"><button type="button" class="ganx" id="iGanX" hidden aria-label="Borrar el %"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="gansuf">%</span><button type="button" class="ganbtn" id="iGanMenu" aria-label="Porcentajes guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
         <div class="gansug" id="iGanSug" hidden></div>
       </div>
-      <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric"></label>
+      <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric"></label>
     </div>
     <label class="f">Categoría<select id="iCat" class="inp"></select></label>
     <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiala.</p>
@@ -547,6 +552,8 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="body gut">
     <div class="row"><button type="button" class="btn cam grow" id="pScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button type="button" class="btn ingreso grow" id="pFoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</button></div>
     <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Nombre del producto" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button class="btn primary" type="submit">Agregar</button></form>
+    <div class="row"><button type="button" class="btn grow" id="pFiltro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="width:20px;height:20px"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtro</button><button type="button" class="btn grow" id="pExport">Exportar</button><label class="btn grow" for="aImport">Cargar</label></div>
+    <div class="fchips" id="pendChips" hidden></div>
     <div class="sect" id="pendCount"></div>
     <div id="pendList"></div>
     <input id="pFotoFile" type="file" accept="image/*" capture="environment" hidden>
@@ -628,8 +635,9 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="btn" id="aNube">Subir copia a TeraBox</button>
     <p class="note" style="margin:0">Se abre el menú <b>Compartir</b> del celular: elige <b>TeraBox</b> (o Drive, WhatsApp…). Para recuperar, descarga el archivo desde TeraBox y usa <b>Importar</b> o <b>Recuperar desde una copia</b>.</p>
     <label class="f">Guardar copia en el celular
-      <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="no">Nunca</option></select>
+      <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="horafija">Todos los días a una hora</option><option value="no">Nunca</option></select>
     </label>
+    <label class="f" id="aArchivoHoraL" hidden>Hora de la copia<input id="aArchivoHora" class="inp num" type="time" value="18:00"></label>
     <p class="note" style="margin:0">Solo guarda si hubo cambios. Ese archivo no se borra aunque el navegador borre sus datos, y sirve para recuperar todo en este u otro celular.</p>
     <div id="aCarpetaBox" class="card" style="display:flex;flex-direction:column;gap:8px">
       <div class="note" id="aCarpetaTxt" style="margin:0"></div>
@@ -642,6 +650,8 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0">Los datos están solo en este celular. Exporta seguido y guarda el archivo en Drive o WhatsApp.</p>
     <p class="note" style="margin:0" id="aUltimaExp"></p>
     <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar</button><label class="btn grow" for="aImport">Importar</label></div>
+    <button type="button" class="btn block" id="aCompartir">Compartir todo con otra persona</button>
+    <p class="note" style="margin:0">Manda por WhatsApp un archivo con todo: productos, clientes, proveedores, ventas y por comprar. La otra persona lo abre en su app con <b>Importar › Combinar</b> y no se le repite nada.</p>
     
   </form>
 </section>
@@ -653,7 +663,7 @@ details.card[open]>summary{margin-bottom:10px}
 <div id="sheetHost"></div>
 <div id="popHost"></div>
 <div id="toastHost"></div>
-<input id="aImport" type="file" accept=".json,.xlsx,.xls,.csv,.txt,application/json,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
+<input id="aImport" type="file" accept=".json,application/octet-stream,.xlsx,.xls,.csv,.txt,application/json,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
 <div id="printArea"><img id="printImg" alt=""></div>
 
 <script>
@@ -1579,7 +1589,7 @@ function pendFormSheet(pre = {}, item = null){
     <div id="pfProvTel" class="note"></div>
     <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" autocomplete="off" inputmode="text"></label>
     <div id="pfErr" class="err"></div>
-    <div class="row">${item ? `<button class="btn danger grow" id="pfDel">Quitar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn primary grow" id="pfOk">${item ? "Guardar" : "Agregar"}</button></div>`,
+    <div class="sheetfoot">${item ? `<button class="btn danger" id="pfDel">Quitar</button>` : `<button class="btn" data-close>Cancelar</button>`}<button class="btn primary" id="pfOk">${item ? "Guardar" : "Agregar"}</button></div>`,
     (el, close) => {
       const img = el.querySelector("#pfImg"), ph = el.querySelector("#pfPh");
       const setFoto = async (src) => {
@@ -1632,9 +1642,19 @@ $("pFoto").onclick = async () => {
   const r = await capturePhoto("Foto del producto por comprar", $("pFotoFile"));
   if (r) pendFormSheet({ foto: r.canvas, codigo: r.code || r.codigoPropio || "" });
 };
+S.pendF = { prov: "", estado: "pend" };
+function pendFiltrados(){
+  const f = S.pendF;
+  return S.pend.filter(p => (!f.prov || (f.prov === "__sin" ? !p.proveedorId : p.proveedorId === f.prov)) && (f.estado === "todos" || (f.estado === "pend" ? !p.hecho : p.hecho)));
+}
 function renderPend(){
-  const abiertos = S.pend.filter(p=>!p.hecho).sort((a,b)=>{ const pa = norm(provById(a.proveedorId)?.nombre||"zzz"), pb = norm(provById(b.proveedorId)?.nombre||"zzz"); return pa.localeCompare(pb) || b.creado - a.creado; });
-  const hechos = S.pend.filter(p=>p.hecho).sort((a,b)=>b.creado-a.creado).slice(0,20);
+  const f = S.pendF, chips = [];
+  if (f.prov) chips.push(`<button type="button" class="fchip" data-px="prov">${esc(f.prov === "__sin" ? "Sin proveedor" : (provById(f.prov)?.nombre || "Proveedor"))} ✕</button>`);
+  if (f.estado !== "pend") chips.push(`<button type="button" class="fchip" data-px="est">${f.estado === "todos" ? "Todos" : "Comprados"} ✕</button>`);
+  $("pendChips").innerHTML = chips.join(""); $("pendChips").hidden = !chips.length;
+  const base = S.pend.filter(p => !f.prov || (f.prov === "__sin" ? !p.proveedorId : p.proveedorId === f.prov));
+  const abiertos = base.filter(p=>!p.hecho && f.estado !== "hechos").sort((a,b)=>{ const pa = norm(provById(a.proveedorId)?.nombre||"zzz"), pb = norm(provById(b.proveedorId)?.nombre||"zzz"); return pa.localeCompare(pb) || b.creado - a.creado; });
+  const hechos = f.estado === "pend" ? base.filter(p=>p.hecho).sort((a,b)=>b.creado-a.creado).slice(0,20) : base.filter(p=>p.hecho && f.estado !== "pend").sort((a,b)=>b.creado-a.creado);
   $("pendCount").textContent = abiertos.length ? `${miles(abiertos.length)} por comprar` : "";
   const row = (p) => { const pv = provById(p.proveedorId);
     return `<div class="prow" data-pend="${esc(p.id)}" style="cursor:pointer">${thumb(p)}<span class="pinfo"><span class="pname" style="${p.hecho?"text-decoration:line-through;color:var(--muted)":""}">${esc(p.nombre)}</span><span class="pmeta">${p.cantidad?`<span><b>${miles(p.cantidad)}</b> und</span>`:""}${p.codigo?`<span class="num">${esc(p.codigo)}</span>`:""}${pv?`<span>${esc(pv.nombre)}${pv.telefono?` · <span class="num">${esc(pv.telefono)}</span>`:""}</span>`:""}<span>${new Date(p.creado).toLocaleDateString("es-CO",{day:"numeric",month:"short"})}</span></span></span>
@@ -1642,6 +1662,60 @@ function renderPend(){
   $("pendList").innerHTML = (abiertos.length ? `<div class="plist">${abiertos.map(row).join("")}</div>` : `<div class="empty">Nada por comprar.</div>`)
     + (hechos.length ? `<div class="sect" style="margin-top:6px">Comprados</div><div class="plist">${hechos.map(row).join("")}</div>` : "");
 }
+$("pendChips").addEventListener("click", (e) => { const b = e.target.closest("[data-px]"); if (!b) return; if (b.dataset.px === "prov") S.pendF.prov = ""; else S.pendF.estado = "pend"; renderPend(); });
+$("pFiltro").onclick = () => {
+  popup("Filtro", `<div class="popsec">Mostrar</div><div id="pfEst" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div class="popsec">Proveedor</div><input id="pfQ" class="inp" inputmode="search" placeholder="Buscar proveedor" autocomplete="off" style="margin-bottom:6px"><div class="poplist" id="pfProv" style="padding-bottom:0"></div>
+    <div class="row" style="margin-top:10px"><button type="button" class="btn grow" id="pfReset">Restablecer</button><button type="button" class="btn primary grow" data-popclose>Listo</button></div>`, (el) => {
+    const o = (attr, val, label, sel, n) => `<button type="button" class="popopt" ${attr}="${esc(val)}" aria-selected="${sel}"><span>${esc(label)}</span><span class="ct">${n != null ? miles(n) : ""}${sel ? " ✓" : ""}</span></button>`;
+    const draw = () => {
+      const f = S.pendF, t = norm(el.querySelector("#pfQ").value);
+      el.querySelector("#pfEst").innerHTML = [["pend","Por comprar"],["hechos","Comprados"],["todos","Todos"]].map(([k,l]) => o("data-pe", k, l, f.estado === k)).join("");
+      const cnt = {}; let sin = 0; S.pend.forEach(p => { if (p.proveedorId) cnt[p.proveedorId] = (cnt[p.proveedorId]||0) + 1; else sin++; });
+      const ps = [...(S.provs||[])].filter(p => !t || norm(p.nombre).includes(t) || norm(p.codigo).includes(t)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
+      el.querySelector("#pfProv").innerHTML = (t ? "" : o("data-pp", "", "Todos", !f.prov, S.pend.length)) + ps.map(p => o("data-pp", p.id, p.nombre + (p.codigo ? " · " + p.codigo : ""), f.prov === p.id, cnt[p.id] || 0)).join("")
+        + (!t && sin ? o("data-pp", "__sin", "Sin proveedor", f.prov === "__sin", sin) : "") + (t && !ps.length ? `<div class="empty">Ningún proveedor con “${esc(el.querySelector("#pfQ").value)}”.</div>` : "");
+    };
+    ponerX(el.querySelector("#pfQ")); el.querySelector("#pfQ").addEventListener("input", draw); draw();
+    el.addEventListener("click", (e) => { const a = e.target.closest("[data-pe]"), b = e.target.closest("[data-pp]");
+      if (a) S.pendF.estado = a.dataset.pe; else if (b) S.pendF.prov = b.dataset.pp; else return; draw(); renderPend(); });
+    el.querySelector("#pfReset").onclick = () => { S.pendF = { prov: "", estado: "pend" }; const q = el.querySelector("#pfQ"); q.value = ""; q.dispatchEvent(new Event("input")); draw(); renderPend(); };
+  });
+};
+function textoPorComprar(lista){
+  const grupos = {};
+  lista.forEach(p => { const k = provById(p.proveedorId)?.nombre || "Sin proveedor"; (grupos[k] = grupos[k] || []).push(p); });
+  const tienda = S.config?.nombre ? S.config.nombre + " · " : "";
+  let t = `*${tienda}Por comprar* (${fFecha(Date.now())})\n`;
+  Object.keys(grupos).sort((a,b) => a === "Sin proveedor" ? 1 : b === "Sin proveedor" ? -1 : a.localeCompare(b)).forEach(g => {
+    t += `\n*${g}*\n`;
+    grupos[g].forEach(p => { t += `• ${p.nombre || p.codigo}${p.cantidad ? ` × ${miles(p.cantidad)}` : ""}${p.codigo && p.nombre ? ` (${p.codigo})` : ""}${p.nota ? ` — ${p.nota}` : ""}${p.hecho ? " ✓" : ""}\n`; });
+  });
+  return t;
+}
+$("pExport").onclick = () => {
+  const lista = pendFiltrados();
+  if (!lista.length){ toast("No hay nada en la lista con ese filtro."); return; }
+  popup("Exportar por comprar", `<p class="note" style="margin:0 0 8px">${miles(lista.length)} producto${lista.length > 1 ? "s" : ""} (según el filtro).</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+    <button type="button" class="btn block" id="peTxt">Texto para WhatsApp</button>
+    <button type="button" class="btn block" id="peApp">Archivo para la app</button>
+    <p class="note" style="margin:0">El archivo lo abre otra persona en su app con <b>Cargar</b>, y se suma a su lista sin repetir.</p></div>`, (el, close) => {
+    el.querySelector("#peTxt").onclick = async () => {
+      const t = textoPorComprar(lista);
+      try { if (navigator.share){ await navigator.share({ text: t }); close(); return; } } catch (e){ if (e?.name === "AbortError") return; }
+      try { await navigator.clipboard.writeText(t); toast("Lista copiada. Pégala en WhatsApp."); } catch {}
+      window.open("https://wa.me/?text=" + encodeURIComponent(t), "_blank"); close();
+    };
+    el.querySelector("#peApp").onclick = async () => {
+      const docs = {}; const provs = new Set();
+      lista.forEach(p => { const { id, ...d } = p; docs["pendientes/" + id] = d; if (p.proveedorId) provs.add(p.proveedorId); });
+      provs.forEach(id => { const pv = provById(id); if (pv){ const { id: _, ...d } = pv; docs["proveedores/" + id] = d; } });
+      const data = { app:"caja-ferreteria", version:1, tipo:"por-comprar", fecha:new Date().toISOString(), docs };
+      await shareFile(new Blob([JSON.stringify(data)], { type:"application/json" }), `por-comprar-${stamp()}.json`); close();
+    };
+  });
+};
 $("pendList").addEventListener("click", e => {
   const ok = e.target.closest("[data-pok]"), del = e.target.closest("[data-pdel]");
   if (ok){ S.db.doc("pendientes/"+ok.dataset.pok).update({hecho:true}).catch(()=>toast("No se pudo actualizar.")); return; }
@@ -1956,7 +2030,7 @@ function openIngreso(opts={}){
     $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
     $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = cp;
     $("iGan").value = p.ganancia != null && p.ganancia !== "" ? fmtGan(p.ganancia) : (p.precio && p.costo && p.precio >= p.costo ? fmtGan(Math.round((p.precio/p.costo - 1) * 1000) / 10) : "");
-    if (p.costo) $("iCosto").dataset.manual = "1";
+    S.calcHist = $("iGan").value.trim() ? ["G"] : [];
     if (p.creado){ $("iFechas").hidden = false; $("iFechas").textContent = `Ingresado el ${fFecha(p.creado)} a las ${fHora(p.creado)}` + (p.actualizado && p.actualizado !== p.creado ? ` · Actualizado el ${fFecha(p.actualizado)} a las ${fHora(p.actualizado)}` : ""); }
     if (p.foto){ S.iFotoData = p.foto; $("iFotoImg").src=p.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; }
     pintarOrig();
@@ -1964,11 +2038,13 @@ function openIngreso(opts={}){
     if (opts.codigo) setIngCodigo(opts.codigo);
     if (opts.nombre) $("iNombre").value = opts.nombre;
     if (opts.foto){ if (typeof opts.foto === "string"){ S.iFotoData = opts.foto; $("iFotoImg").src = opts.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; } else setIngFoto(opts.foto); }
-    const ug = ls.get("ultGan"); if (ug !== null && ug !== "") $("iGan").value = fmtGan(Number(ug));
+    S.calcHist = [];
+    const ug = ls.get("ultGan"); if (ug !== null && ug !== "" && ug !== "null"){ $("iGan").value = fmtGan(Number(ug)); S.calcHist = ["G"]; }
     if (opts.nombre){ const c = sugerirCategoria(opts.nombre); if (c){ $("iCat").value = c; refreshPicker($("iCat")); $("iCatNota").hidden = false; } }
     if (opts.codigoPropio) setCodigoLeido(opts.codigoPropio, true);
     pintarOrig();
   }
+  $("iGanX").hidden = !$("iGan").value.trim();
   previewCodigo();
   show("ingreso");
 }
@@ -1991,7 +2067,8 @@ function aplicarCodigoPropio(){
   const c = $("iCosto"), pr = $("iPrecio");
   if (!pr.value.trim() || pr.dataset.auto === "1"){ pr.value = miles(d.precio); pr.dataset.auto = "1"; }
   if (!$("iGan").value.trim() || $("iGan").dataset.auto === "1" || pr.dataset.auto === "1"){ $("iGan").value = fmtGan(d.ganancia); $("iGan").dataset.auto = "1"; }
-  if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; c.dataset.manual = ""; }
+  if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; }
+  S.calcHist = ["P", "G"]; $("iGanX").hidden = !$("iGan").value.trim();
 }
 /* Código escrito a mano (ej. 9585x56) */
 const esEscrito = (c) => /^\d{2,}\s*x\s*\d+$/i.test(String(c||"").trim());
@@ -2095,15 +2172,25 @@ const GAN_DEF = [10, 15, 20, 25, 30, 35, 40, 50, 60, 80, 100];
 const ganLista = () => { const l = S.config?.ganancias; return (Array.isArray(l) ? l : GAN_DEF).slice().sort((a,b) => a-b); };
 const fmtGan = (g) => String(Math.round(g*100)/100).replace(".", ",");
 const leerGan = () => { const t = $("iGan").value.trim().replace(",", ".").replace("%", ""); if (t === "") return null; const n = Number(t); return isFinite(n) && n >= 0 ? n : null; };
-function calcCosto(){   /* precio y % → costo */
-  const pr = toNum($("iPrecio").value), g = leerGan(), c = $("iCosto");
-  if (pr && g !== null && c.dataset.manual !== "1"){ c.value = miles(Math.round(pr / (1 + g/100) / 10) * 10); c.dataset.auto = "1"; }
+/* Precio (P), costo (C) y % (G): con los dos últimos que usted escribió se calcula el tercero.
+   Costo sin % → el precio queda igual al costo hasta que ponga el %. */
+S.calcHist = [];
+const redondeoPrecio = (v) => v >= 1000 ? Math.ceil(v / 100) * 100 : Math.ceil(v / 50) * 50;
+function tocar(k){
+  if (k === "G" && leerGan() === null) S.calcHist = S.calcHist.filter(x => x !== "G");
+  else S.calcHist = [k, ...S.calcHist.filter(x => x !== k)].slice(0, 2);
+  if (!(k === "G" && leerGan() === null)) recalcular();
+  $("iGanX").hidden = !$("iGan").value.trim();
   previewCodigo();
 }
-function calcGan(){     /* precio y costo escrito a mano → % */
-  const pr = toNum($("iPrecio").value), co = toNum($("iCosto").value);
-  if (pr && co && pr >= co){ $("iGan").value = fmtGan(Math.round((pr/co - 1) * 1000) / 10); }
-  previewCodigo();
+function recalcular(){
+  const P = toNum($("iPrecio").value), C = toNum($("iCosto").value), g = leerGan(), h = S.calcHist;
+  let obj = h.length === 2 ? ["P","C","G"].find(x => !h.includes(x)) : null;
+  if (h.length === 1){ const k = h[0]; obj = k === "C" ? "P" : k === "P" ? (g !== null ? "C" : (C ? "G" : null)) : (C ? "P" : (P ? "C" : null)); }
+  if (obj === "P" && C){ $("iPrecio").value = miles(g === null ? C : redondeoPrecio(C * (1 + g/100))); }
+  else if (obj === "C" && P && g !== null){ $("iCosto").value = miles(Math.round(P / (1 + g/100) / 10) * 10); }
+  else if (obj === "G" && P && C){ $("iGan").value = fmtGan(Math.round((P/C - 1) * 1000) / 10); }
+  $("iGanX").hidden = !$("iGan").value.trim();
 }
 function previewCodigo(){
   const cp = $("iCodP"), c9 = codigo9(toNum($("iPrecio").value), leerGan());
@@ -2112,8 +2199,10 @@ function previewCodigo(){
   if (n){ const pr = toNum($("iPrecio").value);
     n.textContent = cp.value.trim() ? "Código propio escrito o leído." : c9 ? `Si lo dejas vacío, se crea ${c9} con el precio y el % de ganancia.` : pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20)."; }
 }
-$("iPrecio").addEventListener("input", () => { if ($("iCosto").dataset.manual === "1" && toNum($("iCosto").value)) calcGan(); else calcCosto(); });
-$("iCosto").addEventListener("input", () => { $("iCosto").dataset.manual = $("iCosto").value.trim() ? "1" : ""; calcGan(); });
+$("iPrecio").addEventListener("input", () => { $("iPrecio").dataset.auto = ""; tocar("P"); });
+$("iCosto").addEventListener("input", () => { $("iCosto").dataset.auto = ""; tocar("C"); });
+$("iGanX").addEventListener("mousedown", (e) => e.preventDefault());
+$("iGanX").onclick = () => { $("iGan").value = ""; $("iGanSug").hidden = true; tocar("G"); };
 /* autocompletar el % mientras se escribe, con la lista guardada */
 function ganSugerir(){
   const box = $("iGanSug"), t = $("iGan").value.trim().replace("%", "").replace(",", ".");
@@ -2122,10 +2211,10 @@ function ganSugerir(){
   if (!ops.length){ box.hidden = true; return; }
   box.innerHTML = ops.map(g => `<button type="button" data-g="${g}">${fmtGan(g)} %</button>`).join(""); box.hidden = false;
 }
-$("iGan").addEventListener("input", () => { $("iCosto").dataset.manual = ""; ganSugerir(); calcCosto(); });
+$("iGan").addEventListener("input", () => { ganSugerir(); tocar("G"); });
 $("iGan").addEventListener("blur", () => setTimeout(() => { $("iGanSug").hidden = true; }, 200));
 $("iGanSug").addEventListener("mousedown", (e) => e.preventDefault());
-$("iGanSug").addEventListener("click", (e) => { const b = e.target.closest("[data-g]"); if (!b) return; $("iGan").value = fmtGan(Number(b.dataset.g)); $("iGanSug").hidden = true; $("iCosto").dataset.manual = ""; calcCosto(); });
+$("iGanSug").addEventListener("click", (e) => { const b = e.target.closest("[data-g]"); if (!b) return; $("iGan").value = fmtGan(Number(b.dataset.g)); $("iGanSug").hidden = true; tocar("G"); });
 /* menú con la flechita: escoger, agregar o borrar porcentajes */
 $("iGanMenu").onclick = () => {
   $("iGanSug").hidden = true;
@@ -2138,7 +2227,7 @@ $("iGanMenu").onclick = () => {
     pintar();
     el.querySelector("#gnList").addEventListener("click", (e) => {
       const pk = e.target.closest("[data-pick]"), dl = e.target.closest("[data-del]");
-      if (pk){ $("iGan").value = fmtGan(Number(pk.dataset.pick)); $("iCosto").dataset.manual = ""; calcCosto(); close(); }
+      if (pk){ $("iGan").value = fmtGan(Number(pk.dataset.pick)); tocar("G"); close(); }
       else if (dl){ lista = lista.filter(g => String(g) !== dl.dataset.del); pintar(); guardar(); }
     });
     const add = () => { const v = Number(el.querySelector("#gnNuevo").value.trim().replace(",", ".").replace("%", ""));
@@ -2484,6 +2573,7 @@ function fillAjustes(){
   $("aAutoMin").value = String(c.autoMin || 10);
   $("aRecordar").value = String(c.recordarDias ?? 7);
   $("aArchivo").value = c.copiaArchivo || "hora";
+  $("aArchivoHoraL").hidden = (c.copiaArchivo || "hora") !== "horafija"; $("aArchivoHora").value = c.copiaHora || "18:00";
   try { pintarCarpeta(); } catch {}
   try { pintarEtqAjustes(); } catch {}
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
@@ -2508,7 +2598,9 @@ $("aFondo").onchange = () => cfgSet({ fondoFoto: $("aFondo").value }, "Listo");
 $("aAuto").onclick = () => { const on = S.config?.autoGuardado === false; $("aAuto").setAttribute("aria-checked", on); cfgSet({ autoGuardado: on }, on ? "Autoguardado activado" : "Autoguardado apagado"); };
 $("aAutoMin").onchange = () => cfgSet({ autoMin: Number($("aAutoMin").value) }, "Listo");
 $("aRecordar").onchange = () => cfgSet({ recordarDias: Number($("aRecordar").value) }, "Listo");
-$("aArchivo").onchange = () => cfgSet({ copiaArchivo: $("aArchivo").value }, "Listo");
+$("aArchivo").onchange = () => { $("aArchivoHoraL").hidden = $("aArchivo").value !== "horafija"; cfgSet({ copiaArchivo: $("aArchivo").value }, "Listo"); };
+$("aArchivoHora").onchange = () => cfgSet({ copiaHora: $("aArchivoHora").value || "18:00" }, "Listo");
+$("aCompartir").onclick = () => compartirTodo();
 $("aLogoFile").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
   try {
@@ -3212,6 +3304,8 @@ function archivoPendiente(trasVenta){
   if (modo === "no") return false;
   if (modo === "venta") return !!trasVenta;
   if (modo === "hora") return Date.now() - last >= 3600e3;
+  if (modo === "horafija"){ const [hh, mm] = String(S.config?.copiaHora || "18:00").split(":").map(Number); const t = new Date(); t.setHours(hh||0, mm||0, 0, 0);
+    return Date.now() >= t.getTime() && last < t.getTime(); }
   const dia = (t) => { const x = new Date(t); return x.getFullYear()*1e4 + x.getMonth()*100 + x.getDate(); };
   return !last || dia(last) !== dia(Date.now());
 }
@@ -3356,6 +3450,10 @@ function openLocalDb(){
         doc: docRef,
         collection: (col) => ({ ...query(col), path: col, doc: (id) => docRef(col+"/"+(id||newId())), add: async (d) => { const r = docRef(col+"/"+newId()); await r.set(d); return r; } }),
         exportAll: () => Object.fromEntries(mem),
+        putMany: async (obj) => {
+          await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); for (const [k,v] of Object.entries(obj)) o.put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); });
+          for (const [k,v] of Object.entries(obj)){ mem.set(k,v); dbChanged(k); } notify();
+        },
         importAll: async (obj) => {
           await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); o.clear(); for (const [k,v] of Object.entries(obj)) o.put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); });
           mem.clear(); for (const [k,v] of Object.entries(obj)) mem.set(k,v); notify();
@@ -3546,16 +3644,7 @@ async function extrasImport(x){
 }
 $("aImport").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
-  if (/\.json$/i.test(f.name) || f.type === "application/json"){
-    let data; try { data = JSON.parse(await f.text()); } catch { toast("Ese archivo no es una copia válida."); return; }
-    if (data?.app !== "caja-ferreteria" || !data.docs) { toast("Ese archivo no es una copia de esta app."); return; }
-    const n = Object.keys(data.docs).filter(k=>k.startsWith("productos/")).length;
-    confirmar(`¿Reemplazar todo lo de este celular con la copia (${n} productos)?`, "Reemplazar", async () => {
-      try { await guardarCopia("antes-de-cargar"); await S.db.importAll(data.docs); ss.del("unlock"); toast("Copia cargada. Entra con la clave de esa copia."); setTimeout(lockNow, 800); }
-      catch { toast("No se pudo cargar la copia."); }
-    });
-    return;
-  }
+  if (/\.json$/i.test(f.name) || f.type === "application/json" || /^application\/octet/.test(f.type)){ await cargarArchivoApp(f); return; }
   let rows; try { rows = await rowsFromFile(f); } catch { toast("No se pudo leer ese archivo."); return; }
   const hi = rows.findIndex(r => colIndex(r.map(String)).nombre >= 0);
   if (hi < 0){ toast("No encontré una columna de nombre o producto en el archivo.", 3500); return; }
@@ -3762,6 +3851,70 @@ $("aInstalar").onclick = async () => { if (!installEvt) return; installEvt.promp
 /* ---------- modo sin conexión ---------- */
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
+}
+
+/* ---------- combinar datos de otra persona sin repetir ---------- */
+const COLS_COMB = {
+  productos:   (d) => [d.codigo && "b:" + String(d.codigo).trim(), "n:" + norm(d.nombre)],
+  clientes:    (d) => [d.doc && "d:" + String(d.doc).replace(/\D/g, ""), "n:" + norm(d.nombre)],
+  proveedores: (d) => [d.codigo && "c:" + norm(d.codigo), "n:" + norm(d.nombre)],
+  pendientes:  (d) => ["n:" + norm(d.nombre) + "|" + String(d.codigo||"").trim()],
+  ventas:      (d) => ["v:" + d.numero + "|" + d.fecha],
+};
+const fechaDoc = (d) => Number(d?.actualizado || d?.creado || d?.fecha || 0);
+async function combinarDatos(docs){
+  const mios = S.db.exportAll(), cambios = {}, cuenta = { nuevos: 0, actualizados: 0, iguales: 0 };
+  const indices = {};
+  for (const [k, v] of Object.entries(mios)){ const col = k.split("/")[0], f = COLS_COMB[col]; if (!f) continue;
+    indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => { if (!indices[col].has(x)) indices[col].set(x, k); }); }
+  for (const [k, v] of Object.entries(docs)){
+    const col = k.split("/")[0], f = COLS_COMB[col];
+    if (col === "config"){
+      const c = mios["config/tienda"] || {}, extra = {};
+      if (Array.isArray(v.catsExtra)) extra.catsExtra = [...new Set([...(c.catsExtra||[]), ...v.catsExtra])];
+      if (Array.isArray(v.ganancias)) extra.ganancias = [...new Set([...(c.ganancias||GAN_DEF), ...v.ganancias])].sort((a,b) => a-b);
+      if (Object.keys(extra).length && mios["config/tienda"]) cambios["config/tienda"] = { ...c, ...extra };
+      continue;
+    }
+    if (!f) continue;
+    let destino = mios[k] ? k : null;
+    if (!destino){ for (const key of f(v).filter(Boolean)){ const m = indices[col]?.get(key); if (m){ destino = m; break; } } }
+    if (!destino){ cambios[k] = v; cuenta.nuevos++; indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => indices[col].set(x, k)); continue; }
+    const actual = mios[destino];
+    if (fechaDoc(v) > fechaDoc(actual)){ cambios[destino] = { ...actual, ...v }; cuenta.actualizados++; }
+    else cuenta.iguales++;
+  }
+  if (Object.keys(cambios).length) await S.db.putMany(cambios);
+  return cuenta;
+}
+/* Leer un archivo de la app y preguntar cómo cargarlo */
+async function cargarArchivoApp(f){
+  let data; try { data = JSON.parse(await f.text()); } catch { toast("Ese archivo no es una copia válida."); return; }
+  if (data?.app !== "caja-ferreteria" || !data.docs){ toast("Ese archivo no es de esta app."); return; }
+  const n = (c) => Object.keys(data.docs).filter(k => k.startsWith(c + "/")).length;
+  const soloLista = data.tipo === "por-comprar";
+  const resumen = soloLista ? `${miles(n("pendientes"))} por comprar` : `${miles(n("productos"))} productos · ${miles(n("clientes"))} clientes · ${miles(n("proveedores"))} proveedores · ${miles(n("ventas"))} ventas · ${miles(n("pendientes"))} por comprar`;
+  sheet(`<h2>Cargar archivo</h2><p class="note" style="margin:0">${resumen}${data.fecha ? ` · del ${fFecha(Date.parse(data.fecha))} ${fHora(Date.parse(data.fecha))}` : ""}</p>
+    <button type="button" class="btn primary block" id="caComb">Combinar con lo mío</button>
+    <p class="note" style="margin:-4px 0 0">Agrega lo nuevo y actualiza lo que cambió. Si un cliente, producto o proveedor ya lo tiene, no lo repite. Su clave y ajustes no cambian.</p>
+    ${soloLista ? "" : `<button type="button" class="btn danger block" id="caRemp">Reemplazar todo</button><p class="note" style="margin:-4px 0 0">Deja el celular exactamente igual al archivo (también la clave). Lo de ahora se guarda antes en una copia.</p>`}
+    <div class="sheetfoot"><button class="btn block" data-close>Cancelar</button></div>`, (el, close) => {
+    el.querySelector("#caComb").onclick = async () => {
+      try { await guardarCopia("antes-de-cargar"); const r = await combinarDatos(data.docs); close();
+        toast(`Listo: ${miles(r.nuevos)} nuevos, ${miles(r.actualizados)} actualizados, ${miles(r.iguales)} ya los tenía.`, 4500); }
+      catch { toast("No se pudo combinar."); }
+    };
+    const rp = el.querySelector("#caRemp");
+    if (rp) rp.onclick = () => { close(); confirmar(`¿Reemplazar todo lo de este celular con el archivo?`, "Reemplazar", async () => {
+      try { await guardarCopia("antes-de-cargar"); await S.db.importAll(data.docs); ss.del("unlock"); toast("Copia cargada. Entra con la clave de esa copia."); setTimeout(lockNow, 800); }
+      catch { toast("No se pudo cargar la copia."); } }); };
+  });
+}
+/* Compartir todo (para otra persona de la ferretería) */
+async function compartirTodo(){
+  const data = { app:"caja-ferreteria", version:1, tipo:"todo", fecha:new Date().toISOString(), docs:S.db.exportAll() };
+  const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
+  await shareFile(new Blob([JSON.stringify(data)], { type:"application/json" }), `ferreteria-todo-${stamp()}-${hm}.json`);
 }
 
 /* ---------- casillas: X para borrar lo escrito ---------- */
