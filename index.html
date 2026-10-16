@@ -689,7 +689,7 @@ details.card[open]>summary{margin-bottom:10px}
       <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
         <div class="row"><button type="button" class="btn block" id="nubeSync">Sincronizar ahora</button></div>
         <button type="button" class="btn danger block" id="nubeSalir">Cerrar sesión</button>
-        <p class="note" style="margin:0">Para entrar con otro usuario, cierre sesión y escriba el nuevo. Los datos se quedan en este celular.</p>
+        <p class="note" style="margin:0">Al cerrar sesión la app vuelve a la pantalla de inicio. Todo queda guardado en la nube y se trae de nuevo al entrar.</p>
       </div>
     </div>
     </div>
@@ -4205,10 +4205,39 @@ $("setNubeGo").onclick = async () => {
 $("nubeEntrar").onclick = () => nubeEntrar(false);
 $("nubeCrear").onclick = () => nubeEntrar(true);
 $("nubeSync").onclick = async () => { if (!N.uid) return; Object.keys(S.db.exportAll()).forEach(k => N.cola.add(k)); await nubeSubir(); nubeEscuchar(); toast("Sincronizado"); };
-$("nubeSalir").onclick = () => confirmar("¿Cerrar sesión de la nube? Los datos se quedan en este celular, pero ya no se comparten hasta que vuelva a entrar.", "Cerrar sesión", async () => {
-  try { if (N.unsub) N.unsub(); N.unsub = null; await firebase.auth().signOut(); } catch {}
-  N.lista = false; N.uid = null; ls.set("nube", "0"); ls.set("nubeUid", ""); N.cola.clear(); ls.set("nubeCola", "[]"); pintarNube(); toast("Sesión cerrada");
-}, false);
+/* Cerrar sesión: sube lo pendiente, sale de la cuenta, limpia este celular y vuelve a la pantalla de inicio */
+async function borrarLocalTodo(){
+  await new Promise((res) => {
+    try {
+      const rq = indexedDB.open("caja-ferreteria", 1);
+      rq.onsuccess = () => { try { const db = rq.result, t = db.transaction("docs", "readwrite"); t.objectStore("docs").clear(); t.oncomplete = () => { db.close(); res(); }; t.onerror = t.onabort = () => { db.close(); res(); }; } catch { res(); } };
+      rq.onerror = () => res();
+    } catch { res(); }
+  });
+  const guardar = ["camVivo", "luzModo", "modoCam", "fsWanted", "ultGan"];
+  try { Object.keys(localStorage).forEach(k => { if (!guardar.includes(k)) localStorage.removeItem(k); }); } catch {}
+  try { sessionStorage.clear(); } catch {}
+}
+async function cerrarSesion(){
+  const b = $("nubeSalir"); b.disabled = true; b.textContent = "Cerrando…";
+  try {
+    if (N.cola.size && navigator.onLine !== false){ try { await nubeSubir(); } catch {} }
+    if (N.cola.size){
+      b.disabled = false; b.textContent = "Cerrar sesión";
+      return confirmar(`Hay ${miles(N.cola.size)} cambio${N.cola.size > 1 ? "s" : ""} que todavía no se han subido a la nube (sin internet). Si cierra sesión ahora se pierden. ¿Cerrar de todas formas?`, "Cerrar y perderlos", () => terminarSalida());
+    }
+    await terminarSalida();
+  } catch { b.disabled = false; b.textContent = "Cerrar sesión"; }
+}
+async function terminarSalida(){
+  try { if (N.unsub) N.unsub(); N.unsub = null; } catch {}
+  N.lista = false; N.uid = null; try { N.cola.clear(); } catch {}
+  try { await firebase.auth().signOut(); } catch {}
+  await borrarLocalTodo();
+  S.kiosco = false;
+  location.replace(location.pathname);
+}
+$("nubeSalir").onclick = () => confirmar("¿Cerrar sesión? Todo queda guardado en la nube y la app vuelve a la pantalla de inicio para entrar o crear una caja.", "Cerrar sesión", cerrarSesion, false);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && N.cola.size) nubeSubir(); });
 window.addEventListener("online", () => { if (N.cola.size) nubeSubir(); });
 
