@@ -425,6 +425,7 @@ details.card[open]>summary{margin-bottom:10px}
         <div id="pinDots" class="pin" aria-live="polite">····</div>
         <div id="pinErr" class="err"></div>
         <div class="keypad" id="keypad"></div>
+        <button type="button" class="btn block" id="huellaBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="width:24px;height:24px"><path d="M12 11v3a8 8 0 0 1-1.5 4.7"/><path d="M8.5 8.6A4 4 0 0 1 16 11v1.5a12 12 0 0 1-.6 3.8"/><path d="M5.6 7.4A8 8 0 0 1 20 11v1"/><path d="M8 12a4 4 0 0 0 0 0v2a12 12 0 0 1-1.4 5.6"/><path d="M4.3 11.3A8 8 0 0 0 4 13.5"/><path d="M18.9 16.5a16 16 0 0 1-.9 3"/></svg>Entrar con huella</button>
       </div>
     </div>
   </div>
@@ -658,7 +659,7 @@ details.card[open]>summary{margin-bottom:10px}
     </label>
       </div>
     </details>
-    <details class="ajsec acc" data-sec="pant" data-grupo="gen"><summary><span class="acct">Pantalla y clave</span><span class="accd">Pantalla completa, instalar app y clave</span></summary>
+    <details class="ajsec acc" data-sec="pant" data-grupo="gen"><summary><span class="acct">Pantalla y clave</span><span class="accd">Pantalla completa, instalar app, clave y huella</span></summary>
       <div class="accb">
     <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
       <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
@@ -669,6 +670,10 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
     <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:8px">Clave de la app</div>
+    <div id="huellaAj" hidden style="display:flex;flex-direction:column;gap:6px">
+      <button type="button" class="switch" id="aHuella" role="switch" aria-checked="false"><span>Entrar con huella<br><small class="note" style="font-weight:500">Use el lector de huella (o la cara) del celular en vez de la clave. La clave sigue sirviendo.</small></span><span class="tg"></span></button>
+      <div id="huellaErr" class="err"></div>
+    </div>
     <label class="f">Nueva clave (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
     <button type="button" class="btn" id="aPinGo">Cambiar clave</button>
     <button type="button" class="btn" id="aLock">Bloquear ahora</button>
@@ -895,7 +900,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>Cuando un producto queda con pocas unidades aparece en <b>Por comprar</b>.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>Cuando un producto queda con pocas unidades aparece en <b>Por comprar</b>.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -903,16 +908,70 @@ $("aGuia").onclick = abrirGuia;
 $("crearCajaBtn").onclick = () => { $("crearCajaPop").hidden = false; setTimeout(() => $("setNombre").focus(), 80); };
 $("crearCajaX").onclick = () => { $("crearCajaPop").hidden = true; };
 $("crearCajaPop").addEventListener("click", (e) => { if (e.target === $("crearCajaPop")) $("crearCajaPop").hidden = true; });
-function unlock(){ try { $("crearCajaPop").hidden = true; } catch {} S.unlocked=true; S.hist=["home"]; show("home",false); try { recordarExport(); } catch {} }
-function lockNow(){ ss.del("unlock"); S.unlocked=false; S.hist=["lock"]; pinBuf=""; $("pinDots").textContent="····"; showLockState(); show("lock",false); }
+function unlock(){ S.bloqueoManual = false; try { $("crearCajaPop").hidden = true; } catch {} S.unlocked=true; S.hist=["home"]; show("home",false); try { recordarExport(); } catch {} }
+function lockNow(){ S.bloqueoManual = true; ss.del("unlock"); S.unlocked=false; S.hist=["lock"]; pinBuf=""; $("pinDots").textContent="····"; showLockState(); show("lock",false); }
 
+/* ---------- entrar con huella (lector del celular, WebAuthn) ---------- */
+const HUELLA = {
+  ok: false,
+  id(){ return ls.get("huellaId") || ""; },
+  b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); },
+  bytes(b){ b = b.replace(/-/g, "+").replace(/_/g, "/"); while (b.length % 4) b += "="; return Uint8Array.from(atob(b), c => c.charCodeAt(0)); },
+  reto(){ return crypto.getRandomValues(new Uint8Array(32)); }
+};
+async function huellaDisponible(){
+  try { return !!(window.PublicKeyCredential && isSecureContext && await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()); } catch { return false; }
+}
+async function huellaActivar(){
+  const nombre = (S.config?.nombre || "Caja Ferretería").slice(0, 60);
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: HUELLA.reto(), rp: { name: "Caja Ferretería" },
+    user: { id: crypto.getRandomValues(new Uint8Array(16)), name: nombre, displayName: nombre },
+    pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
+    timeout: 60000, attestation: "none"
+  }});
+  if (!cred) throw new Error("cancelado");
+  ls.set("huellaId", HUELLA.b64(cred.rawId));
+}
+async function huellaVerificar(){
+  const id = HUELLA.id(); if (!id) return false;
+  const r = await navigator.credentials.get({ publicKey: {
+    challenge: HUELLA.reto(), allowCredentials: [{ type: "public-key", id: HUELLA.bytes(id), transports: ["internal"] }],
+    userVerification: "required", timeout: 60000
+  }});
+  return !!(r && r.response && r.response.authenticatorData && (new Uint8Array(r.response.authenticatorData)[32] & 4));
+}
+function pintarHuella(){
+  const on = !!HUELLA.id();
+  $("huellaAj").hidden = !HUELLA.ok; $("aHuella").setAttribute("aria-checked", on ? "true" : "false");
+  $("huellaBtn").hidden = !(HUELLA.ok && on);
+}
+let huellaOcupada = false;
+async function entrarConHuella(auto){
+  if (huellaOcupada || S.unlocked) return; huellaOcupada = true;
+  try { if (await huellaVerificar()){ ss.set("unlock", S.config?.pinHash || ""); $("pinErr").textContent = ""; unlock(); } else if (!auto) $("pinErr").textContent = "No se reconoció la huella. Use la clave."; }
+  catch (e) { if (!auto) $("pinErr").textContent = e?.name === "NotAllowedError" ? "Se canceló. Puede usar la clave." : "No se pudo usar la huella. Use la clave."; }
+  huellaOcupada = false;
+}
+$("huellaBtn").onclick = () => entrarConHuella(false);
+$("aHuella").onclick = async () => {
+  $("huellaErr").textContent = "";
+  if (HUELLA.id()){ ls.set("huellaId", ""); try { localStorage.removeItem("huellaId"); } catch {} pintarHuella(); toast("Huella desactivada en este celular"); return; }
+  try { await huellaActivar(); pintarHuella(); toast("Listo: ya puede entrar con la huella"); }
+  catch (e) { $("huellaErr").textContent = e?.name === "NotAllowedError" ? "Se canceló o el celular no tiene huella registrada." : "Este celular o navegador no permite usar la huella aquí."; }
+};
+huellaDisponible().then(ok => {
+  HUELLA.ok = ok; pintarHuella();
+  if (ok && HUELLA.id() && !S.unlocked && !$("pinForm").hidden) setTimeout(() => entrarConHuella(true), 400);
+});
 function showLockState(){
   if (S.restaurando) return;
   $("lockMsg").hidden = true;
   const rec = ss.get("recuperado");
   if (rec != null){ ss.del("recuperado"); setTimeout(() => toast(`Datos recuperados: ${miles(Number(rec)||0)} productos. Entra con tu clave.`, 3500), 300); }
   if (!S.config || !S.config.pinHash){ $("setupForm").hidden=false; $("pinForm").hidden=true; $("lockTitle").textContent="Iniciar sesión"; }
-  else { $("setupForm").hidden=true; $("pinForm").hidden=false; $("lockTitle").textContent=S.config.nombre||"Caja Ferretería"; }
+  else { $("setupForm").hidden=true; $("pinForm").hidden=false; $("lockTitle").textContent=S.config.nombre||"Caja Ferretería"; try { pintarHuella(); if (HUELLA.ok && HUELLA.id() && !S.bloqueoManual) setTimeout(() => entrarConHuella(true), 400); } catch {} }
 }
 $("setRestore").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
