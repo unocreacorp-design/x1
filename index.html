@@ -344,6 +344,7 @@ details.card[open]>summary{margin-bottom:10px}
 .ganrow{display:flex;align-items:center;gap:8px}
 .ganrow .pick{flex:1;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font-size:18px;font-weight:700}
 .ganrow .del{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--danger);font-size:20px;font-weight:700}
+.origbox[hidden]{display:none}
 .origbox{border:1px dashed var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
 .origtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .origtxt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
@@ -519,7 +520,7 @@ details.card[open]>summary{margin-bottom:10px}
       <input id="iCodP" class="inp num" enterkeyhint="done" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
     </label>
     <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
-    <p class="note" id="iCodNota" style="margin:-6px 0 0">Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20).</p>
+    <p class="note" id="iCodNota" style="margin:-6px 0 0" hidden></p>
     <div id="iExiste" hidden></div>
     <input id="iCodigo" type="hidden">
     <div class="origbox" id="iOrig">
@@ -2236,7 +2237,8 @@ function pintarOrig(){
   const cod = $("iCodigo").value.trim(), cp = $("iCodP").value.trim(), box = $("iOrigTxt");
   if (cod){ box.innerHTML = `<span class="num">${esc(cod)}</span><span class="origtipo">${tipoCodigo(cod, S.iOrigTipo)}</span>`; $("iOrigQuitar").hidden = false; }
   else if (cp && (S.iOrigTipo === "escrito" || esEscrito(cp))){ box.innerHTML = `<span class="num">${esc(cp)}</span><span class="origtipo">Escrito en el producto</span><span class="note">Es el mismo código propio</span>`; $("iOrigQuitar").hidden = true; }
-  else { box.innerHTML = `<span class="note">No tiene. Escanea el código de barras o QR que trae el producto.</span>`; $("iOrigQuitar").hidden = true; }
+  else { box.innerHTML = ""; $("iOrigQuitar").hidden = true; }
+  $("iOrig").hidden = !box.innerHTML;
   showBarcode(cod);
   $("iEtiqueta").hidden = !(cp || cod) || !window.JsBarcode;
 }
@@ -2346,7 +2348,8 @@ function previewCodigo(){
   cp.placeholder = c9 ? "Se creará: " + c9 : "";
   const n = $("iCodNota");
   if (n){ const pr = toNum($("iPrecio").value);
-    n.textContent = cp.value.trim() ? "Código propio escrito o leído." : c9 ? `Si lo dejas vacío, se crea ${c9} con el precio y el % de ganancia.` : pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20)."; }
+    const aviso = !cp.value.trim() && !c9 && pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "";
+    n.textContent = aviso; n.hidden = !aviso; }
 }
 $("iPrecio").addEventListener("input", () => { $("iPrecio").dataset.auto = ""; tocar("P"); });
 $("iCosto").addEventListener("input", () => { $("iCosto").dataset.auto = ""; tocar("C"); });
