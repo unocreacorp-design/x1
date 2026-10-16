@@ -144,7 +144,8 @@ body.kb .foot:not(:focus-within){display:none}
 .btn.block{width:100%}
 .btn:disabled{opacity:.5;cursor:default}
 .btn svg{width:20px;height:20px}
-label.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.gansug,.ganwrap .inp{text-transform:none;letter-spacing:normal}
 .inp{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:12px 12px;font-size:17px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--ink)}
 .inp:focus{border-color:var(--accent)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
@@ -298,6 +299,19 @@ details.card[open]>summary{margin-bottom:10px}
 .cap .capbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));background:#000}
 .cap .captop{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cap .captop>span{background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.ganbox{position:relative}
+.ganwrap{position:relative;display:flex}
+.ganwrap .inp{width:100%;padding-right:78px}
+.gansuf{position:absolute;right:54px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
+.ganbtn{position:absolute;right:4px;top:4px;bottom:4px;width:44px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;border-radius:0 10px 10px 0}
+.ganbtn svg{width:22px;height:22px}
+.gansug{position:absolute;left:0;right:0;top:100%;z-index:6;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:220px;overflow-y:auto}
+.gansug button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px 14px;font-size:17px;font-weight:700;font-family:var(--f-mono, monospace)}
+.gansug button+button{border-top:1px solid var(--line)}
+.ganlist{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto}
+.ganrow{display:flex;align-items:center;gap:8px}
+.ganrow .pick{flex:1;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;font-size:18px;font-weight:700}
+.ganrow .del{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--danger);font-size:20px;font-weight:700}
 .origbox{border:1px dashed var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
 .origtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .origtxt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
@@ -461,7 +475,7 @@ details.card[open]>summary{margin-bottom:10px}
       <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
     </label>
     <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
-    <p class="note" style="margin:-6px 0 0">Si lo dejas vacío, al guardar se crea uno con la fecha y la categoría.</p>
+    <p class="note" id="iCodNota" style="margin:-6px 0 0">Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20).</p>
     <div id="iExiste" hidden></div>
     <input id="iCodigo" type="hidden">
     <div class="origbox" id="iOrig">
@@ -475,9 +489,14 @@ details.card[open]>summary{margin-bottom:10px}
       <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric" placeholder="0"></label>
     </div>
     <div class="row" style="align-items:flex-start">
+      <div class="f grow ganbox"><span>% Ganancia</span>
+        <div class="ganwrap"><input id="iGan" class="inp num" inputmode="decimal" placeholder="Ej: 20" autocomplete="off" enterkeyhint="next"><span class="gansuf">%</span><button type="button" class="ganbtn" id="iGanMenu" aria-label="Porcentajes guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+        <div class="gansug" id="iGanSug" hidden></div>
+      </div>
       <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric" placeholder="0"></label>
-      <label class="f grow">Categoría<select id="iCat" class="inp"></select></label>
     </div>
+    <label class="f">Categoría<select id="iCat" class="inp"></select></label>
+    <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiala.</p>
     <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden inputmode="text">
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
     <label class="f">Foto
@@ -1099,6 +1118,7 @@ function scanCode(titulo, opts = {}){
       if (!cont){ beep(); setTimeout(() => finish(escrito ? { code, escrito: true, cuenta } : { code, cuenta }), 260); return true; }
       const r = opts.onCode ? opts.onCode(code, escrito) : { ok: true, msg: code };
       if (r.notFound){ try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} setTimeout(() => finish({ notFound: code, cuenta }), 150); return true; }
+      if (r.multi){ beep(); setTimeout(() => finish({ multi: code, cuenta }), 150); return true; }
       if (r.ok){ cuenta++; beep(); pintarCancel(); }
       else { try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch {} }
       const m = $("scMsg"); if (m){ m.textContent = r.msg; m.classList.toggle("mal", !r.ok); m.style.opacity = 1; clearTimeout(msgT); msgT = setTimeout(() => { if (m) m.style.opacity = 0; }, 1800); }
@@ -1671,7 +1691,9 @@ $("cart").addEventListener("change", e => {
 });
 $("vScan").onclick = async () => {
   const r = await scanCode("Escanear", { varios: true, onCode: (code) => {
-    const p = byCode(code);
+    const ps = porCodigo(code);
+    if (ps.length > 1) return { multi: true };
+    const p = ps[0];
     if (!p) return { notFound: true };
     addToCart(p); const it = S.carrito.find(i => i.id === p.id);
     return { ok: true, msg: `+1 ${p.nombre}${it && it.cant > 1 ? ` (${miles(it.cant)})` : ""}` };
@@ -1679,9 +1701,12 @@ $("vScan").onclick = async () => {
   if (!r) return;
   if (r.cuenta) toast(`${miles(r.cuenta)} producto${r.cuenta > 1 ? "s" : ""} agregado${r.cuenta > 1 ? "s" : ""}`);
   if (r.notFound){ notFoundSheet(r.notFound); return; }
+  const alCarro = (p) => { addToCart(p); toast("Agregado: " + p.nombre); };
+  if (r.multi){ elegirProducto(r.multi, porCodigo(r.multi), alCarro); return; }
   if (r.code){
-    const p = byCode(r.code);
-    if (p){ addToCart(p); toast("Agregado: " + p.nombre); }
+    const ps = porCodigo(r.code);
+    if (ps.length > 1) elegirProducto(r.code, ps, alCarro);
+    else if (ps[0]) alCarro(ps[0]);
     else notFoundSheet(r.code);
   }
 };
@@ -1693,7 +1718,9 @@ $("vQ").addEventListener("input", () => {
 });
 $("vQ").addEventListener("keydown", e => {
   if (e.key!=="Enter") return; e.preventDefault();
-  const q = $("vQ").value.trim(), p = byCode(q) || (searchProducts(q,2).length===1 ? searchProducts(q,1)[0] : null);
+  const q = $("vQ").value.trim(), ps = porCodigo(q);
+  if (ps.length > 1){ elegirProducto(q, ps, (x) => { addToCart(x); $("vQ").value=""; $("vDrop").hidden=true; toast("Agregado: "+x.nombre); }); return; }
+  const p = ps[0] || (searchProducts(q,2).length===1 ? searchProducts(q,1)[0] : null);
   if (p){ addToCart(p); $("vQ").value=""; $("vDrop").hidden=true; toast("Agregado: "+p.nombre); }
 });
 $("vDrop").addEventListener("click", e => {
@@ -1914,12 +1941,15 @@ function openIngreso(opts={}){
   $("iBorrar").hidden = !p;
   $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar";
   $("iCodigo").value = ""; S.iOrigTipo = ""; $("iCosto").dataset.auto = ""; $("iPrecio").dataset.auto = ""; $("iCodInfo").hidden = true;
+  $("iCosto").dataset.manual = ""; $("iCat").dataset.manual = opts.edit?.categoria ? "1" : ""; $("iCatNota").hidden = true; $("iGanSug").hidden = true;
   if (p){
     let cod = p.codigo||"", cp = p.codigoPropio||"";
     if (!cp && /^FR\d+$/i.test(cod)){ cp = cod; cod = ""; }   /* códigos automáticos viejos pasan a ser el código propio */
     $("iCodigo").value = cod; S.iOrigTipo = p.codigoTipo || "";
     $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
     $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = cp;
+    $("iGan").value = p.ganancia != null && p.ganancia !== "" ? fmtGan(p.ganancia) : (p.precio && p.costo && p.precio >= p.costo ? fmtGan(Math.round((p.precio/p.costo - 1) * 1000) / 10) : "");
+    if (p.costo) $("iCosto").dataset.manual = "1";
     if (p.creado){ $("iFechas").hidden = false; $("iFechas").textContent = `Ingresado el ${fFecha(p.creado)} a las ${fHora(p.creado)}` + (p.actualizado && p.actualizado !== p.creado ? ` · Actualizado el ${fFecha(p.actualizado)} a las ${fHora(p.actualizado)}` : ""); }
     if (p.foto){ S.iFotoData = p.foto; $("iFotoImg").src=p.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; }
     pintarOrig();
@@ -1927,9 +1957,12 @@ function openIngreso(opts={}){
     if (opts.codigo) setIngCodigo(opts.codigo);
     if (opts.nombre) $("iNombre").value = opts.nombre;
     if (opts.foto){ if (typeof opts.foto === "string"){ S.iFotoData = opts.foto; $("iFotoImg").src = opts.foto; $("iFotoImg").hidden=false; $("iFotoPh").hidden=true; } else setIngFoto(opts.foto); }
+    const ug = ls.get("ultGan"); if (ug !== null && ug !== "") $("iGan").value = fmtGan(Number(ug));
+    if (opts.nombre){ const c = sugerirCategoria(opts.nombre); if (c){ $("iCat").value = c; refreshPicker($("iCat")); $("iCatNota").hidden = false; } }
     if (opts.codigoPropio) setCodigoLeido(opts.codigoPropio, true);
     pintarOrig();
   }
+  previewCodigo();
   show("ingreso");
 }
 /* Código escrito a mano (ej. 9195x20):
@@ -1941,7 +1974,7 @@ function descifrarCodigo(c){
   const factor = Number(m[1] + "." + m[3]), costo = Number(m[2]) * 100;
   if (!costo || !factor) return null;
   const precio = costo;   /* el valor del código ya es el precio de venta */
-  return { precio, factor, ganancia: Math.round((factor - 1) * 100), costo: Math.round(precio / factor / 10) * 10 };
+  return { precio, factor, ganancia: Math.round((factor - 1) * 10000) / 100, costo: Math.round(precio / factor / 10) * 10 };
 }
 function aplicarCodigoPropio(){
   const info = $("iCodInfo"), d = descifrarCodigo($("iCodP").value);
@@ -1949,8 +1982,9 @@ function aplicarCodigoPropio(){
   info.hidden = false;
   info.innerHTML = `Precio <b>${fmt(d.precio)}</b> · Margen <b>${d.factor.toFixed(2).replace(".", ",")}</b> (${d.ganancia}%) · Costo aprox. <b>${fmt(d.costo)}</b>`;
   const c = $("iCosto"), pr = $("iPrecio");
-  if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; }
   if (!pr.value.trim() || pr.dataset.auto === "1"){ pr.value = miles(d.precio); pr.dataset.auto = "1"; }
+  if (!$("iGan").value.trim() || $("iGan").dataset.auto === "1" || pr.dataset.auto === "1"){ $("iGan").value = fmtGan(d.ganancia); $("iGan").dataset.auto = "1"; }
+  if (!c.value.trim() || c.dataset.auto === "1"){ c.value = miles(d.costo); c.dataset.auto = "1"; c.dataset.manual = ""; }
 }
 /* Código escrito a mano (ej. 9585x56) */
 const esEscrito = (c) => /^\d{2,}\s*x\s*\d+$/i.test(String(c||"").trim());
@@ -2003,7 +2037,7 @@ function sumarSheet(p){
         catch { toast("No se pudo guardar. Revisa la conexión."); }
       }; });
 }
-$("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); });
+$("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); previewCodigo(); });
 $("iCodP").addEventListener("change", checkExiste);
 ["iCosto","iPrecio"].forEach(id => $(id).addEventListener("input", () => { $(id).dataset.auto = ""; }));
 $("iCodP").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
@@ -2024,6 +2058,142 @@ function nuevoCodigoPropio(cat){
   do { code = ean13("2" + f + cc + String(n).padStart(3,"0")); n++; } while (byCode(code) && n < 1000);
   return code;
 }
+/* ---------- código propio con el formato 9 ----------
+   9 · parte entera del margen · precio÷100 · x (=00) · decimales del margen
+   ej.: precio 9.500 con 20 % → margen 1,20 → 9 1 95 x 20 → 9195x20 */
+function codigo9(precio, gan){
+  if (gan === null || gan === undefined || gan === "") return null;
+  precio = Math.round(Number(precio)||0); gan = Number(gan);
+  if (!precio || precio % 100 || !isFinite(gan) || gan < 0) return null;
+  let ent = Math.floor(1 + gan/100 + 1e-9), dec = Math.round((1 + gan/100 - ent) * 100);
+  if (dec >= 100){ ent++; dec -= 100; }
+  if (ent > 9) return null;
+  return "9" + ent + (precio/100) + "x" + String(dec).padStart(2, "0");
+}
+const esCodigo9 = (c) => /^9\d\d+x\d{1,2}$/i.test(String(c||"").trim());
+/* Todos los productos con ese código (el código 9 puede repetirse si tienen el mismo precio y ganancia) */
+function porCodigo(code){
+  const c = String(code||"").trim(); if (!c) return [];
+  const cp = normCP(c), out = S.productos.filter(p => String(p.codigo||"").trim() === c);
+  S.productos.forEach(p => { if (p.codigoPropio && normCP(p.codigoPropio) === cp && !out.includes(p)) out.push(p); });
+  return out;
+}
+function elegirProducto(code, lista, alElegir){
+  popup("¿Cuál producto?", `<p class="note" style="margin:0 0 8px">Estos productos tienen el código <b class="num">${esc(code)}</b>.</p><div class="plist" id="elgList">${lista.map(p => prowHTML(p)).join("")}</div>`, (el, close) => {
+    el.querySelector("#elgList").addEventListener("click", (e) => { const r = e.target.closest(".prow[data-pid]"); if (!r) return; e.stopPropagation(); e.preventDefault(); const p = S.productos.find(x => x.id === r.dataset.pid); close(); if (p) alElegir(p); });
+  });
+}
+/* ---------- % de ganancia ↔ costo ---------- */
+const GAN_DEF = [10, 15, 20, 25, 30, 35, 40, 50, 60, 80, 100];
+const ganLista = () => { const l = S.config?.ganancias; return (Array.isArray(l) ? l : GAN_DEF).slice().sort((a,b) => a-b); };
+const fmtGan = (g) => String(Math.round(g*100)/100).replace(".", ",");
+const leerGan = () => { const t = $("iGan").value.trim().replace(",", ".").replace("%", ""); if (t === "") return null; const n = Number(t); return isFinite(n) && n >= 0 ? n : null; };
+function calcCosto(){   /* precio y % → costo */
+  const pr = toNum($("iPrecio").value), g = leerGan(), c = $("iCosto");
+  if (pr && g !== null && c.dataset.manual !== "1"){ c.value = miles(Math.round(pr / (1 + g/100) / 10) * 10); c.dataset.auto = "1"; }
+  previewCodigo();
+}
+function calcGan(){     /* precio y costo escrito a mano → % */
+  const pr = toNum($("iPrecio").value), co = toNum($("iCosto").value);
+  if (pr && co && pr >= co){ $("iGan").value = fmtGan(Math.round((pr/co - 1) * 1000) / 10); }
+  previewCodigo();
+}
+function previewCodigo(){
+  const cp = $("iCodP"), c9 = codigo9(toNum($("iPrecio").value), leerGan());
+  cp.placeholder = c9 ? "Se creará: " + c9 : "Escanea o escribe";
+  const n = $("iCodNota");
+  if (n){ const pr = toNum($("iPrecio").value);
+    n.textContent = cp.value.trim() ? "Código propio escrito o leído." : c9 ? `Si lo dejas vacío, se crea ${c9} con el precio y el % de ganancia.` : pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20)."; }
+}
+$("iPrecio").addEventListener("input", () => { if ($("iCosto").dataset.manual === "1" && toNum($("iCosto").value)) calcGan(); else calcCosto(); });
+$("iCosto").addEventListener("input", () => { $("iCosto").dataset.manual = $("iCosto").value.trim() ? "1" : ""; calcGan(); });
+/* autocompletar el % mientras se escribe, con la lista guardada */
+function ganSugerir(){
+  const box = $("iGanSug"), t = $("iGan").value.trim().replace("%", "").replace(",", ".");
+  if (!t){ box.hidden = true; return; }
+  const ops = ganLista().filter(g => String(g).startsWith(t) && String(g) !== t);
+  if (!ops.length){ box.hidden = true; return; }
+  box.innerHTML = ops.map(g => `<button type="button" data-g="${g}">${fmtGan(g)} %</button>`).join(""); box.hidden = false;
+}
+$("iGan").addEventListener("input", () => { $("iCosto").dataset.manual = ""; ganSugerir(); calcCosto(); });
+$("iGan").addEventListener("blur", () => setTimeout(() => { $("iGanSug").hidden = true; }, 200));
+$("iGanSug").addEventListener("mousedown", (e) => e.preventDefault());
+$("iGanSug").addEventListener("click", (e) => { const b = e.target.closest("[data-g]"); if (!b) return; $("iGan").value = fmtGan(Number(b.dataset.g)); $("iGanSug").hidden = true; $("iCosto").dataset.manual = ""; calcCosto(); });
+/* menú con la flechita: escoger, agregar o borrar porcentajes */
+$("iGanMenu").onclick = () => {
+  $("iGanSug").hidden = true;
+  popup("% de ganancia", `<div class="ganlist" id="gnList"></div>
+    <div class="sect" style="margin-top:12px">Agregar</div>
+    <div class="row"><input id="gnNuevo" class="inp num grow" inputmode="decimal" placeholder="Ej: 45" autocomplete="off"><button type="button" class="btn primary" id="gnAdd">Agregar</button></div>`, (el, close) => {
+    let lista = ganLista();
+    const guardar = () => cfgSet({ ganancias: lista.slice() });
+    const pintar = () => { el.querySelector("#gnList").innerHTML = lista.length ? lista.map(g => `<div class="ganrow"><button type="button" class="pick" data-pick="${g}">${fmtGan(g)} %</button><button type="button" class="del" data-del="${g}" aria-label="Borrar ${fmtGan(g)} %">×</button></div>`).join("") : `<div class="empty">No hay porcentajes. Agrega uno abajo.</div>`; };
+    pintar();
+    el.querySelector("#gnList").addEventListener("click", (e) => {
+      const pk = e.target.closest("[data-pick]"), dl = e.target.closest("[data-del]");
+      if (pk){ $("iGan").value = fmtGan(Number(pk.dataset.pick)); $("iCosto").dataset.manual = ""; calcCosto(); close(); }
+      else if (dl){ lista = lista.filter(g => String(g) !== dl.dataset.del); pintar(); guardar(); }
+    });
+    const add = () => { const v = Number(el.querySelector("#gnNuevo").value.trim().replace(",", ".").replace("%", ""));
+      if (!isFinite(v) || v < 0 || v > 899) { toast("Escribe un porcentaje válido"); return; }
+      if (!lista.includes(v)){ lista.push(v); lista.sort((a,b) => a-b); guardar(); }
+      el.querySelector("#gnNuevo").value = ""; pintar(); toast(fmtGan(v) + " % agregado"); };
+    el.querySelector("#gnAdd").onclick = add;
+    el.querySelector("#gnNuevo").addEventListener("keydown", (e) => { if (e.key === "Enter"){ e.preventDefault(); add(); } });
+  });
+};
+/* ---------- categoría según el nombre ---------- */
+const CAT_PALABRAS = [
+  ["Plomería y grifería", ["llave de paso","llave de jardin","llave terminal","llave lavamanos","llave lavaplatos","grifo","griferia","registro","tubo pvc","tuberia","codo","tee ","union","adaptador","niple","buje","tapon","sifon","valvula","flotador","ducha","regadera","sanitario","lavamanos","lavaplatos","teflon","soldadura pvc","limpiador pvc","desague","rejilla","flexible","acople","cheque","tanque","pvc","cpvc","sello de agua"]],
+  ["Eléctricos e iluminación", ["toma","tomacorriente","enchufe","clavija","interruptor","suiche","switch","bombillo","bombilla","foco","led","reflector","lampara","cable","breaker","taco","tablero","extension","multitoma","regleta","plafon","roseta","cinta aislante","canaleta","conduit","balasto","fotocelda","timbre","sensor","empalme","borna","multimetro","pila","bateria aa","linterna","cordon","alambre electrico","alambre duplex","tubo led","panel led","socket","portalampara"]],
+  ["Herramientas eléctricas", ["taladro","pulidora","esmeriladora","sierra circular","caladora","rotomartillo","atornillador inalambrico","lijadora","cautin","pistola de calor","compresor","hidrolavadora","demoledor","router","ingleteadora","mototool","motortool","soldador","planta electrica"]],
+  ["Herramientas manuales", ["martillo","alicate","pinza","destornillador","serrucho","segueta","metro","flexometro","nivel","escuadra","palustre","llana","cincel","formon","lima","prensa","tenaza","hombresolo","cortafrio","mazo","espatula","bisturi","cuchilla","navaja","juego de llaves","llave","rache","copas","pata de cabra","tijera","grapadora","remachadora","pistola de silicona"]],
+  ["Tornillería y fijación", ["tornillo","tuerca","arandela","perno","chazo","clavo","puntilla","remache","esparrago","grapa","tirafondo","anclaje","varilla roscada","chilillo","drywall tornillo","autoperforante"]],
+  ["Pinturas y accesorios", ["pintura","vinilo","esmalte","laca","anticorrosivo","thinner","varsol","brocha","rodillo","bandeja","estuco","aerosol","spray","tinte","barniz","cinta de enmascarar","enmascarar","pigmento"]],
+  ["Construcción y obra", ["cemento","arena","ladrillo","bloque","varilla","malla","alambre negro","alambre dulce","alambre","yeso","drywall","perfil","teja","impermeabilizante","pegacor","boquilla","carretilla","mortero","concreto","gravilla","plastico negro","polisombra","angulo","platina","tubo galvanizado","hierro"]],
+  ["Cerrajería y seguridad", ["candado","cerradura","chapa","cerrojo","pasador","bisagra","picaporte","manija","pomo","cadena","aldaba","tranca","mirilla","guaya"]],
+  ["Pegantes y selladores", ["pegante","pegamento","silicona","colbon","boxer","superbonder","epoxica","soldadura en frio","sellador","masilla","espuma","cola","adhesivo","sika"]],
+  ["Abrasivos y corte", ["lija","disco","broca","hoja de segueta","piedra esmeril","grata","cepillo de alambre","copa de alambre","sierra copa"]],
+  ["Jardinería", ["manguera","aspersor","tijera de podar","podadora","machete","rastrillo","azadon","pala","guadana","fumigadora","abono","semilla","matera","regadera de jardin","pica"]],
+  ["Seguridad industrial", ["guante","casco","gafas","monogafas","tapabocas","mascarilla","respirador","botas","chaleco","arnes","protector auditivo","tapaoidos","overol","cono","señal","senal","careta"]],
+  ["Hogar y limpieza", ["escoba","trapero","recogedor","balde","detergente","jabon","cloro","limpiador","esponja","bolsa","caneca","ambientador","insecticida","veneno","gancho","cuerda","lazo","vela","fosforo"]],
+];
+function sugerirCategoria(nombre){
+  const n = " " + norm(nombre).replace(/[^a-z0-9ñ ]+/g, " ").replace(/\s+/g, " ") + " ";
+  if (n.trim().length < 3) return "";
+  const cats = allCats();
+  /* 1) lo que usted ya tiene: productos que empiezan con la misma palabra */
+  const pal = n.trim().split(" ")[0];
+  if (pal.length >= 3){
+    const cuenta = {};
+    S.productos.forEach(p => { if (!p.categoria || p.id === S.editId) return; const w = norm(p.nombre).replace(/[^a-z0-9ñ ]+/g, " ").trim().split(/\s+/)[0]; if (w === pal) cuenta[p.categoria] = (cuenta[p.categoria]||0) + 1; });
+    const mejor = Object.entries(cuenta).sort((a,b) => b[1]-a[1])[0];
+    if (mejor && cats.includes(mejor[0])) return mejor[0];
+  }
+  /* 2) palabras conocidas: gana la que aparece primero en el nombre (la del objeto) */
+  let best = null;
+  for (const [cat, ws] of CAT_PALABRAS){
+    if (!cats.includes(cat)) continue;
+    for (const w of ws){
+      const i = n.indexOf(" " + w.trim()); if (i < 0) continue;
+      const len = w.trim().length;
+      if (!best || i < best.i || (i === best.i && len > best.len)) best = { cat, i, len };
+    }
+  }
+  return best ? best.cat : "";
+}
+let catT = 0;
+$("iNombre").addEventListener("input", () => {
+  clearTimeout(catT);
+  catT = setTimeout(() => {
+    const sel = $("iCat"); if (sel.dataset.manual === "1") return;
+    const c = sugerirCategoria($("iNombre").value);
+    if (c && sel.value !== c){ sel.value = c; refreshPicker(sel); $("iCatOtra").hidden = true; }
+    $("iCatNota").hidden = !c;
+  }, 350);
+});
+$("iCat").addEventListener("change", () => { $("iCat").dataset.manual = "1"; $("iCatNota").hidden = true; });
+
 /* Foto del producto: centrada y sin recortes; si está activo, sin fondo y sobre blanco con el logo */
 async function setIngFoto(c){
   const box = $("iFotoPh");
@@ -2095,23 +2265,35 @@ $("ingForm").onsubmit = async (e) => {
   if (!precio) return $("iErr").textContent = "Falta el precio de venta.";
   const dup = codigo ? byCode(codigo) : null;
   if (dup && dup.id !== S.editId) return $("iErr").textContent = "El código original ya es de “"+dup.nombre+"”. Usa “Sumar unidades” o quítalo.";
-  const dupP = codigoPropio ? byCode(codigoPropio) : null;
-  if (dupP && dupP.id !== S.editId) return $("iErr").textContent = "Ese código propio ya es de “"+dupP.nombre+"”. Cámbialo o déjalo vacío.";
+  const dupP = codigoPropio ? porCodigo(codigoPropio).find(x => x.id !== S.editId) : null;
+  if (dupP && !esCodigo9(codigoPropio)) return $("iErr").textContent = "Ese código propio ya es de “"+dupP.nombre+"”. Cámbialo o déjalo vacío.";
+  const gan = leerGan();
   let categoria = $("iCat").value;
   if (categoria === "__otra"){
     categoria = $("iCatOtra").value.trim();
     if (categoria && !allCats().includes(categoria)){ try { await S.db.doc("config/tienda").update({ catsExtra: [...((S.config?.catsExtra)||[]), categoria] }); } catch {} }
   }
   let auto = false;
-  if (!codigoPropio){ codigoPropio = nuevoCodigoPropio(categoria); auto = true; $("iCodP").value = codigoPropio; }
+  if (!codigoPropio){
+    const c9 = codigo9(precio, gan);
+    if (!c9){
+      if (gan === null) return $("iErr").textContent = "Escribe el % de ganancia para crear el código propio.";
+      if (precio % 100) return $("iErr").textContent = "Para crear el código 9 el precio debe terminar en 00 (ej. 9.500). Ajusta el precio o escribe el código.";
+      return $("iErr").textContent = "No se pudo crear el código con ese % de ganancia.";
+    }
+    codigoPropio = c9; auto = true; $("iCodP").value = codigoPropio;
+  }
+  const otros9 = esCodigo9(codigoPropio) ? porCodigo(codigoPropio).filter(x => x.id !== S.editId) : [];
   const provSel = $("iProv").value;
   const data = { codigo, codigoTipo: codigo ? (S.iOrigTipo === "qr" ? "qr" : tipoCodigo(codigo) === "Código QR" ? "qr" : "barras") : (S.iOrigTipo === "escrito" || esEscrito(codigoPropio) ? "escrito" : ""), nombre, precio, cantidad: cant, costo: toNum($("iCosto").value), categoria: categoria || "", proveedorId: provSel && provSel !== "__nuevo" ? provSel : "",
-    codigoPropio, foto: S.iFotoData || null, actualizado: Date.now() };
+    codigoPropio, ganancia: gan, foto: S.iFotoData || null, actualizado: Date.now() };
+  if (gan !== null) ls.set("ultGan", String(gan));
   const btn = $("iGuardar"); btn.disabled = true;
   try {
     if (S.editId) await S.db.doc("productos/"+S.editId).update(data);
     else await S.db.collection("productos").add({ ...data, creado: Date.now() });
     toast(S.editId ? "Cambios guardados" : "Guardado: "+nombre);
+    if (otros9.length) setTimeout(() => toast(`El código ${codigoPropio} también lo tiene ${otros9[0].nombre}${otros9.length > 1 ? " y otros" : ""}. Al escanearlo te preguntará cuál.`, 4500), 1600);
     if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
     else back();
   } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revisa la conexión."; }
@@ -2193,7 +2375,9 @@ $("invQ").addEventListener("input", renderInv);
 $("invSearchForm").onsubmit = (e) => {
   e.preventDefault();
   const q = $("invQ").value.trim(); if (!q) return;
-  const exact = byCode(q);
+  const varios = porCodigo(q);
+  if (varios.length > 1){ $("invQ").value = ""; renderInv(); elegirProducto(q, varios, productSheet); return; }
+  const exact = varios[0];
   if (exact){ $("invQ").value = ""; renderInv(); productSheet(exact); return; }
   const r = searchProducts(q, 2);
   if (r.length === 1) productSheet(r[0]);
@@ -2233,8 +2417,8 @@ $("invCam").onclick = async () => {
   const r = await scanCode("Buscar producto", { photo: true });
   if (!r) return;
   if (r.photo){ photoSheet(r.photo); return; }
-  const p = byCode(r.code);
-  if (p) productSheet(p); else notFoundSheet(r.code);
+  const ps = porCodigo(r.code);
+  if (ps.length > 1) elegirProducto(r.code, ps, productSheet); else if (ps[0]) productSheet(ps[0]); else notFoundSheet(r.code);
 };
 function renderInv(){
   const low = S.config?.bajo ?? 3;
@@ -3135,7 +3319,7 @@ const fHora = (t) => new Date(t).toLocaleTimeString("es-CO",{hour:"2-digit",minu
 function invRows(){
   return [...S.productos].sort((a,b)=>norm(a.nombre).localeCompare(norm(b.nombre))).map(p => ({
     "Código propio": p.codigoPropio||"", "Código original": p.codigo||"", "Nombre": p.nombre||"", "Categoría": p.categoria||"", "Proveedor": provById(p.proveedorId)?.nombre||"",
-    "Costo": Number(p.costo)||0, "Precio": Number(p.precio)||0, "Cantidad": Number(p.cantidad)||0,
+    "Costo": Number(p.costo)||0, "% Ganancia": p.ganancia != null && p.ganancia !== "" ? Number(p.ganancia) : (p.costo && p.precio ? Math.round((p.precio/p.costo - 1) * 1000) / 10 : ""), "Precio": Number(p.precio)||0, "Cantidad": Number(p.cantidad)||0,
     "Valor en inventario": Math.max(0,Number(p.cantidad)||0)*(Number(p.precio)||0),
     "Fecha de ingreso": p.creado ? fFecha(p.creado) : "", "Hora de ingreso": p.creado ? fHora(p.creado) : "",
     "Última actualización": p.actualizado ? `${fFecha(p.actualizado)} ${fHora(p.actualizado)}` : "" }));
@@ -3175,7 +3359,7 @@ function toSheet(rows, cols){
   return ws;
 }
 const COLS = {
-  inv: ["Código propio","Código original","Nombre","Categoría","Proveedor","Costo","Precio","Cantidad","Valor en inventario","Fecha de ingreso","Hora de ingreso","Última actualización"],
+  inv: ["Código propio","Código original","Nombre","Categoría","Proveedor","Costo","% Ganancia","Precio","Cantidad","Valor en inventario","Fecha de ingreso","Hora de ingreso","Última actualización"],
   ven: ["Factura","Fecha","Hora","Cliente","NIT/CC","Código","Producto","Cantidad","Precio unitario","Subtotal","Total factura"],
   res: ["Fecha","Facturas","Artículos","Total vendido"],
   pen: ["Producto","Código","Cantidad","Proveedor","Teléfono","Nota","Agregado","Estado"],
