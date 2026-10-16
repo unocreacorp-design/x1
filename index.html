@@ -271,6 +271,13 @@ details.card[open]>summary{margin-bottom:10px}
 #ajSave{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;padding:14px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);font-size:17px}
 #ajForm{padding-bottom:96px}
 .tabsbar{background:var(--surface);border-bottom:1px solid var(--line);padding-block:8px}
+.ajgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
+.ajgrid button{border:0;background:none;border-radius:9px;padding:9px 4px;font-weight:700;font-size:14px;line-height:1.15;color:var(--muted);min-height:40px}
+.ajgrid button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.ajsec{display:flex;flex-direction:column;gap:12px}
+.ajsec[hidden]{display:none}
+.ajhead h2{font-family:var(--f-display);font-weight:800;font-size:22px;text-transform:uppercase;margin:0}
+.ajhead .note{margin:2px 0 0}
 .seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
 .seg3 button{border:0;background:none;border-radius:9px;padding:10px 4px;font-weight:700;font-size:15px;color:var(--muted)}
 .seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
@@ -569,7 +576,7 @@ details.card[open]>summary{margin-bottom:10px}
 <!-- AJUSTES -->
 <section id="ajustes" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--muted)"></span><h1>Ajustes</h1></div>
-  <div class="tabsbar gut"><div class="seg3" id="ajTabs" role="tablist"><button type="button" data-tab="app" aria-pressed="true">Ajustes</button><button type="button" data-tab="cli" aria-pressed="false">Clientes</button><button type="button" data-tab="prov" aria-pressed="false">Proveedores</button></div></div>
+  <div class="tabsbar gut"><div class="ajgrid" id="ajTabs" role="tablist"><button type="button" data-tab="neg" aria-pressed="true">Negocio</button><button type="button" data-tab="cli" aria-pressed="false">Clientes</button><button type="button" data-tab="prov" aria-pressed="false">Proveedores</button><button type="button" data-tab="imp" aria-pressed="false">Impresión</button><button type="button" data-tab="inv" aria-pressed="false">Inventario</button><button type="button" data-tab="foto" aria-pressed="false">Cámara y fotos</button><button type="button" data-tab="nube" aria-pressed="false">Cuenta y nube</button><button type="button" data-tab="copias" aria-pressed="false">Copias</button><button type="button" data-tab="pant" aria-pressed="false">Pantalla y clave</button></div></div>
   <div class="body gut" id="tabCli" hidden>
     <div class="row"><input id="cliQ" class="inp grow" placeholder="Nombre, NIT o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
     <div id="cliList"></div>
@@ -579,7 +586,8 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="provList"></div>
   </div>
   <form class="body gut" id="ajForm" autocomplete="off">
-    <div class="sect">Empresa</div>
+    <div class="ajsec" data-sec="neg" hidden>
+      <div class="ajhead"><h2>Negocio</h2><p class="note">Los datos de la ferretería que salen en la factura. Toque <b>Guardar</b> al terminar.</p></div>
     <label class="f">Nombre<input id="aNombre" class="inp" inputmode="text"></label>
     <label class="f">NIT<input id="aNit" class="inp" inputmode="tel" autocomplete="off"></label>
     <label class="f">Dirección<input id="aDir" class="inp" inputmode="text"></label>
@@ -589,27 +597,27 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Correo<input id="aMail" class="inp" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
     <label class="f">Régimen<input id="aReg" class="inp" inputmode="text"></label>
     <label class="f">Mensaje de la factura<input id="aPie" class="inp" inputmode="text"></label>
+    <button class="btn primary" type="submit" id="ajSave">Guardar</button>
+    </div>
+    <div class="ajsec" data-sec="imp" hidden>
+      <div class="ajhead"><h2>Impresión y etiquetas</h2><p class="note">La impresora térmica y lo que sale en las etiquetas de los productos.</p></div>
     <label class="f">Ancho del papel
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
-    <label class="f">Alerta de pocas unidades<input id="aBajo" class="inp num miles" inputmode="numeric"></label>
-    <button class="btn primary" type="submit" id="ajSave">Guardar</button>
-    <div class="sect" style="margin-top:10px">Pantalla</div>
-    <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
-      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
-      <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
+    <div class="sect" style="margin-top:8px">Etiqueta</div>
+    <p class="note" style="margin:0">Toca lo que quieres que salga en la etiqueta. El código de barras lleva el código propio.</p>
+    <div class="tabs" id="aEtqOpts"></div>
+    <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" maxlength="40"></label>
+    <div class="recibo-wrap" id="aEtqPrev" style="align-self:stretch;flex-shrink:0"></div>
     </div>
-    <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
-    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app abre en pantalla completa sin el aviso del navegador.</p>
-    <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
-    <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
-    <div class="sect" style="margin-top:10px">Clave</div>
-    <label class="f">Nueva clave (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
-    <button type="button" class="btn" id="aPinGo">Cambiar clave</button>
-    <button type="button" class="btn" id="aLock">Bloquear ahora</button>
-    <div class="sect" style="margin-top:10px">Cámara</div>
+    <div class="ajsec" data-sec="inv" hidden>
+      <div class="ajhead"><h2>Inventario</h2><p class="note">Avisos de existencias.</p></div>
+    <label class="f">Alerta de pocas unidades<input id="aBajo" class="inp num miles" inputmode="numeric"></label>
+    </div>
+    <div class="ajsec" data-sec="foto" hidden>
+      <div class="ajhead"><h2>Cámara y fotos</h2><p class="note">Cómo lee códigos la cámara y cómo quedan las fotos de los productos.</p></div>
     <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee sola, sin tomar foto. Requiere abrir desde el link.</small></span><span class="tg"></span></button>
-    <div class="sect" style="margin-top:10px">Fotos</div>
+    <div class="sect" style="margin-top:8px">Fotos de productos</div>
     <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Recortar producto con IA<br><small class="note" style="font-weight:500">Borra el fondo de la foto.</small></span><span class="tg"></span></button>
     <div class="row" style="align-items:center;gap:12px">
       <img id="aLogoImg" class="logoprev" alt="Logo" hidden>
@@ -625,12 +633,28 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Logo en la foto
       <select id="aLogoPos" class="inp"><option value="esquina">En la esquina</option><option value="fondo">Suave de fondo</option><option value="ninguno">No poner logo</option></select>
     </label>
-    <div class="sect" style="margin-top:10px">Etiqueta</div>
-    <p class="note" style="margin:0">Toca lo que quieres que salga en la etiqueta. El código de barras lleva el código propio.</p>
-    <div class="tabs" id="aEtqOpts"></div>
-    <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" maxlength="40"></label>
-    <div class="recibo-wrap" id="aEtqPrev" style="align-self:stretch;flex-shrink:0"></div>
-    <div class="sect" style="margin-top:10px">Copias de seguridad</div>
+    </div>
+    <div class="ajsec" data-sec="nube" hidden>
+      <div class="ajhead"><h2>Cuenta y nube</h2><p class="note">Entre con el usuario de la ferretería para que todos los celulares compartan lo mismo.</p></div>
+    <div class="card" id="nubeBox" style="display:flex;flex-direction:column;gap:10px">
+      <div id="nubeEstado" class="note" style="margin:0"></div>
+      <div id="nubeFuera" style="display:flex;flex-direction:column;gap:10px">
+        <label class="f">Usuario<input id="nubeMail" class="inp" type="text" inputmode="text" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="f">Contraseña<input id="nubeClave" class="inp" type="password" autocomplete="current-password"></label>
+        <div id="nubeErr" class="err"></div>
+        <div class="row"><button type="button" class="btn primary grow" id="nubeEntrar">Entrar</button><button type="button" class="btn grow" id="nubeCrear">Crear cuenta</button></div>
+        <p class="note" style="margin:0">Use el mismo usuario y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
+      </div>
+      <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><button type="button" class="btn block" id="nubeSync">Sincronizar ahora</button></div>
+        <button type="button" class="btn danger block" id="nubeSalir">Cerrar sesión</button>
+        <p class="note" style="margin:0">Para entrar con otro usuario, cierre sesión y escriba el nuevo. Los datos se quedan en este celular.</p>
+      </div>
+    </div>
+
+    </div>
+    <div class="ajsec" data-sec="copias" hidden>
+      <div class="ajhead"><h2>Copias y archivos</h2><p class="note">Copias guardadas dentro de la app, Excel y archivos para compartir.</p></div>
     <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Solo guarda si hubo ventas o cambios.</small></span><span class="tg"></span></button>
     <label class="f">Frecuencia
       <select id="aAutoMin" class="inp"><option value="5">5 minutos</option><option value="10">10 minutos</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select>
@@ -654,27 +678,28 @@ details.card[open]>summary{margin-bottom:10px}
       <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">Nunca</option></select>
     </label>
     </div>
-    <div class="sect" style="margin-top:10px">Exportar e importar</div>
+    <div class="sect" style="margin-top:8px">Exportar e importar</div>
     <p class="note" style="margin:0">Con la nube conectada todo queda guardado en internet. Exportar sirve para sacar Excel o una copia a mano.</p>
     <p class="note" style="margin:0" id="aUltimaExp" hidden></p>
     <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar</button><label class="btn grow" for="aImport">Importar</label></div>
-    <div class="sect" style="margin-top:10px">Nube: compartir entre celulares</div>
-    <div class="card" id="nubeBox" style="display:flex;flex-direction:column;gap:10px">
-      <div id="nubeEstado" class="note" style="margin:0"></div>
-      <div id="nubeFuera" style="display:flex;flex-direction:column;gap:10px">
-        <label class="f">Usuario<input id="nubeMail" class="inp" type="text" inputmode="text" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
-        <label class="f">Contraseña<input id="nubeClave" class="inp" type="password" autocomplete="current-password"></label>
-        <div id="nubeErr" class="err"></div>
-        <div class="row"><button type="button" class="btn primary grow" id="nubeEntrar">Entrar</button><button type="button" class="btn grow" id="nubeCrear">Crear cuenta</button></div>
-        <p class="note" style="margin:0">Use el mismo usuario y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
-      </div>
-      <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
-        <div class="row"><button type="button" class="btn grow" id="nubeSync">Sincronizar ahora</button><button type="button" class="btn grow" id="nubeSalir">Salir / cambiar cuenta</button></div>
-      </div>
-    </div>
     <button type="button" class="btn block" id="aCompartir">Compartir todo con otra persona</button>
     <p class="note" style="margin:0">Manda por WhatsApp un archivo con todo: productos, clientes, proveedores, ventas y por comprar. La otra persona lo abre en su app con <b>Importar › Combinar</b> y no se le repite nada.</p>
-    
+    </div>
+    <div class="ajsec" data-sec="pant" hidden>
+      <div class="ajhead"><h2>Pantalla y clave</h2><p class="note">Pantalla completa y la clave de 4 a 6 números para entrar a la app.</p></div>
+    <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
+      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
+      <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
+    </div>
+    <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
+    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app abre en pantalla completa sin el aviso del navegador.</p>
+    <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
+    <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
+    <div class="sect" style="margin-top:8px">Clave de la app</div>
+    <label class="f">Nueva clave (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+    <button type="button" class="btn" id="aPinGo">Cambiar clave</button>
+    <button type="button" class="btn" id="aLock">Bloquear ahora</button>
+    </div>
   </form>
 </section>
 
@@ -723,7 +748,7 @@ function show(name, push=true){
   if (name==="venta") renderCart();
   if (name==="inventario") renderInv();
   if (name==="pendientes") renderPend();
-  if (name==="ajustes"){ fillAjustes(); setAjTab(S.ajTab || "app"); }
+  if (name==="ajustes"){ fillAjustes(); setAjTab(S.ajTab || "neg"); }
   upgradeAll($(name));
 }
 function back(){
@@ -2608,6 +2633,8 @@ $("ajForm").onsubmit = async (e) => {
       ciudad:$("aCiudad").value.trim(), celular:$("aCel").value.trim(), correo:$("aMail").value.trim(), regimen:$("aReg").value.trim() });
     toast("Ajustes guardados"); } catch { toast("No se pudo guardar."); }
 };
+$("aPapel").addEventListener("change", () => cfgSet({ papel: Number($("aPapel").value) }, "Listo"));
+$("aBajo").addEventListener("change", () => cfgSet({ bajo: Math.max(0, toNum($("aBajo").value)) }, "Listo"));
 $("aPinGo").onclick = async () => {
   const p = $("aPin").value.trim(); if (!/^\d{4,6}$/.test(p)) { toast("La clave debe tener de 4 a 6 números."); return; }
   const salt = randSalt(), h = await hashPin(p, salt);
@@ -3154,9 +3181,15 @@ async function ocrFlow(canvas){
 /* ---------- pestañas de Ajustes ---------- */
 S.ajTab = "app";
 function setAjTab(t){
+  if (t === "app") t = "neg";
   S.ajTab = t;
   [...$("ajTabs").children].forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === t));
-  $("ajForm").hidden = t !== "app"; $("tabCli").hidden = t !== "cli"; $("tabProv").hidden = t !== "prov";
+  const lista = t === "cli" || t === "prov";
+  $("ajForm").hidden = lista; $("tabCli").hidden = t !== "cli"; $("tabProv").hidden = t !== "prov";
+  document.querySelectorAll("#ajForm .ajsec").forEach(x => { x.hidden = x.dataset.sec !== t; });
+  $("ajSave").hidden = t !== "neg";
+  if (t === "nube") pintarNube(); if (t === "copias") { try { renderCopias(); } catch {} }
+  try { document.querySelector("#ajustes .body:not([hidden]), #ajForm:not([hidden])").scrollTop = 0; } catch {}
   if (t === "cli") renderClientes(); if (t === "prov") renderProvs();
 }
 $("ajTabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) setAjTab(b.dataset.tab); });
@@ -4122,9 +4155,9 @@ $("setNubeGo").onclick = async () => {
 $("nubeEntrar").onclick = () => nubeEntrar(false);
 $("nubeCrear").onclick = () => nubeEntrar(true);
 $("nubeSync").onclick = async () => { if (!N.uid) return; Object.keys(S.db.exportAll()).forEach(k => N.cola.add(k)); await nubeSubir(); nubeEscuchar(); toast("Sincronizado"); };
-$("nubeSalir").onclick = () => confirmar("¿Salir de la cuenta de la nube? Los datos se quedan en este celular, pero ya no se comparten.", "Salir", async () => {
+$("nubeSalir").onclick = () => confirmar("¿Cerrar sesión de la nube? Los datos se quedan en este celular, pero ya no se comparten hasta que vuelva a entrar.", "Cerrar sesión", async () => {
   try { if (N.unsub) N.unsub(); N.unsub = null; await firebase.auth().signOut(); } catch {}
-  N.lista = false; N.uid = null; ls.set("nube", "0"); ls.set("nubeUid", ""); N.cola.clear(); ls.set("nubeCola", "[]"); pintarNube(); toast("Saliste de la nube");
+  N.lista = false; N.uid = null; ls.set("nube", "0"); ls.set("nubeUid", ""); N.cola.clear(); ls.set("nubeCola", "[]"); pintarNube(); toast("Sesión cerrada");
 }, false);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && N.cola.size) nubeSubir(); });
 window.addEventListener("online", () => { if (N.cola.size) nubeSubir(); });
