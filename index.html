@@ -654,11 +654,11 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="card" id="nubeBox" style="display:flex;flex-direction:column;gap:10px">
       <div id="nubeEstado" class="note" style="margin:0"></div>
       <div id="nubeFuera" style="display:flex;flex-direction:column;gap:10px">
-        <label class="f">Correo de la ferretería<input id="nubeMail" class="inp" type="email" inputmode="email" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
-        <label class="f">Contraseña de la nube<input id="nubeClave" class="inp" type="password" autocomplete="current-password"></label>
+        <label class="f">Usuario<input id="nubeMail" class="inp" type="text" inputmode="text" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="f">Contraseña<input id="nubeClave" class="inp" type="password" autocomplete="current-password"></label>
         <div id="nubeErr" class="err"></div>
         <div class="row"><button type="button" class="btn primary grow" id="nubeEntrar">Entrar</button><button type="button" class="btn grow" id="nubeCrear">Crear cuenta</button></div>
-        <p class="note" style="margin:0">Use el mismo correo y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
+        <p class="note" style="margin:0">Use el mismo usuario y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
       </div>
       <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
         <div class="row"><button type="button" class="btn grow" id="nubeSync">Sincronizar ahora</button><button type="button" class="btn grow" id="nubeSalir">Salir / cambiar cuenta</button></div>
@@ -4069,19 +4069,29 @@ function pintarNube(){
   $("nubeFuera").hidden = dentro; $("nubeDentro").hidden = !dentro;
   if (dentro){
     const pend = N.cola.size;
-    est.innerHTML = `Conectado como <b>${esc(N.mail)}</b>.<br>${pend ? `${miles(pend)} cambio${pend > 1 ? "s" : ""} por subir…` : "Todo al día."}${N.ult ? ` Última sincronización: ${fHora(N.ult)}.` : ""}${N.err ? `<br><span class="err" style="min-height:0">${esc(N.err)}</span>` : ""}`;
+    est.innerHTML = `Conectado como <b>${esc(mailAUsuario(N.mail))}</b>.<br>${pend ? `${miles(pend)} cambio${pend > 1 ? "s" : ""} por subir…` : "Todo al día."}${N.ult ? ` Última sincronización: ${fHora(N.ult)}.` : ""}${N.err ? `<br><span class="err" style="min-height:0">${esc(N.err)}</span>` : ""}`;
   } else {
-    est.innerHTML = nubeActiva() && N.err ? esc(N.err) : (nubeActiva() ? "Conectando…" : "No está conectado. Entre con la cuenta de la ferretería para compartir todo entre celulares.");
-    if (ls.get("nubeMail") && !$("nubeMail").value) $("nubeMail").value = ls.get("nubeMail");
+    est.innerHTML = nubeActiva() && N.err ? esc(N.err) : (nubeActiva() ? "Conectando…" : "No está conectado. Entre con el usuario de la ferretería para compartir todo entre celulares.");
+    if (ls.get("nubeMail") && !$("nubeMail").value) $("nubeMail").value = mailAUsuario(ls.get("nubeMail"));
   }
 }
-const ERR_AUTH = { "auth/invalid-email": "El correo no es válido.", "auth/missing-password": "Escribe la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
-  "auth/email-already-in-use": "Ese correo ya tiene cuenta. Usa Entrar.", "auth/invalid-credential": "Correo o contraseña incorrectos.", "auth/wrong-password": "Correo o contraseña incorrectos.",
-  "auth/user-not-found": "No hay cuenta con ese correo. Usa Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intenta de nuevo." };
+/* El usuario se escribe como nombre (ej. "tornillo"); Firebase necesita forma de correo, así que se completa por dentro */
+const DOM_USUARIO = "@usuarios-cajax1.app";
+function usuarioAMail(u){
+  u = String(u||"").trim().toLowerCase();
+  if (u.includes("@")) return u;   /* por si alguien ya tenía correo */
+  u = u.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, ".").replace(/[^a-z0-9._-]/g, "");
+  return u ? u + DOM_USUARIO : "";
+}
+const mailAUsuario = (m) => String(m||"").endsWith(DOM_USUARIO) ? String(m).slice(0, -DOM_USUARIO.length) : String(m||"");
+const ERR_AUTH = { "auth/invalid-email": "El usuario no es válido. Usa letras y números.", "auth/missing-password": "Escribe la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
+  "auth/email-already-in-use": "Ese usuario ya existe. Usa Entrar.", "auth/invalid-credential": "Usuario o contraseña incorrectos.", "auth/wrong-password": "Usuario o contraseña incorrectos.",
+  "auth/user-not-found": "No existe ese usuario. Usa Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intenta de nuevo." };
 async function nubeEntrar(crear){
-  const mail = $("nubeMail").value.trim(), clave = $("nubeClave").value;
+  const mail = usuarioAMail($("nubeMail").value), clave = $("nubeClave").value;
   $("nubeErr").textContent = "";
-  if (!mail || !clave){ $("nubeErr").textContent = "Escribe el correo y la contraseña."; return; }
+  if (!mail || !clave){ $("nubeErr").textContent = "Escribe el usuario y la contraseña."; return; }
+  if (crear && mail.replace(DOM_USUARIO, "").length < 3){ $("nubeErr").textContent = "El usuario debe tener al menos 3 letras o números."; return; }
   const b = crear ? $("nubeCrear") : $("nubeEntrar"); b.disabled = true;
   try {
     const fb = await cargarFirebase(); ls.set("nube", "1");
