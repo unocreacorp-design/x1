@@ -374,13 +374,19 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="lockMsg" class="status"><div class="spin"></div><span>Abriendo el inventario…</span></div>
     <div id="setupForm" hidden>
       <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="sect">¿Ya tiene cuenta en la nube?</div>
+        <label class="f">Usuario<input id="setNubeU" class="inp" type="text" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="f">Contraseña<input id="setNubeC" class="inp" type="password" autocomplete="current-password"></label>
+        <div id="setNubeErr" class="err"></div>
+        <button type="button" class="btn primary block" id="setNubeGo">Entrar y traer todo</button>
+        <div class="sect" style="margin-top:10px">¿Caja nueva?</div>
         <p class="note" style="margin:0">Primera vez. Pon el nombre del negocio y una clave de 4 a 6 números. Se pedirá cada vez que se abra la app.</p>
         <label class="f">Nombre del negocio<input id="setNombre" class="inp" autocomplete="off" inputmode="text"></label>
         <label class="f">Clave nueva<input id="setPin" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <label class="f">Repite la clave<input id="setPin2" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <div id="setErr" class="err"></div>
         <button id="setGo" class="btn primary block">Crear inventario</button>
-        <div class="sect" style="margin-top:6px">¿Ya tenías datos?</div>
+        <div class="sect" style="margin-top:6px">¿Tiene un archivo de copia?</div>
         <label class="btn block" for="setRestore">Recuperar desde una copia</label>
         <input id="setRestore" type="file" accept=".json,application/json" hidden>
         <p class="note" style="margin:0">Busca en <b>Descargas</b> el archivo más nuevo que empiece por <b>copia-ferreteria</b>.</p>
@@ -634,6 +640,7 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
     <button type="button" class="btn" id="aNube">Subir copia a TeraBox</button>
     <p class="note" style="margin:0">Se abre el menú <b>Compartir</b> del celular: elige <b>TeraBox</b> (o Drive, WhatsApp…). Para recuperar, descarga el archivo desde TeraBox y usa <b>Importar</b> o <b>Recuperar desde una copia</b>.</p>
+    <div hidden id="copiasArchivoViejas">
     <label class="f">Guardar copia en el celular
       <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="horafija">Todos los días a una hora</option><option value="no">Nunca</option></select>
     </label>
@@ -646,9 +653,10 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Recordar copia en el celular cada
       <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">Nunca</option></select>
     </label>
+    </div>
     <div class="sect" style="margin-top:10px">Exportar e importar</div>
-    <p class="note" style="margin:0">Los datos están solo en este celular. Exporta seguido y guarda el archivo en Drive o WhatsApp.</p>
-    <p class="note" style="margin:0" id="aUltimaExp"></p>
+    <p class="note" style="margin:0">Con la nube conectada todo queda guardado en internet. Exportar sirve para sacar Excel o una copia a mano.</p>
+    <p class="note" style="margin:0" id="aUltimaExp" hidden></p>
     <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar</button><label class="btn grow" for="aImport">Importar</label></div>
     <div class="sect" style="margin-top:10px">Nube: compartir entre celulares</div>
     <div class="card" id="nubeBox" style="display:flex;flex-direction:column;gap:10px">
@@ -3314,6 +3322,7 @@ async function guardarArchivo(){
   } catch {}
 }
 function archivoPendiente(trasVenta){
+  return false;   /* las copias en archivo se quitaron: ahora todo queda en la nube */
   if (!S.db || !S.unlocked || !S.fileDirty) return false;
   const modo = S.config?.copiaArchivo || "hora", last = Number(ls.get("lastExport")) || 0;
   if (modo === "no") return false;
@@ -3408,6 +3417,7 @@ function renderUltimaExp(){
   el.textContent = t ? `Última copia guardada en el celular: ${fFecha(t)} ${fHora(t)}.` : "Todavía no has guardado una copia en el celular.";
 }
 function recordarExport(){
+  return;   /* sin recordatorios de copia: la nube guarda todo */
   const dias = S.config?.recordarDias ?? 7; if (!dias) return;
   if ((S.config?.copiaArchivo || "hora") !== "no") return;
   const t = Number(ls.get("lastExport")) || 0, hoyK = stamp();
@@ -4023,7 +4033,8 @@ async function nubePrimeraVez(){
   const local = S.db.exportAll(), nLocal = Object.keys(local).filter(k => !k.startsWith("config/")).length, nRemoto = Object.keys(remoto).length;
   const subirTodo = (obj) => { Object.keys(obj).forEach(k => N.cola.add(k)); ls.set("nubeCola", JSON.stringify([...N.cola])); };
   if (!nRemoto){ subirTodo(local); }
-  else if (!nLocal){ N.aplicando = true; try { await S.db.importAll({ ...remoto, ...(remoto["config/tienda"] ? {} : { "config/tienda": local["config/tienda"] }) }); } finally { N.aplicando = false; } }
+  else if (!nLocal){ const todo = { ...remoto }; if (!todo["config/tienda"] && local["config/tienda"]) todo["config/tienda"] = local["config/tienda"];
+    N.aplicando = true; try { await S.db.importAll(todo); } finally { N.aplicando = false; } }
   else {
     const eleccion = await new Promise((res) => {
       sheet(`<h2>Esta cuenta ya tiene datos</h2><p class="note" style="margin:0">En la nube hay ${miles(Object.keys(remoto).filter(k => k.startsWith("productos/")).length)} productos y en este celular ${miles(Object.keys(local).filter(k => k.startsWith("productos/")).length)}.</p>
@@ -4087,21 +4098,27 @@ const mailAUsuario = (m) => String(m||"").endsWith(DOM_USUARIO) ? String(m).slic
 const ERR_AUTH = { "auth/invalid-email": "El usuario no es válido. Usa letras y números.", "auth/missing-password": "Escribe la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
   "auth/email-already-in-use": "Ese usuario ya existe. Usa Entrar.", "auth/invalid-credential": "Usuario o contraseña incorrectos.", "auth/wrong-password": "Usuario o contraseña incorrectos.",
   "auth/user-not-found": "No existe ese usuario. Usa Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intenta de nuevo." };
-async function nubeEntrar(crear){
-  const mail = usuarioAMail($("nubeMail").value), clave = $("nubeClave").value;
-  $("nubeErr").textContent = "";
-  if (!mail || !clave){ $("nubeErr").textContent = "Escribe el usuario y la contraseña."; return; }
-  if (crear && mail.replace(DOM_USUARIO, "").length < 3){ $("nubeErr").textContent = "El usuario debe tener al menos 3 letras o números."; return; }
-  const b = crear ? $("nubeCrear") : $("nubeEntrar"); b.disabled = true;
+async function nubeEntrar(crear, f = { u: "nubeMail", c: "nubeClave", err: "nubeErr", btn: crear ? "nubeCrear" : "nubeEntrar" }){
+  const mail = usuarioAMail($(f.u).value), clave = $(f.c).value, errEl = $(f.err);
+  errEl.textContent = "";
+  if (!mail || !clave){ errEl.textContent = "Escribe el usuario y la contraseña."; return false; }
+  if (crear && mail.replace(DOM_USUARIO, "").length < 3){ errEl.textContent = "El usuario debe tener al menos 3 letras o números."; return false; }
+  const b = $(f.btn); b.disabled = true; let ok = false;
   try {
     const fb = await cargarFirebase(); ls.set("nube", "1");
     const r = crear ? await fb.auth().createUserWithEmailAndPassword(mail, clave) : await fb.auth().signInWithEmailAndPassword(mail, clave);
-    $("nubeClave").value = "";
+    $(f.c).value = "";
     fb.auth().onAuthStateChanged((u) => { if (!u){ N.lista = false; N.uid = null; pintarNube(); } });
-    await nubeIniciar(r.user); toast(crear ? "Cuenta creada y conectada" : "Conectado a la nube");
-  } catch (e) { $("nubeErr").textContent = ERR_AUTH[e?.code] || ("No se pudo: " + (e?.code || e?.message || "error")); if (!N.uid) ls.set("nube", "0"); }
-  b.disabled = false;
+    await nubeIniciar(r.user); toast(crear ? "Cuenta creada y conectada" : "Conectado a la nube"); ok = true;
+  } catch (e) { errEl.textContent = ERR_AUTH[e?.code] || ("No se pudo: " + (e?.code || e?.message || "error")); if (!N.uid) ls.set("nube", "0"); }
+  b.disabled = false; return ok;
 }
+$("setNubeGo").onclick = async () => {
+  const b = $("setNubeGo"), txt = b.textContent; b.textContent = "Trayendo todo…";
+  const ok = await nubeEntrar(false, { u: "setNubeU", c: "setNubeC", err: "setNubeErr", btn: "setNubeGo" });
+  b.textContent = txt;
+  if (ok && !S.config?.pinHash) $("setNubeErr").textContent = "Esa cuenta no tiene datos todavía. Cree la caja abajo y luego conéctela en Ajustes.";
+};
 $("nubeEntrar").onclick = () => nubeEntrar(false);
 $("nubeCrear").onclick = () => nubeEntrar(true);
 $("nubeSync").onclick = async () => { if (!N.uid) return; Object.keys(S.db.exportAll()).forEach(k => N.cola.add(k)); await nubeSubir(); nubeEscuchar(); toast("Sincronizado"); };
