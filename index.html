@@ -2194,6 +2194,8 @@ function openIngreso(opts={}){
   $("iGanX").hidden = !$("iGan").value.trim();
   previewCodigo();
   show("ingreso");
+  const arriba = () => { try { $("ingForm").scrollTop = 0; $("ingreso").scrollTop = 0; window.scrollTo(0, 0); } catch {} };
+  arriba(); requestAnimationFrame(arriba); setTimeout(arriba, 120);
 }
 /* Código escrito a mano (ej. 9195x20):
    9 = inicio · 1 = parte entera del margen · 95 = valor · x = 00 · 20 = decimales del margen
