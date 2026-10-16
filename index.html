@@ -650,6 +650,20 @@ details.card[open]>summary{margin-bottom:10px}
     <p class="note" style="margin:0">Los datos están solo en este celular. Exporta seguido y guarda el archivo en Drive o WhatsApp.</p>
     <p class="note" style="margin:0" id="aUltimaExp"></p>
     <div class="row"><button type="button" class="btn primary grow" id="aExport">Exportar</button><label class="btn grow" for="aImport">Importar</label></div>
+    <div class="sect" style="margin-top:10px">Nube: compartir entre celulares</div>
+    <div class="card" id="nubeBox" style="display:flex;flex-direction:column;gap:10px">
+      <div id="nubeEstado" class="note" style="margin:0"></div>
+      <div id="nubeFuera" style="display:flex;flex-direction:column;gap:10px">
+        <label class="f">Correo de la ferretería<input id="nubeMail" class="inp" type="email" inputmode="email" autocomplete="username" data-autollenar="1" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+        <label class="f">Contraseña de la nube<input id="nubeClave" class="inp" type="password" autocomplete="current-password"></label>
+        <div id="nubeErr" class="err"></div>
+        <div class="row"><button type="button" class="btn primary grow" id="nubeEntrar">Entrar</button><button type="button" class="btn grow" id="nubeCrear">Crear cuenta</button></div>
+        <p class="note" style="margin:0">Use el mismo correo y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
+      </div>
+      <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
+        <div class="row"><button type="button" class="btn grow" id="nubeSync">Sincronizar ahora</button><button type="button" class="btn grow" id="nubeSalir">Salir / cambiar cuenta</button></div>
+      </div>
+    </div>
     <button type="button" class="btn block" id="aCompartir">Compartir todo con otra persona</button>
     <p class="note" style="margin:0">Manda por WhatsApp un archivo con todo: productos, clientes, proveedores, ventas y por comprar. La otra persona lo abre en su app con <b>Importar › Combinar</b> y no se le repite nada.</p>
     
@@ -2575,6 +2589,7 @@ function fillAjustes(){
   $("aArchivo").value = c.copiaArchivo || "hora";
   $("aArchivoHoraL").hidden = (c.copiaArchivo || "hora") !== "horafija"; $("aArchivoHora").value = c.copiaHora || "18:00";
   try { pintarCarpeta(); } catch {}
+  try { pintarNube(); } catch {}
   try { pintarEtqAjustes(); } catch {}
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
   $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
@@ -3236,7 +3251,7 @@ async function clienteParaVenta(){
 
 /* ---------- copias automáticas ---------- */
 S.dirty = false;
-function dbChanged(path){ if (!String(path).startsWith("config/")) { S.dirty = true; S.fileDirty = true; } else if (!S.dirtyCfg) S.dirtyCfg = true; }
+function dbChanged(path){ if (!String(path).startsWith("config/")) { S.dirty = true; S.fileDirty = true; } else if (!S.dirtyCfg) S.dirtyCfg = true; try { nubeCambio(path); } catch {} }
 /* copia en archivo (Descargas): sobrevive aunque el navegador borre sus datos al cerrarse */
 /* ---------- copias en una carpeta: solo 2 archivos (1 = la más reciente, 2 = la anterior) ---------- */
 const ARCH1 = "copia-ferreteria-1-reciente.json", ARCH2 = "copia-ferreteria-2-anterior.json";
@@ -3450,6 +3465,10 @@ function openLocalDb(){
         doc: docRef,
         collection: (col) => ({ ...query(col), path: col, doc: (id) => docRef(col+"/"+(id||newId())), add: async (d) => { const r = docRef(col+"/"+newId()); await r.set(d); return r; } }),
         exportAll: () => Object.fromEntries(mem),
+        deleteMany: async (paths) => {
+          await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); paths.forEach(k => o.delete(k)); t.oncomplete=res; t.onerror=()=>rej(t.error); });
+          paths.forEach(k => { mem.delete(k); dbChanged(k); }); notify();
+        },
         putMany: async (obj) => {
           await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); for (const [k,v] of Object.entries(obj)) o.put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); });
           for (const [k,v] of Object.entries(obj)){ mem.set(k,v); dbChanged(k); } notify();
@@ -3862,30 +3881,37 @@ const COLS_COMB = {
   ventas:      (d) => ["v:" + d.numero + "|" + d.fecha],
 };
 const fechaDoc = (d) => Number(d?.actualizado || d?.creado || d?.fecha || 0);
-async function combinarDatos(docs){
-  const mios = S.db.exportAll(), cambios = {}, cuenta = { nuevos: 0, actualizados: 0, iguales: 0 };
-  const indices = {};
-  for (const [k, v] of Object.entries(mios)){ const col = k.split("/")[0], f = COLS_COMB[col]; if (!f) continue;
+/* Junta "entrante" sobre "base" sin repetir (por id, código de barras, NIT o nombre); gana lo más reciente */
+function mezclar(base, entrante){
+  const res = { ...base }, cambiadas = new Set(), cuenta = { nuevos: 0, actualizados: 0, iguales: 0 }, indices = {};
+  for (const [k, v] of Object.entries(base)){ const col = k.split("/")[0], f = COLS_COMB[col]; if (!f || !v) continue;
     indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => { if (!indices[col].has(x)) indices[col].set(x, k); }); }
-  for (const [k, v] of Object.entries(docs)){
+  for (const [k, v] of Object.entries(entrante)){
+    if (!v) continue;
     const col = k.split("/")[0], f = COLS_COMB[col];
     if (col === "config"){
-      const c = mios["config/tienda"] || {}, extra = {};
+      const c = res["config/tienda"]; if (!c){ res["config/tienda"] = v; cambiadas.add("config/tienda"); continue; }
+      const extra = {};
       if (Array.isArray(v.catsExtra)) extra.catsExtra = [...new Set([...(c.catsExtra||[]), ...v.catsExtra])];
-      if (Array.isArray(v.ganancias)) extra.ganancias = [...new Set([...(c.ganancias||GAN_DEF), ...v.ganancias])].sort((a,b) => a-b);
-      if (Object.keys(extra).length && mios["config/tienda"]) cambios["config/tienda"] = { ...c, ...extra };
+      if (Array.isArray(v.ganancias)) extra.ganancias = [...new Set([...(c.ganancias||GAN_DEF), ...v.ganancias])].sort((x,y) => x-y);
+      if (JSON.stringify({ a: c.catsExtra, b: c.ganancias }) !== JSON.stringify({ a: extra.catsExtra ?? c.catsExtra, b: extra.ganancias ?? c.ganancias })){ res["config/tienda"] = { ...c, ...extra }; cambiadas.add("config/tienda"); }
       continue;
     }
     if (!f) continue;
-    let destino = mios[k] ? k : null;
+    let destino = res[k] ? k : null;
     if (!destino){ for (const key of f(v).filter(Boolean)){ const m = indices[col]?.get(key); if (m){ destino = m; break; } } }
-    if (!destino){ cambios[k] = v; cuenta.nuevos++; indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => indices[col].set(x, k)); continue; }
-    const actual = mios[destino];
-    if (fechaDoc(v) > fechaDoc(actual)){ cambios[destino] = { ...actual, ...v }; cuenta.actualizados++; }
+    if (!destino){ res[k] = v; cambiadas.add(k); cuenta.nuevos++; indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => indices[col].set(x, k)); continue; }
+    const actual = res[destino];
+    if (fechaDoc(v) > fechaDoc(actual)){ res[destino] = { ...actual, ...v }; cambiadas.add(destino); cuenta.actualizados++; }
     else cuenta.iguales++;
   }
+  return { resultado: res, cambiadas: [...cambiadas], cuenta };
+}
+async function combinarDatos(docs){
+  const r = mezclar(S.db.exportAll(), docs), cambios = {};
+  r.cambiadas.forEach(k => { cambios[k] = r.resultado[k]; });
   if (Object.keys(cambios).length) await S.db.putMany(cambios);
-  return cuenta;
+  return r.cuenta;
 }
 /* Leer un archivo de la app y preguntar cómo cargarlo */
 async function cargarArchivoApp(f){
@@ -3917,6 +3943,165 @@ async function compartirTodo(){
   await shareFile(new Blob([JSON.stringify(data)], { type:"application/json" }), `ferreteria-todo-${stamp()}-${hm}.json`);
 }
 
+/* ---------- NUBE (Firebase): los celulares con la misma cuenta comparten todo ----------
+   Cada documento de la app se guarda en tiendas/{cuenta}/docs/{ruta}. Los cambios de este
+   celular se suben solos; los de los otros celulares llegan solos. Si no hay internet, se
+   guardan y se suben cuando vuelva. */
+const FB_CONFIG = { apiKey: "AIzaSyAVv8aa6HAdYt13G8IDNHPQKneO51RNEZo", authDomain: "caja-ferreteria-x1.firebaseapp.com", projectId: "caja-ferreteria-x1", storageBucket: "caja-ferreteria-x1.firebasestorage.app", messagingSenderId: "264772442595", appId: "1:264772442595:web:ac6dd01094aa7d1bdf68d6" };
+const N = { lista: false, uid: null, mail: "", unsub: null, cola: new Set(), aplicando: false, t: 0, sub: 0, ult: 0, err: "" };
+try { JSON.parse(ls.get("nubeCola") || "[]").forEach(x => N.cola.add(x)); } catch {}
+const nubeActiva = () => ls.get("nube") === "1";
+const nubeDev = (() => { let d = ls.get("nubeDev"); if (!d){ d = Math.random().toString(36).slice(2, 10); ls.set("nubeDev", d); } return d; })();
+const idNube = (path) => path.replace(/\//g, "~");
+let fbP = null;
+function cargarFirebase(){
+  if (fbP) return fbP;
+  const abs = (f) => new URL(f, location.href).href;
+  const js = (f) => new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = abs(f); sc.onload = res; sc.onerror = () => rej(new Error("sin internet")); document.head.appendChild(sc); });
+  fbP = js("fb/firebase-app-compat.js").then(() => Promise.all([js("fb/firebase-auth-compat.js"), js("fb/firebase-firestore-compat.js")])).then(async () => {
+    if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+    try { await firebase.firestore().enablePersistence({ synchronizeTabs: true }); } catch {}
+    return firebase;
+  });
+  fbP.catch(() => { fbP = null; });
+  return fbP;
+}
+function nubeCambio(path){
+  if (!nubeActiva() || N.aplicando) return;
+  N.cola.add(path); ls.set("nubeCola", JSON.stringify([...N.cola]));
+  clearTimeout(N.t); N.t = setTimeout(nubeSubir, 900); pintarNube();
+}
+async function nubeSubir(){
+  if (!N.lista || !N.uid || !N.cola.size || N.sub) return;
+  N.sub = 1;
+  try {
+    const db = firebase.firestore(), col = db.collection("tiendas").doc(N.uid).collection("docs"), mios = S.db.exportAll();
+    const rutas = [...N.cola];
+    for (let i = 0; i < rutas.length; i += 400){
+      const b = db.batch();
+      rutas.slice(i, i + 400).forEach(p => { const v = mios[p]; b.set(col.doc(idNube(p)), { p, j: v === undefined ? null : JSON.stringify(v), dev: nubeDev, t: firebase.firestore.FieldValue.serverTimestamp() }); });
+      await b.commit();
+      rutas.slice(i, i + 400).forEach(p => N.cola.delete(p));
+      ls.set("nubeCola", JSON.stringify([...N.cola]));
+    }
+    N.ult = Date.now(); N.err = "";
+  } catch (e) { N.err = "No se pudo subir: " + (e?.code || e?.message || "sin internet"); }
+  N.sub = 0; pintarNube();
+  if (N.cola.size) setTimeout(nubeSubir, 5000);
+}
+async function aplicarRemotos(cambios, borrar){
+  N.aplicando = true;
+  try { if (Object.keys(cambios).length) await S.db.putMany(cambios); if (borrar.length) await S.db.deleteMany(borrar); }
+  finally { N.aplicando = false; }
+}
+/* Escuchar los cambios de los otros celulares (solo los nuevos desde la última vez) */
+function nubeEscuchar(){
+  if (N.unsub) N.unsub();
+  const col = firebase.firestore().collection("tiendas").doc(N.uid).collection("docs");
+  const desde = Number(ls.get("nubeT_" + N.uid) || 0);
+  const q = desde ? col.where("t", ">", firebase.firestore.Timestamp.fromMillis(desde)) : col;
+  N.unsub = q.onSnapshot({ includeMetadataChanges: false }, async (snap) => {
+    const cambios = {}, borrar = []; let maxT = desde;
+    snap.docChanges().forEach(ch => {
+      if (ch.type === "removed") return;
+      const d = ch.doc.data(); if (!d || !d.p) return;
+      const tm = d.t && d.t.toMillis ? d.t.toMillis() : 0; if (tm > maxT) maxT = tm;
+      if (d.dev === nubeDev || ch.doc.metadata.hasPendingWrites || N.cola.has(d.p)) return;
+      if (d.j === null) borrar.push(d.p); else { try { cambios[d.p] = JSON.parse(d.j); } catch {} }
+    });
+    if (Object.keys(cambios).length || borrar.length){ await aplicarRemotos(cambios, borrar); }
+    if (maxT > desde && !snap.metadata.fromCache) ls.set("nubeT_" + N.uid, String(maxT));
+    N.ult = Date.now(); pintarNube();
+  }, (e) => { N.err = "Sin conexión con la nube (" + (e?.code || "error") + ")"; pintarNube(); });
+}
+/* Primera vez en este celular con esta cuenta: unir lo de aquí con lo de la nube */
+async function nubePrimeraVez(){
+  const col = firebase.firestore().collection("tiendas").doc(N.uid).collection("docs");
+  const snap = await col.get({ source: "server" });
+  const remoto = {}; let maxT = 0;
+  snap.forEach(doc => { const d = doc.data(); const tm = d.t && d.t.toMillis ? d.t.toMillis() : 0; if (tm > maxT) maxT = tm; if (d.p && d.j !== null) { try { remoto[d.p] = JSON.parse(d.j); } catch {} } });
+  const local = S.db.exportAll(), nLocal = Object.keys(local).filter(k => !k.startsWith("config/")).length, nRemoto = Object.keys(remoto).length;
+  const subirTodo = (obj) => { Object.keys(obj).forEach(k => N.cola.add(k)); ls.set("nubeCola", JSON.stringify([...N.cola])); };
+  if (!nRemoto){ subirTodo(local); }
+  else if (!nLocal){ N.aplicando = true; try { await S.db.importAll({ ...remoto, ...(remoto["config/tienda"] ? {} : { "config/tienda": local["config/tienda"] }) }); } finally { N.aplicando = false; } }
+  else {
+    const eleccion = await new Promise((res) => {
+      sheet(`<h2>Esta cuenta ya tiene datos</h2><p class="note" style="margin:0">En la nube hay ${miles(Object.keys(remoto).filter(k => k.startsWith("productos/")).length)} productos y en este celular ${miles(Object.keys(local).filter(k => k.startsWith("productos/")).length)}.</p>
+        <button type="button" class="btn primary block" id="npComb">Combinar (sin repetir)</button>
+        <p class="note" style="margin:-4px 0 0">Junta lo de este celular con lo de la nube. Lo que ya existe no se repite.</p>
+        <button type="button" class="btn block" id="npNube">Usar solo lo de la nube</button>
+        <p class="note" style="margin:-4px 0 0">Este celular queda igual a la nube. Lo de aquí se guarda antes en una copia.</p>`, (el, close) => {
+        el.querySelector("#npComb").onclick = () => { close(); res("comb"); };
+        el.querySelector("#npNube").onclick = () => { close(); res("nube"); };
+      });
+    });
+    await guardarCopia("antes-de-cargar");
+    if (eleccion === "nube"){ N.aplicando = true; try { await S.db.importAll(remoto); } finally { N.aplicando = false; } }
+    else {
+      /* la nube es la base; lo de este celular se suma sin repetir */
+      const r = mezclar(remoto, local);
+      N.aplicando = true; try { await S.db.importAll(r.resultado); } finally { N.aplicando = false; }
+      r.cambiadas.forEach(k => N.cola.add(k)); ls.set("nubeCola", JSON.stringify([...N.cola]));
+      toast(`Combinado: ${miles(r.cuenta.nuevos)} nuevos, ${miles(r.cuenta.actualizados)} actualizados, ${miles(r.cuenta.iguales)} ya estaban.`, 4500);
+    }
+  }
+  ls.set("nubeT_" + N.uid, String(maxT));
+  ls.set("nubeUid", N.uid);
+}
+async function nubeIniciar(user){
+  N.uid = user.uid; N.mail = user.email || ""; N.lista = true; ls.set("nube", "1"); ls.set("nubeMail", N.mail);
+  try {
+    if (ls.get("nubeUid") !== N.uid) await nubePrimeraVez();
+    nubeEscuchar(); await nubeSubir();
+  } catch (e) { N.err = "No se pudo sincronizar: " + (e?.code || e?.message || ""); }
+  pintarNube();
+}
+async function nubeArrancar(){
+  if (!nubeActiva()) { pintarNube(); return; }
+  try {
+    const fb = await cargarFirebase();
+    fb.auth().onAuthStateChanged((u) => { if (u && N.uid !== u.uid) nubeIniciar(u); else if (!u){ N.lista = false; N.uid = null; pintarNube(); } });
+  } catch { N.err = "Sin internet: los cambios se subirán cuando vuelva."; pintarNube(); }
+}
+function pintarNube(){
+  const est = $("nubeEstado"); if (!est) return;
+  const dentro = !!(N.lista && N.uid);
+  $("nubeFuera").hidden = dentro; $("nubeDentro").hidden = !dentro;
+  if (dentro){
+    const pend = N.cola.size;
+    est.innerHTML = `Conectado como <b>${esc(N.mail)}</b>.<br>${pend ? `${miles(pend)} cambio${pend > 1 ? "s" : ""} por subir…` : "Todo al día."}${N.ult ? ` Última sincronización: ${fHora(N.ult)}.` : ""}${N.err ? `<br><span class="err" style="min-height:0">${esc(N.err)}</span>` : ""}`;
+  } else {
+    est.innerHTML = nubeActiva() && N.err ? esc(N.err) : (nubeActiva() ? "Conectando…" : "No está conectado. Entre con la cuenta de la ferretería para compartir todo entre celulares.");
+    if (ls.get("nubeMail") && !$("nubeMail").value) $("nubeMail").value = ls.get("nubeMail");
+  }
+}
+const ERR_AUTH = { "auth/invalid-email": "El correo no es válido.", "auth/missing-password": "Escribe la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
+  "auth/email-already-in-use": "Ese correo ya tiene cuenta. Usa Entrar.", "auth/invalid-credential": "Correo o contraseña incorrectos.", "auth/wrong-password": "Correo o contraseña incorrectos.",
+  "auth/user-not-found": "No hay cuenta con ese correo. Usa Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intenta de nuevo." };
+async function nubeEntrar(crear){
+  const mail = $("nubeMail").value.trim(), clave = $("nubeClave").value;
+  $("nubeErr").textContent = "";
+  if (!mail || !clave){ $("nubeErr").textContent = "Escribe el correo y la contraseña."; return; }
+  const b = crear ? $("nubeCrear") : $("nubeEntrar"); b.disabled = true;
+  try {
+    const fb = await cargarFirebase(); ls.set("nube", "1");
+    const r = crear ? await fb.auth().createUserWithEmailAndPassword(mail, clave) : await fb.auth().signInWithEmailAndPassword(mail, clave);
+    $("nubeClave").value = "";
+    fb.auth().onAuthStateChanged((u) => { if (!u){ N.lista = false; N.uid = null; pintarNube(); } });
+    await nubeIniciar(r.user); toast(crear ? "Cuenta creada y conectada" : "Conectado a la nube");
+  } catch (e) { $("nubeErr").textContent = ERR_AUTH[e?.code] || ("No se pudo: " + (e?.code || e?.message || "error")); if (!N.uid) ls.set("nube", "0"); }
+  b.disabled = false;
+}
+$("nubeEntrar").onclick = () => nubeEntrar(false);
+$("nubeCrear").onclick = () => nubeEntrar(true);
+$("nubeSync").onclick = async () => { if (!N.uid) return; Object.keys(S.db.exportAll()).forEach(k => N.cola.add(k)); await nubeSubir(); nubeEscuchar(); toast("Sincronizado"); };
+$("nubeSalir").onclick = () => confirmar("¿Salir de la cuenta de la nube? Los datos se quedan en este celular, pero ya no se comparten.", "Salir", async () => {
+  try { if (N.unsub) N.unsub(); N.unsub = null; await firebase.auth().signOut(); } catch {}
+  N.lista = false; N.uid = null; ls.set("nube", "0"); ls.set("nubeUid", ""); N.cola.clear(); ls.set("nubeCola", "[]"); pintarNube(); toast("Saliste de la nube");
+}, false);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && N.cola.size) nubeSubir(); });
+window.addEventListener("online", () => { if (N.cola.size) nubeSubir(); });
+
 /* ---------- casillas: X para borrar lo escrito ---------- */
 function ponerX(inp){
   if (!inp || inp.dataset.conx) return; inp.dataset.conx = "1";
@@ -3944,7 +4129,7 @@ document.addEventListener("keydown", (e) => {
 /* Sin ayudas de contraseña/tarjeta/dirección del teclado salvo en las claves */
 function sinAutollenado(root){
   (root.querySelectorAll ? root : document).querySelectorAll("input:not([type=file]):not([type=hidden]):not([type=checkbox])").forEach(el => {
-    if (el.type === "password"){ return; }
+    if (el.type === "password" || el.dataset.autollenar === "1"){ return; }
     el.setAttribute("autocomplete", "off"); el.setAttribute("data-lpignore", "true"); el.setAttribute("data-1p-ignore", "true"); el.setAttribute("data-form-type", "other");
     if (!el.getAttribute("name")) el.setAttribute("name", "c" + Math.random().toString(36).slice(2, 8));
     if (!el.getAttribute("enterkeyhint") && !esBuscador(el)) el.setAttribute("enterkeyhint", "done");
@@ -3956,6 +4141,14 @@ sinAutollenado(document);
 new MutationObserver((ms) => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) sinAutollenado(n); }); }).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- boot ---------- */
+function envolverImportAll(){
+  const orig = S.db.importAll;
+  S.db.importAll = async (obj) => {
+    const antes = S.db.exportAll(); await orig(obj);
+    if (N.aplicando || !nubeActiva()) return;
+    new Set([...Object.keys(antes), ...Object.keys(obj)]).forEach(k => { if (JSON.stringify(antes[k]) !== JSON.stringify(obj[k])) nubeCambio(k); });
+  };
+}
 try { const d = JSON.parse(ls.get("carrito")||"[]"); if (Array.isArray(d)) S.carrito = d; } catch {}
 setModo(S.modoCam); buildKeypad();
 
@@ -3967,7 +4160,7 @@ const vigia = setTimeout(() => {
   $("bootRecargar").onclick = () => { try { sessionStorage.setItem("recarga", String(Date.now())); } catch {} location.reload(); };
 }, 8000);
 (async () => {
-  try { S.db = await openLocalDb(); }
+  try { S.db = await openLocalDb(); envolverImportAll(); setTimeout(nubeArrancar, 300); }
   catch {
     $("lockMsg").innerHTML = "<span>Este navegador no deja guardar datos (¿modo incógnito?). Abre la app en una ventana normal de Chrome o Safari.</span>";
     return;
