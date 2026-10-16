@@ -247,7 +247,7 @@ details.card[open]>summary{margin-bottom:10px}
 .picker span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .picker svg{width:20px;height:20px;flex-shrink:0;color:var(--muted)}
 .pop{position:fixed;inset:0;z-index:28;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
-.popbox{background:var(--bg);width:100%;max-height:78%;border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.popbox{background:var(--bg);width:100%;max-height:78%;border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding-bottom:calc(26px + env(safe-area-inset-bottom,0px))}
 .pophead{display:flex;align-items:center;gap:10px;padding-top:14px;padding-bottom:10px}
 .pophead h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:22px;text-transform:uppercase;flex:1;min-width:0}
 .poplist{overflow-y:auto;padding-bottom:14px;display:flex;flex-direction:column;gap:6px}
@@ -299,6 +299,11 @@ details.card[open]>summary{margin-bottom:10px}
 .cap .capbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));background:#000}
 .cap .captop{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));display:flex;justify-content:space-between;align-items:center;gap:10px}
 .cap .captop>span{background:rgba(0,0,0,.55);padding:6px 12px;border-radius:999px;font-weight:700;font-size:16px}
+.qwrap{position:relative;display:flex;flex:1;min-width:0}
+.qwrap>.inp{width:100%;padding-right:46px}
+.qx{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:0;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+.qx svg{width:16px;height:16px}
+.qx[hidden]{display:none}
 .ganbox{position:relative}
 .ganwrap{position:relative;display:flex}
 .ganwrap .inp{width:100%;padding-right:78px}
@@ -365,7 +370,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="setupForm" hidden>
       <div style="display:flex;flex-direction:column;gap:12px">
         <p class="note" style="margin:0">Primera vez. Pon el nombre del negocio y una clave de 4 a 6 números. Se pedirá cada vez que se abra la app.</p>
-        <label class="f">Nombre del negocio<input id="setNombre" class="inp" placeholder="Ferretería El Tornillo" autocomplete="off" inputmode="text"></label>
+        <label class="f">Nombre del negocio<input id="setNombre" class="inp" autocomplete="off" inputmode="text"></label>
         <label class="f">Clave nueva<input id="setPin" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <label class="f">Repite la clave<input id="setPin2" class="inp num" inputmode="numeric" type="password" maxlength="6" autocomplete="new-password"></label>
         <div id="setErr" class="err"></div>
@@ -441,14 +446,14 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="cart"></div>
     <details class="card" id="vCliBox"><summary>Cliente</summary>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" placeholder="Opcional" autocomplete="off" inputmode="text"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
-        <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" placeholder="Opcional" autocomplete="off" inputmode="tel"></label>
+        <div class="row"><label class="f grow">Nombre<input id="vCli" class="inp" autocomplete="off" inputmode="text"></label><button type="button" class="btn" id="vCliElegir" style="align-self:flex-end">Elegir</button></div>
+        <label class="f">NIT o cédula<input id="vCliDoc" class="inp num" autocomplete="off" inputmode="tel"></label>
       </div>
     </details>
   </div>
   <div class="foot gut">
     <div class="total"><span class="lab">Total</span><span class="val" id="vTotal">$0</span></div>
-    <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" placeholder="0" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
+    <div class="row" style="align-items:center"><label class="f grow" style="flex-direction:row;align-items:center;gap:8px">Recibido<input id="vRecibido" class="inp num miles" inputmode="numeric" style="padding:9px 10px"></label><div class="cambio" style="flex-direction:column;align-items:flex-end;gap:0;min-width:96px"><span class="note" style="font-size:12px">Cambio</span><span class="num" id="vCambio">—</span></div></div>
     <div class="row"><button class="btn" id="vVaciar">Vaciar</button><button class="btn venta grow" id="vCobrar" disabled>Cobrar</button></div>
     <div class="row"><button class="btn grow" id="vLibre">Sin código</button><button class="btn cam grow" id="vScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button></div>
   </div>
@@ -472,7 +477,7 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ingreso)"></span><h1 id="ingTitle">Ingresar producto</h1></div>
   <form class="body gut" id="ingForm" autocomplete="off">
     <label class="f">Código propio
-      <input id="iCodP" class="inp num" placeholder="Escanea o escribe" enterkeyhint="next" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <input id="iCodP" class="inp num" enterkeyhint="done" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
     </label>
     <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
     <p class="note" id="iCodNota" style="margin:-6px 0 0">Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20).</p>
@@ -483,17 +488,17 @@ details.card[open]>summary{margin-bottom:10px}
       <div id="iOrigTxt" class="origtxt"></div>
       <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
     </div>
-    <label class="f">Nombre<input id="iNombre" class="inp" placeholder="Martillo de uña 16 oz mango fibra" enterkeyhint="next" inputmode="text"></label>
+    <label class="f">Nombre<input id="iNombre" class="inp" enterkeyhint="done" inputmode="text"></label>
     <div class="row" style="align-items:flex-start">
-      <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric" placeholder="0"></label>
-      <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric" placeholder="0"></label>
+      <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric"></label>
+      <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric"></label>
     </div>
     <div class="row" style="align-items:flex-start">
       <div class="f grow ganbox"><span>% Ganancia</span>
-        <div class="ganwrap"><input id="iGan" class="inp num" inputmode="decimal" placeholder="Ej: 20" autocomplete="off" enterkeyhint="next"><span class="gansuf">%</span><button type="button" class="ganbtn" id="iGanMenu" aria-label="Porcentajes guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
+        <div class="ganwrap"><input id="iGan" class="inp num" inputmode="decimal" autocomplete="off" enterkeyhint="done"><span class="gansuf">%</span><button type="button" class="ganbtn" id="iGanMenu" aria-label="Porcentajes guardados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></div>
         <div class="gansug" id="iGanSug" hidden></div>
       </div>
-      <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric" placeholder="0"></label>
+      <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric"></label>
     </div>
     <label class="f">Categoría<select id="iCat" class="inp"></select></label>
     <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiala.</p>
@@ -521,7 +526,6 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="inventario" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ink)"></span><h1>Inventario</h1></div>
   <div class="body gut">
-    <button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button>
     <div class="card row" style="justify-content:space-between;flex-wrap:wrap">
       <div><div class="sect">Productos</div><div class="num" style="font-size:22px;font-weight:600" id="invCount">0</div></div>
       <div><div class="sect">Unidades</div><div class="num" style="font-size:22px;font-weight:600" id="invUnits">0</div></div>
@@ -530,12 +534,11 @@ details.card[open]>summary{margin-bottom:10px}
     <form id="invSearchForm" class="row" autocomplete="off">
       <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
       <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
-      <button class="btn ico primary" type="submit" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
     </form>
     <div class="fchips" id="invChips" hidden></div>
     <div id="invList"></div>
   </div>
-  <div class="foot gut"><div class="row"><button class="btn grow" id="invExport">Exportar</button><label class="btn grow" for="aImport">Importar</label><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
+  <div class="foot gut"><button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><div class="row"><button class="btn grow" id="invExport">Exportar</button><label class="btn grow" for="aImport">Importar</label><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
 </section>
 
 <!-- PENDIENTES -->
@@ -559,20 +562,20 @@ details.card[open]>summary{margin-bottom:10px}
     <div id="cliList"></div>
   </div>
   <div class="body gut" id="tabProv" hidden>
-    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
+    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre, código o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
     <div id="provList"></div>
   </div>
   <form class="body gut" id="ajForm" autocomplete="off">
     <div class="sect">Empresa</div>
     <label class="f">Nombre<input id="aNombre" class="inp" inputmode="text"></label>
-    <label class="f">NIT<input id="aNit" class="inp" placeholder="900.123.456-7" inputmode="tel" autocomplete="off"></label>
+    <label class="f">NIT<input id="aNit" class="inp" inputmode="tel" autocomplete="off"></label>
     <label class="f">Dirección<input id="aDir" class="inp" inputmode="text"></label>
-    <label class="f">Ciudad<input id="aCiudad" class="inp" placeholder="Chía, Cundinamarca" inputmode="text"></label>
+    <label class="f">Ciudad<input id="aCiudad" class="inp" inputmode="text"></label>
     <label class="f">Teléfono<input id="aTel" class="inp" inputmode="tel"></label>
     <label class="f">Celular / WhatsApp<input id="aCel" class="inp" inputmode="tel"></label>
     <label class="f">Correo<input id="aMail" class="inp" inputmode="email" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
-    <label class="f">Régimen<input id="aReg" class="inp" placeholder="No responsable de IVA" inputmode="text"></label>
-    <label class="f">Mensaje de la factura<input id="aPie" class="inp" placeholder="Gracias por su compra" inputmode="text"></label>
+    <label class="f">Régimen<input id="aReg" class="inp" inputmode="text"></label>
+    <label class="f">Mensaje de la factura<input id="aPie" class="inp" inputmode="text"></label>
     <label class="f">Ancho del papel
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
@@ -612,7 +615,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="sect" style="margin-top:10px">Etiqueta</div>
     <p class="note" style="margin:0">Toca lo que quieres que salga en la etiqueta. El código de barras lleva el código propio.</p>
     <div class="tabs" id="aEtqOpts"></div>
-    <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" placeholder="Ej: Garantía 3 meses" maxlength="40"></label>
+    <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" maxlength="40"></label>
     <div class="recibo-wrap" id="aEtqPrev" style="align-self:stretch;flex-shrink:0"></div>
     <div class="sect" style="margin-top:10px">Copias de seguridad</div>
     <button type="button" class="switch" id="aAuto" role="switch" aria-checked="true"><span>Autoguardado<br><small class="note" style="font-weight:500">Solo guarda si hubo ventas o cambios.</small></span><span class="tg"></span></button>
@@ -624,10 +627,14 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
     <button type="button" class="btn" id="aNube">Subir copia a TeraBox</button>
     <p class="note" style="margin:0">Se abre el menú <b>Compartir</b> del celular: elige <b>TeraBox</b> (o Drive, WhatsApp…). Para recuperar, descarga el archivo desde TeraBox y usa <b>Importar</b> o <b>Recuperar desde una copia</b>.</p>
-    <label class="f">Guardar copia en Descargas
+    <label class="f">Guardar copia en el celular
       <select id="aArchivo" class="inp"><option value="venta">En cada venta</option><option value="hora">Cada hora</option><option value="dia">Una vez al día</option><option value="no">Nunca</option></select>
     </label>
     <p class="note" style="margin:0">Solo guarda si hubo cambios. Ese archivo no se borra aunque el navegador borre sus datos, y sirve para recuperar todo en este u otro celular.</p>
+    <div id="aCarpetaBox" class="card" style="display:flex;flex-direction:column;gap:8px">
+      <div class="note" id="aCarpetaTxt" style="margin:0"></div>
+      <div class="row"><button type="button" class="btn grow" id="aCarpeta">Elegir carpeta</button><button type="button" class="btn" id="aCarpetaQuitar" hidden>Quitar</button></div>
+    </div>
     <label class="f">Recordar copia en el celular cada
       <select id="aRecordar" class="inp"><option value="3">3 días</option><option value="7">7 días</option><option value="15">15 días</option><option value="0">Nunca</option></select>
     </label>
@@ -748,7 +755,7 @@ function popup(titulo, bodyHTML, onMount){
 }
 function openPicker(sel){
   const opts = [...sel.options].filter(o => !o.hidden);
-  const buscar = opts.length > 10;
+  const buscar = opts.length > 6 || sel.dataset.buscar === "1";
   popup(labelOf(sel), `${buscar ? `<input class="inp" id="pkQ" inputmode="search" placeholder="Buscar" autocomplete="off" style="margin-bottom:8px">` : ""}<div class="poplist" id="pkList"></div>`, (el, close) => {
     const list = el.querySelector("#pkList");
     const draw = (q = "") => {
@@ -756,7 +763,7 @@ function openPicker(sel){
       list.innerHTML = opts.filter(o => !t || norm(o.textContent).includes(t)).map(o => `<button type="button" class="popopt" role="option" data-v="${esc(o.value)}" aria-selected="${o.value === sel.value}"><span>${esc(o.textContent)}</span>${o.value === sel.value ? '<span class="ct">✓</span>' : ""}</button>`).join("") || `<div class="note">Sin resultados</div>`;
     };
     draw();
-    const q = el.querySelector("#pkQ"); if (q) q.addEventListener("input", () => draw(q.value));
+    const q = el.querySelector("#pkQ"); if (q){ ponerX(q); q.addEventListener("input", () => draw(q.value)); }
     list.addEventListener("click", (e) => {
       const b = e.target.closest("[data-v]"); if (!b) return;
       sel.value = b.dataset.v; close();
@@ -1519,10 +1526,10 @@ async function photoData(src){
 function provForm(prov, onSaved){
   const p = prov || {};
   sheet(`<h2>${prov ? "Editar proveedor" : "Nuevo proveedor"}</h2>
-    <label class="f">Nombre<input id="pvN" class="inp" value="${esc(p.nombre||"")}" placeholder="Distribuidora El Perno" autocomplete="off" inputmode="text"></label>
+    <label class="f">Nombre<input id="pvN" class="inp" value="${esc(p.nombre||"")}" autocomplete="off" inputmode="text"></label>
     <label class="f">Teléfono<input id="pvT" class="inp num" inputmode="tel" value="${esc(p.telefono||"")}" autocomplete="off"></label>
-    <label class="f">Código del proveedor<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" placeholder="Opcional" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
-    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
+    <label class="f">Código del proveedor<input id="pvC" class="inp num" value="${esc(p.codigo||"")}" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label class="f">Nota<input id="pvNota" class="inp" value="${esc(p.nota||"")}" autocomplete="off" inputmode="text"></label>
     <div id="pvErr" class="err"></div>
     <div class="row">${prov ? `<button class="btn danger grow" id="pvDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="pvOk">Guardar</button></div>`,
     (el, close) => {
@@ -1545,7 +1552,7 @@ function provForm(prov, onSaved){
 function renderProvs(){
   const box = $("provList"); if (!box) return;
   const q = norm($("provQ")?.value || "");
-  const ps = [...(S.provs||[])].filter(p => !q || norm(p.nombre).includes(q) || norm(p.telefono).includes(q)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
+  const ps = [...(S.provs||[])].filter(p => !q || norm(p.nombre).includes(q) || norm(p.telefono).includes(q) || norm(p.codigo).includes(q)).sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
   box.innerHTML = ps.length ? `<div class="plist">${ps.map(p => `<button type="button" class="provrow" data-prov="${esc(p.id)}"><span class="pinfo"><span class="pname">${esc(p.nombre)}</span><span class="pmeta">${p.telefono ? `<span class="num">${esc(p.telefono)}</span>` : "Sin teléfono"}${p.codigo ? `<span>Código: <b class="num">${esc(p.codigo)}</b></span>` : ""}</span></span></button>`).join("")}</div>`
     : `<div class="empty">Sin proveedores.</div>`;
 }
@@ -1565,12 +1572,12 @@ function pendFormSheet(pre = {}, item = null){
       <div class="ph" id="pfPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
       <img id="pfImg" alt="Foto" hidden style="object-fit:contain;background:#fff">
     </button>
-    <label class="f">Producto<input id="pfN" class="inp" value="${esc(nombre0)}" placeholder="Llave de paso 1/2" autocomplete="off" inputmode="text"></label>
+    <label class="f">Producto<input id="pfN" class="inp" value="${esc(nombre0)}" autocomplete="off" inputmode="text"></label>
     <label class="f">Código<div class="row"><input id="pfC" class="inp num grow" value="${esc(it.codigo || pre.codigo || "")}" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="btn" id="pfScan">Leer</button></div></label>
-    <div class="row" style="align-items:flex-start"><label class="f grow">Cantidad<input id="pfCant" class="inp num miles" inputmode="numeric" value="${it.cantidad ? miles(it.cantidad) : ""}" placeholder="0"></label></div>
+    <div class="row" style="align-items:flex-start"><label class="f grow">Cantidad<input id="pfCant" class="inp num miles" inputmode="numeric" value="${it.cantidad ? miles(it.cantidad) : ""}"></label></div>
     <label class="f">Proveedor<select id="pfProv" class="inp"></select></label>
     <div id="pfProvTel" class="note"></div>
-    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
+    <label class="f">Nota<input id="pfNota" class="inp" value="${esc(it.nota||"")}" autocomplete="off" inputmode="text"></label>
     <div id="pfErr" class="err"></div>
     <div class="row">${item ? `<button class="btn danger grow" id="pfDel">Quitar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn primary grow" id="pfOk">${item ? "Guardar" : "Agregar"}</button></div>`,
     (el, close) => {
@@ -1730,7 +1737,7 @@ $("vDrop").addEventListener("click", e => {
 });
 document.addEventListener("click", e => { if (!e.target.closest(".drop")) $("vDrop").hidden = true; });
 $("vLibre").onclick = () => sheet(`<h2>Artículo sin código</h2>
-  <label class="f">Descripción<input id="lbN" class="inp" placeholder="Corte de varilla 1 m" inputmode="text"></label>
+  <label class="f">Descripción<input id="lbN" class="inp" inputmode="text"></label>
   <div class="row"><label class="f grow">Precio<input id="lbP" class="inp num miles" inputmode="numeric"></label><label class="f grow">Cantidad<input id="lbC" class="inp num miles" inputmode="numeric" value="1"></label></div>
   <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn venta grow" id="lbOk">Agregar</button></div>`,
   (el, close) => { el.querySelector("#lbOk").onclick = () => {
@@ -2025,7 +2032,7 @@ function checkExiste(){
 }
 function sumarSheet(p){
   sheet(`<h2 style="text-transform:none">${esc(p.nombre)}</h2><p class="note" style="margin:0">Hay <b>${miles(p.cantidad)}</b> unidades. ¿Cuántas llegaron?</p>
-    <label class="f">Unidades que entran<input id="smC" class="inp num miles" inputmode="numeric" placeholder="0"></label>
+    <label class="f">Unidades que entran<input id="smC" class="inp num miles" inputmode="numeric"></label>
     <label class="f">Precio de venta<input id="smP" class="inp num miles" inputmode="numeric" value="${p.precio ? miles(p.precio) : ""}"></label>
     <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn ingreso grow" id="smOk">Sumar</button></div>`,
     (el, close) => { setTimeout(()=>el.querySelector("#smC").focus(),50);
@@ -2100,7 +2107,7 @@ function calcGan(){     /* precio y costo escrito a mano → % */
 }
 function previewCodigo(){
   const cp = $("iCodP"), c9 = codigo9(toNum($("iPrecio").value), leerGan());
-  cp.placeholder = c9 ? "Se creará: " + c9 : "Escanea o escribe";
+  cp.placeholder = c9 ? "Se creará: " + c9 : "";
   const n = $("iCodNota");
   if (n){ const pr = toNum($("iPrecio").value);
     n.textContent = cp.value.trim() ? "Código propio escrito o leído." : c9 ? `Si lo dejas vacío, se crea ${c9} con el precio y el % de ganancia.` : pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "Si lo dejas vacío, se crea con el precio de venta y el % de ganancia (ej. 9195x20)."; }
@@ -2124,7 +2131,7 @@ $("iGanMenu").onclick = () => {
   $("iGanSug").hidden = true;
   popup("% de ganancia", `<div class="ganlist" id="gnList"></div>
     <div class="sect" style="margin-top:12px">Agregar</div>
-    <div class="row"><input id="gnNuevo" class="inp num grow" inputmode="decimal" placeholder="Ej: 45" autocomplete="off"><button type="button" class="btn primary" id="gnAdd">Agregar</button></div>`, (el, close) => {
+    <div class="row"><input id="gnNuevo" class="inp num grow" inputmode="decimal" autocomplete="off"><button type="button" class="btn primary" id="gnAdd">Agregar</button></div>`, (el, close) => {
     let lista = ganLista();
     const guardar = () => cfgSet({ ganancias: lista.slice() });
     const pintar = () => { el.querySelector("#gnList").innerHTML = lista.length ? lista.map(g => `<div class="ganrow"><button type="button" class="pick" data-pick="${g}">${fmtGan(g)} %</button><button type="button" class="del" data-del="${g}" aria-label="Borrar ${fmtGan(g)} %">×</button></div>`).join("") : `<div class="empty">No hay porcentajes. Agrega uno abajo.</div>`; };
@@ -2233,8 +2240,8 @@ function fillCatSelect(val){
 $("iCat").addEventListener("change", () => { const o = $("iCat").value === "__otra"; $("iCatOtra").hidden = !o; if (o) setTimeout(() => $("iCatOtra").focus(), 50); });
 function fillProvSelect(sel, val){
   const ps = [...(S.provs||[])].sort((a,b) => norm(a.nombre).localeCompare(norm(b.nombre)));
-  sel.innerHTML = `<option value="">Sin proveedor</option>` + ps.map(p => `<option value="${esc(p.id)}"${p.id===val?" selected":""}>${esc(p.nombre)}</option>`).join("") + `<option value="__nuevo">+ Nuevo proveedor…</option>`;
-  sel.dataset.prev = val || "";
+  sel.innerHTML = `<option value="">Sin proveedor</option>` + ps.map(p => `<option value="${esc(p.id)}"${p.id===val?" selected":""}>${esc(p.nombre)}${p.codigo ? " · " + esc(p.codigo) : ""}</option>`).join("") + `<option value="__nuevo">+ Nuevo proveedor…</option>`;
+  sel.dataset.prev = val || ""; sel.dataset.buscar = "1";
   upgradeSelect(sel);
   sel.onchange = () => {
     if (sel.value !== "__nuevo"){ sel.dataset.prev = sel.value; return; }
@@ -2391,17 +2398,23 @@ function invFiltrosPopup(){
       const cats = allCats(); Object.keys(cnt).forEach(c => { if (!cats.includes(c)) cats.push(c); });
       const est = S.invFiltro || "todos", cat = S.invCat || "__todas";
       const o = (attr, val, label, sel, n) => `<button type="button" class="popopt" ${attr}="${esc(val)}" aria-selected="${sel}"><span>${esc(label)}</span><span class="ct">${n != null ? miles(n) : ""}${sel ? " ✓" : ""}</span></button>`;
-      el.querySelector("#fiList").innerHTML = `<div class="popsec">Estado</div>` + Object.entries(ESTADOS).map(([k, l]) => o("data-est", k, l, est === k)).join("")
-        + `<div class="popsec">Categoría</div>` + o("data-cat", "__todas", "Todas", cat === "__todas", S.productos.length)
-        + cats.map(c => o("data-cat", c, c, cat === c, cnt[c] || 0)).join("") + (sin ? o("data-cat", "__sin", "Sin categoría", cat === "__sin", sin) : "");
+      const t = norm(el.querySelector("#fiQ")?.value || "");
+      const vis = cats.filter(c => !t || norm(c).includes(t));
+      el.querySelector("#fiEst").innerHTML = Object.entries(ESTADOS).map(([k, l]) => o("data-est", k, l, est === k)).join("");
+      el.querySelector("#fiCats").innerHTML = (t ? "" : o("data-cat", "__todas", "Todas", cat === "__todas", S.productos.length))
+        + vis.map(c => o("data-cat", c, c, cat === c, cnt[c] || 0)).join("") + (sin && (!t || norm("sin categoria").includes(t)) ? o("data-cat", "__sin", "Sin categoría", cat === "__sin", sin) : "")
+        + (t && !vis.length ? `<div class="empty">Ninguna categoría con “${esc(el.querySelector("#fiQ").value)}”.</div>` : "");
     };
+    el.querySelector("#fiList").innerHTML = `<div class="popsec">Estado</div><div id="fiEst" style="display:flex;flex-direction:column;gap:6px"></div><div class="popsec">Categoría</div><input id="fiQ" class="inp" inputmode="search" placeholder="Buscar categoría" autocomplete="off" style="margin-bottom:6px"><div id="fiCats" style="display:flex;flex-direction:column;gap:6px"></div>`;
+    ponerX(el.querySelector("#fiQ"));
+    el.querySelector("#fiQ").addEventListener("input", draw);
     draw();
     el.querySelector("#fiList").addEventListener("click", (e) => {
       const a = e.target.closest("[data-est]"), b = e.target.closest("[data-cat]");
       if (a) S.invFiltro = a.dataset.est; else if (b) S.invCat = b.dataset.cat; else return;
       draw(); renderInv();
     });
-    el.querySelector("#fiReset").onclick = () => { S.invFiltro = "todos"; S.invCat = "__todas"; draw(); renderInv(); };
+    el.querySelector("#fiReset").onclick = () => { S.invFiltro = "todos"; S.invCat = "__todas"; const q = el.querySelector("#fiQ"); q.value = ""; q.dispatchEvent(new Event("input")); draw(); renderInv(); };
   });
 }
 $("invFiltros").onclick = invFiltrosPopup;
@@ -2471,6 +2484,7 @@ function fillAjustes(){
   $("aAutoMin").value = String(c.autoMin || 10);
   $("aRecordar").value = String(c.recordarDias ?? 7);
   $("aArchivo").value = c.copiaArchivo || "hora";
+  try { pintarCarpeta(); } catch {}
   try { pintarEtqAjustes(); } catch {}
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
   $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
@@ -3062,7 +3076,7 @@ function clienteForm(cli, onSaved){
     <label class="f">Teléfono<input id="clT" class="inp num" inputmode="tel" value="${esc(c.telefono||"")}" autocomplete="off"></label>
     <label class="f">Correo<input id="clM" class="inp" inputmode="email" value="${esc(c.correo||"")}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
     <label class="f">Dirección<input id="clDir" class="inp" value="${esc(c.direccion||"")}" autocomplete="off" inputmode="text"></label>
-    <label class="f">Nota<input id="clNota" class="inp" value="${esc(c.nota||"")}" placeholder="Opcional" autocomplete="off" inputmode="text"></label>
+    <label class="f">Nota<input id="clNota" class="inp" value="${esc(c.nota||"")}" autocomplete="off" inputmode="text"></label>
     <div id="clErr" class="err"></div>
     <div class="row">${cli ? `<button class="btn danger grow" id="clDel">Eliminar</button>` : `<button class="btn grow" data-close>Cancelar</button>`}<button class="btn ingreso grow" id="clOk">Guardar</button></div>`,
     (el, close) => {
@@ -3132,11 +3146,60 @@ async function clienteParaVenta(){
 S.dirty = false;
 function dbChanged(path){ if (!String(path).startsWith("config/")) { S.dirty = true; S.fileDirty = true; } else if (!S.dirtyCfg) S.dirtyCfg = true; }
 /* copia en archivo (Descargas): sobrevive aunque el navegador borre sus datos al cerrarse */
-function guardarArchivo(){
+/* ---------- copias en una carpeta: solo 2 archivos (1 = la más reciente, 2 = la anterior) ---------- */
+const ARCH1 = "copia-ferreteria-1-reciente.json", ARCH2 = "copia-ferreteria-2-anterior.json";
+const carpetaPosible = () => typeof window.showDirectoryPicker === "function";
+let carpetaDbP = null;
+function carpetaDb(){
+  if (!carpetaDbP) carpetaDbP = new Promise((res, rej) => { const rq = indexedDB.open("caja-carpeta", 1); rq.onupgradeneeded = () => rq.result.createObjectStore("k"); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); });
+  return carpetaDbP;
+}
+async function carpetaOp(mode, fn){ const db = await carpetaDb(); return new Promise((res, rej) => { const t = db.transaction("k", mode), st = t.objectStore("k"); let out; const r = fn(st); if (r) r.onsuccess = () => { out = r.result; }; t.oncomplete = () => res(out); t.onerror = () => rej(t.error); }); }
+const leerCarpeta = () => carpetaOp("readonly", st => st.get("carpeta")).catch(() => null);
+async function permisoCarpeta(h, pedir){
+  try { const o = { mode: "readwrite" }; if (await h.queryPermission(o) === "granted") return true; if (pedir && await h.requestPermission(o) === "granted") return true; } catch {}
+  return false;
+}
+async function escribirEnCarpeta(texto){
+  const h = await leerCarpeta(); if (!h) return false;
+  if (!await permisoCarpeta(h, true)) return false;
+  try {
+    const f1 = await h.getFileHandle(ARCH1, { create: true });
+    const prev = await (await f1.getFile()).text();
+    if (prev && prev.length > 20){ const f2 = await h.getFileHandle(ARCH2, { create: true }); const w2 = await f2.createWritable(); await w2.write(prev); await w2.close(); }
+    const w1 = await f1.createWritable(); await w1.write(texto); await w1.close();
+    return true;
+  } catch { return false; }
+}
+async function pintarCarpeta(){
+  const txt = $("aCarpetaTxt"); if (!txt) return;
+  if (!carpetaPosible()){
+    txt.innerHTML = "Este navegador no deja reescribir archivos, así que cada copia queda como un archivo nuevo en <b>Descargas</b>. En <b>Chrome</b> sí se puede elegir una carpeta y guardar solo 2 archivos.";
+    $("aCarpeta").hidden = true; $("aCarpetaQuitar").hidden = true; return;
+  }
+  const h = await leerCarpeta();
+  txt.innerHTML = h ? `Las copias se guardan en la carpeta <b>${esc(h.name)}</b>: <b>${ARCH1}</b> (la más reciente) y <b>${ARCH2}</b> (la anterior). Se reescriben, no se acumulan.`
+    : "Elige una carpeta del celular y ahí quedarán solo 2 archivos: la copia <b>más reciente</b> y la <b>anterior</b>. Se reescriben cada vez.";
+  $("aCarpeta").textContent = h ? "Cambiar carpeta" : "Elegir carpeta"; $("aCarpeta").hidden = false; $("aCarpetaQuitar").hidden = !h;
+}
+$("aCarpeta").onclick = async () => {
+  try {
+    const h = await window.showDirectoryPicker({ id: "copias-caja", mode: "readwrite" });
+    await carpetaOp("readwrite", st => st.put(h, "carpeta"));
+    S.fileDirty = true; await guardarArchivo(); pintarCarpeta();
+  } catch (e) { if (e?.name !== "AbortError") toast("No se pudo usar esa carpeta."); }
+};
+$("aCarpetaQuitar").onclick = async () => { try { await carpetaOp("readwrite", st => st.delete("carpeta")); } catch {} pintarCarpeta(); toast("Las copias volverán a Descargas"); };
+async function guardarArchivo(){
   try {
     const data = { app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), docs:S.db.exportAll() };
+    const texto = JSON.stringify(data);
+    if (carpetaPosible() && await escribirEnCarpeta(texto)){
+      ls.set("lastExport", String(Date.now())); S.fileDirty = false; renderUltimaExp();
+      toast("Copia guardada (1 reciente, 2 anterior)", 1800); return;
+    }
     const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
-    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type:"application/json" }));
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([texto], { type:"application/json" }));
     a.download = `copia-ferreteria-${stamp()}-${hm}.json`; document.body.appendChild(a); a.click();
     setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
     ls.set("lastExport", String(Date.now())); S.fileDirty = false; renderUltimaExp();
@@ -3700,6 +3763,44 @@ $("aInstalar").onclick = async () => { if (!installEvt) return; installEvt.promp
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
 }
+
+/* ---------- casillas: X para borrar lo escrito ---------- */
+function ponerX(inp){
+  if (!inp || inp.dataset.conx) return; inp.dataset.conx = "1";
+  const w = document.createElement("div"); w.className = "qwrap" + (inp.classList.contains("grow") ? " grow" : "");
+  inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+  const b = document.createElement("button"); b.type = "button"; b.className = "qx"; b.hidden = !inp.value; b.setAttribute("aria-label", "Borrar lo escrito");
+  b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  w.appendChild(b);
+  const ver = () => { b.hidden = !inp.value; };
+  inp.addEventListener("input", ver); inp.addEventListener("change", ver);
+  b.addEventListener("mousedown", (e) => e.preventDefault());
+  b.onclick = () => { inp.value = ""; ver(); inp.dispatchEvent(new Event("input", { bubbles: true })); inp.focus(); };
+}
+/* Enter en el teclado: solo guarda lo escrito y esconde el teclado (no guarda toda la ficha).
+   En los buscadores sí busca. */
+const esBuscador = (el) => el.getAttribute("inputmode") === "search" || el.getAttribute("enterkeyhint") === "search";
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const el = e.target; if (!el || el.tagName !== "INPUT" || esBuscador(el)) return;
+  if (el.id === "kqPin") return;   /* clave para entrar a una sección */
+  e.preventDefault(); e.stopImmediatePropagation();
+  el.dispatchEvent(new Event("change", { bubbles: true }));
+  el.blur();
+}, true);
+/* Sin ayudas de contraseña/tarjeta/dirección del teclado salvo en las claves */
+function sinAutollenado(root){
+  (root.querySelectorAll ? root : document).querySelectorAll("input:not([type=file]):not([type=hidden]):not([type=checkbox])").forEach(el => {
+    if (el.type === "password"){ return; }
+    el.setAttribute("autocomplete", "off"); el.setAttribute("data-lpignore", "true"); el.setAttribute("data-1p-ignore", "true"); el.setAttribute("data-form-type", "other");
+    if (!el.getAttribute("name")) el.setAttribute("name", "c" + Math.random().toString(36).slice(2, 8));
+    if (!el.getAttribute("enterkeyhint") && !esBuscador(el)) el.setAttribute("enterkeyhint", "done");
+    if (esBuscador(el) && el.id !== "fiQ" && el.id !== "pkQ" && !el.closest(".ganwrap")) ponerX(el);
+  });
+  (root.querySelectorAll ? root : document).querySelectorAll("form").forEach(f => f.setAttribute("autocomplete", "off"));
+}
+sinAutollenado(document);
+new MutationObserver((ms) => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) sinAutollenado(n); }); }).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- boot ---------- */
 try { const d = JSON.parse(ls.get("carrito")||"[]"); if (Array.isArray(d)) S.carrito = d; } catch {}
