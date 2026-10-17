@@ -457,7 +457,6 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="home" class="screen gut" hidden>
   <div class="home-top">
     <div class="brand" id="brand">Ferretería<small id="brandSub">Inventario y caja</small></div>
-    <button class="fsbtn" id="fsBtn" aria-pressed="false" aria-label="Pantalla completa" hidden><svg id="fsIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg></button>
   </div>
   <div class="nubeaviso" id="nubeAviso" hidden></div>
   <div class="toplinks">
@@ -4121,10 +4120,6 @@ async function enterFs(){
 async function exitFs(){ S.wantFs = false; ls.set("fsWanted","0"); try { if (isFs()){ if (document.exitFullscreen) await document.exitFullscreen(); else await document.webkitExitFullscreen(); } } catch {} fsUpdate(); }
 function fsUpdate(){
   const on = enFs(), puede = fsSupported || fsFijo();
-  $("fsBtn").hidden = !fsSupported || standalone();
-  $("fsBtn").setAttribute("aria-pressed", on);
-  $("fsBtn").setAttribute("aria-label", on ? "Salir de pantalla completa" : "Pantalla completa");
-  $("fsIco").innerHTML = on ? '<path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6"/>' : '<path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/>';
   $("aFs").setAttribute("aria-checked", on || (S.wantFs && !!S.fsPaused)); $("aKiosco").setAttribute("aria-checked", S.kiosco);
   $("fsSettings").hidden = !puede;
   $("fsIos").hidden = puede;
@@ -4138,10 +4133,7 @@ $("kiosk").addEventListener("click", enterFs);
 const fsRestore = () => { if (!S.fsPaused && (S.wantFs || S.kiosco) && fsSupported && !enFs()) enterFs(); };
 document.addEventListener("pointerup", fsRestore, true);
 document.addEventListener("click", fsRestore, true);
-$("fsBtn").onclick = () => {
-  if (enFs()){ if (S.kiosco){ toast("La pantalla completa está bloqueada. Se quita en Ajustes con la clave.", 3500); return; } exitFs(); }
-  else enterFs();
-};
+/* (el botón de pantalla completa del inicio se quitó: ahora solo se cambia en Ajustes) */
 $("aFs").onclick = () => {
   if (enFs() || S.wantFs){
     if (S.kiosco){ toast("Primero quita el bloqueo de pantalla completa.", 3000); return; }
