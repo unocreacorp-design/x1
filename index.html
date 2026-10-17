@@ -4160,14 +4160,26 @@ $("aKiosco").onclick = () => {
       el.querySelector("#kqPin").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
     });
 };
-/* El botón o gesto de "atrás" del celular navega dentro de la app en vez de salir de ella */
-try { history.pushState({ caja: 1 }, ""); } catch {}
-window.addEventListener("popstate", () => {
-  try { history.pushState({ caja: 1 }, ""); } catch {}
+/* El botón o gesto de "atrás" del celular navega dentro de la app en vez de salir de ella.
+   El navegador se salta (y sale de la app) las entradas de historial en las que la persona no tocó la pantalla,
+   así que se agrega UNA reserva por cada toque, hasta 12; cada "atrás" gasta una. Antes se agregaba dentro del
+   propio "atrás" (que no cuenta como toque) y por eso el segundo "atrás" cerraba la app. */
+const RESERVA_ATRAS = 12;
+let atrasReserva = Number(history.state?.g) || 0;
+function reponerAtras(){
+  if (atrasReserva >= RESERVA_ATRAS) return;
+  try { history.pushState({ caja: 1, g: atrasReserva + 1 }, ""); atrasReserva++; } catch {}
+}
+document.addEventListener("pointerdown", reponerAtras, true);
+document.addEventListener("keydown", reponerAtras, true);
+window.addEventListener("popstate", (e) => {
+  atrasReserva = Number(e.state?.g) || 0;
   if ($("visor")){ cerrarVisor(); return; }
   const cap = $("capCancel") || $("scCancel"); if (cap){ cap.click(); return; }
+  if ($("popHost").innerHTML){ $("popHost").innerHTML = ""; return; }
   const host = $("sheetHost");
   if (host.innerHTML){ host.innerHTML = ""; return; }
+  if (!$("crearCajaPop").hidden){ $("crearCajaPop").hidden = true; return; }
   if ($("home").hidden && $("lock").hidden) back();
 });
 window.addEventListener("beforeunload", (e) => { if (S.kiosco){ e.preventDefault(); e.returnValue = ""; } });
