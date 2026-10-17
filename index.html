@@ -200,13 +200,14 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .recibo-wrap canvas{background:#fff;max-width:100%;height:auto;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 
 /* Lock */
-#lock{justify-content:center;align-items:center;padding-block:24px}
+#lock{justify-content:flex-start;align-items:center;padding-top:max(24px,12vh);padding-bottom:24px;overflow-y:auto}
 .lockbox{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
 .lockbox h1{font-family:var(--f-display);font-weight:800;font-size:34px;text-transform:uppercase;margin:0;line-height:1}
 .pin{font-family:var(--f-mono);font-size:28px;letter-spacing:.5em;text-align:center}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .keypad button{padding:16px 0;font-size:24px;font-weight:600;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-mono)}
 .err{color:var(--danger);font-weight:600;font-size:14px;min-height:20px}
+#pinErr{min-height:40px;text-align:center}
 
 /* Sheet / toast */
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end}
@@ -442,7 +443,7 @@ details.card[open]>summary{margin-bottom:10px}
     </div></div>
     <div id="pinForm" hidden>
       <div style="display:flex;flex-direction:column;gap:12px">
-        <p class="note" style="margin:0">Escribe la clave para entrar.</p>
+        <p class="note" style="margin:0">Escriba la clave para entrar.</p>
         <div id="pinDots" class="pin" aria-live="polite">····</div>
         <div id="pinErr" class="err"></div>
         <div class="keypad" id="keypad"></div>
@@ -484,9 +485,9 @@ details.card[open]>summary{margin-bottom:10px}
       <button id="cObjeto" aria-pressed="false">Buscar con foto</button>
     </div>
     <div class="shot" id="live" hidden><video id="liveVideo" playsinline muted></video><canvas id="liveBox"></canvas><div class="reticle" id="liveReticle"></div><span class="engine" id="liveEngine"></span></div>
-    <div class="row" id="liveBar" hidden><span class="note grow">Apunta al código; se lee solo.</span><button type="button" class="btn sm" id="torchBtn" hidden aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6v5l-2 4v11h-2V11L9 7z"/></svg>Linterna</button><label class="btn sm" for="camFile">Usar foto</label></div>
+    <div class="row" id="liveBar" hidden><span class="note grow">Apunte al código; se lee solo.</span><button type="button" class="btn sm" id="torchBtn" hidden aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6v5l-2 4v11h-2V11L9 7z"/></svg>Linterna</button><label class="btn sm" for="camFile">Usar foto</label></div>
     <label class="shot" for="camFile" id="shot">
-      <div class="ph" id="shotPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="shotHint">Toca para tomar la foto del código</span></div>
+      <div class="ph" id="shotPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span id="shotHint">Toque para tomar la foto del código</span></div>
       <img id="shotImg" alt="Foto tomada" hidden>
       <div class="reticle" id="reticle"></div>
     </label>
@@ -564,7 +565,7 @@ details.card[open]>summary{margin-bottom:10px}
     </div>
     <label class="f">Categoría<select id="iCat" class="inp"></select></label>
     <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiala.</p>
-    <input id="iCatOtra" class="inp" placeholder="Escribe la categoría nueva" hidden inputmode="text">
+    <input id="iCatOtra" class="inp" placeholder="Escriba la categoría nueva" hidden inputmode="text">
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
     <label class="f">Foto
       <button type="button" class="shot" id="iFotoBtn" style="aspect-ratio:1/1;max-height:320px;width:100%;padding:0">
@@ -650,7 +651,7 @@ details.card[open]>summary{margin-bottom:10px}
       <select id="aPapel" class="inp"><option value="384">58 mm</option><option value="576">80 mm</option></select>
     </label>
     <div class="sect" style="margin-top:8px">Etiqueta</div>
-    <p class="note" style="margin:0">Toca lo que quieres que salga en la etiqueta. El código de barras lleva el código propio.</p>
+    <p class="note" style="margin:0">Toque lo que quiere que salga en la etiqueta. El código de barras lleva el código propio.</p>
     <div class="tabs" id="aEtqOpts"></div>
     <label class="f">Texto extra (opcional)<input id="aEtqExtra" class="inp" inputmode="text" maxlength="40"></label>
     <div class="recibo-wrap" id="aEtqPrev" style="align-self:stretch;flex-shrink:0"></div>
@@ -690,8 +691,8 @@ details.card[open]>summary{margin-bottom:10px}
     </div>
     <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
     <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app se abre desde su ícono, sin la barra del navegador.</p>
-    <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
-    <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
+    <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, use <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
+    <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abra la app en Safari, toque Compartir › <b>Agregar a pantalla de inicio</b> y ábrala desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:8px">Clave de la app</div>
     <div id="huellaAj" hidden style="display:flex;flex-direction:column;gap:6px">
       <button type="button" class="switch" id="aHuella" role="switch" aria-checked="false"><span>Entrar con huella<br><small class="note" style="font-weight:500">Use el lector de huella (o la cara) del celular en vez de la clave. La clave sigue sirviendo.</small></span><span class="tg"></span></button>
@@ -756,7 +757,7 @@ details.card[open]>summary{margin-bottom:10px}
 </section>
 
 </div>
-<button class="kiosk" id="kiosk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg><b>Toca la pantalla</b><span>para volver a pantalla completa</span></button>
+<button class="kiosk" id="kiosk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg><b>Toque la pantalla</b><span>para volver a pantalla completa</span></button>
 <div id="capHost"></div>
 <input id="scanFile" type="file" accept="image/*" capture="environment" hidden>
 <input id="fotoProdFile" type="file" accept="image/*" capture="environment" hidden>
@@ -921,7 +922,7 @@ async function tryPin(){
   const w = esperaPin(); if (w){ $("pinErr").textContent = `Demasiados intentos. Espere ${textoEspera(w)}.`; pinBuf=""; $("pinDots").textContent="····"; return; }
   const h = await hashPin(pinBuf, S.config.pinSalt);
   if (h === S.config.pinHash){ pinOk(); ss.set("unlock", h); unlock(); }
-  else { pinFallo(); const w2 = esperaPin(); $("pinErr").textContent = w2 ? `Clave incorrecta. Espere ${textoEspera(w2)} para intentar otra vez.` : "Clave incorrecta. Intenta de nuevo."; }
+  else { pinFallo(); const w2 = esperaPin(); $("pinErr").textContent = w2 ? `Clave incorrecta. Espere ${textoEspera(w2)} para intentar otra vez.` : "Clave incorrecta. Intente de nuevo."; }
   pinBuf=""; $("pinDots").textContent="····";
 }
 /* al abrir una sección desplegable, mover la vista para que el título quede arriba */
@@ -979,7 +980,8 @@ async function huellaVerificar(){
 function pintarHuella(){
   const on = !!HUELLA.id();
   $("huellaAj").hidden = !HUELLA.ok; $("aHuella").setAttribute("aria-checked", on ? "true" : "false");
-  $("huellaBtn").hidden = !(HUELLA.ok && on);
+  /* con la huella activada el botón ocupa su lugar desde el principio; si el lector no responde solo se desactiva */
+  $("huellaBtn").hidden = !on; $("huellaBtn").disabled = HUELLA.revisado && !HUELLA.ok;
 }
 let huellaOcupada = false;
 async function entrarConHuella(auto){
@@ -995,15 +997,16 @@ $("aHuella").onclick = async () => {
   try { await huellaActivar(); pintarHuella(); toast("Listo: ya puede entrar con la huella"); }
   catch (e) { $("huellaErr").textContent = e?.name === "NotAllowedError" ? "Se canceló o el celular no tiene huella registrada." : "Este celular o navegador no permite usar la huella aquí."; }
 };
+pintarHuella();
 huellaDisponible().then(ok => {
-  HUELLA.ok = ok; pintarHuella();
+  HUELLA.ok = ok; HUELLA.revisado = true; pintarHuella();
   if (ok && HUELLA.id() && !S.unlocked && !$("pinForm").hidden) setTimeout(() => entrarConHuella(true), 400);
 });
 function showLockState(){
   if (S.restaurando) return;
   $("lockMsg").hidden = true;
   const rec = ss.get("recuperado");
-  if (rec != null){ ss.del("recuperado"); setTimeout(() => toast(`Datos recuperados: ${miles(Number(rec)||0)} productos. Entra con tu clave.`, 3500), 300); }
+  if (rec != null){ ss.del("recuperado"); setTimeout(() => toast(`Datos recuperados: ${miles(Number(rec)||0)} productos. Entre con su clave.`, 3500), 300); }
   if (!S.config || !S.config.pinHash){ $("setupForm").hidden=false; $("pinForm").hidden=true; $("lockTitle").textContent="Iniciar sesión"; }
   else { $("setupForm").hidden=true; $("pinForm").hidden=false; $("lockTitle").textContent=S.config.nombre||"Caja Ferretería"; try { pintarHuella(); if (HUELLA.ok && HUELLA.id() && !S.bloqueoManual) setTimeout(() => entrarConHuella(true), 400); } catch {} }
 }
@@ -1014,7 +1017,7 @@ $("setRestore").onchange = async (e) => {
   if (!data.docs["config/tienda"]){ $("setErr").textContent = "A esa copia le falta la configuración de la caja."; return; }
   try {
     S.restaurando = true; $("setupForm").hidden = true; $("pinForm").hidden = true;
-    $("lockMsg").hidden = false; $("lockMsg").innerHTML = `<div class="spin"></div><span>Recuperando tus datos…</span>`;
+    $("lockMsg").hidden = false; $("lockMsg").innerHTML = `<div class="spin"></div><span>Recuperando sus datos…</span>`;
     await S.db.importAll(data.docs);
     const n = Object.keys(data.docs).filter(k => k.startsWith("productos/")).length;
     ss.set("recuperado", String(n));
@@ -1023,13 +1026,13 @@ $("setRestore").onchange = async (e) => {
 };
 $("setGo").onclick = async () => {
   const nombre = $("setNombre").value.trim(), p1=$("setPin").value.trim(), p2=$("setPin2").value.trim();
-  if (!nombre) return $("setErr").textContent="Escribe el nombre del negocio.";
+  if (!nombre) return $("setErr").textContent="Escriba el nombre del negocio.";
   if (!/^\d{4,6}$/.test(p1)) return $("setErr").textContent="La clave debe tener de 4 a 6 números.";
   if (p1!==p2) return $("setErr").textContent="Las dos claves no coinciden.";
   const salt = randSalt(), h = await hashPin(p1, salt);
   const cfg = { nombre, nit:"", direccion:"", telefono:"", pie:"Gracias por su compra", papel:384, bajo:3, pinSalt:salt, pinHash:h, sigFactura:1, sigCodigo:1 };
   try { await S.db.doc("config/tienda").set(cfg); S.config=cfg; ss.set("unlock", h); unlock(); }
-  catch(e){ $("setErr").textContent = "No se pudo guardar: " + (e?.message||"error") + ". Revisa tu conexión."; }
+  catch(e){ $("setErr").textContent = "No se pudo guardar: " + (e?.message||"error") + ". Revise su conexión."; }
 };
 
 /* ---------- home ---------- */
@@ -1037,7 +1040,7 @@ function setModo(m){
   S.modoCam = m; ls.set("modoCam", m);
 
   $("cCodigo").setAttribute("aria-pressed", m==="codigo"); $("cObjeto").setAttribute("aria-pressed", m==="objeto");
-  $("shotHint").textContent = m==="codigo" ? (liveOK() ? "Toca para abrir el lector en vivo" : "Toca para tomar la foto del código") : "Toca para tomar la foto del producto";
+  $("shotHint").textContent = m==="codigo" ? (liveOK() ? "Toque para abrir el lector en vivo" : "Toque para tomar la foto del código") : "Toque para tomar la foto del producto";
   $("reticle").hidden = m!=="codigo";
   $("camTitle").textContent = S.proposito==="venta" ? "Escanear para venta" : S.proposito==="ingreso" ? "Escanear código" : (m==="codigo" ? "Leer código" : "Buscar con foto");
 }
@@ -1176,9 +1179,9 @@ function camHelp(e){
     const perm = await camPermission();
     const name = e?.name || "", msg = e?.message || "";
     const ocupada = name === "NotReadableError" || name === "AbortError";
-    sheet(`<h2>${ocupada ? "Otra app está usando la cámara" : "Usa la cámara del celular"}</h2>
+    sheet(`<h2>${ocupada ? "Otra app está usando la cámara" : "Use la cámara del celular"}</h2>
       <p style="margin:0;font-size:17px;line-height:1.4">${ocupada
-        ? "Cierra la app que esté usando la cámara y vuelve a intentar, o usa la cámara del celular."
+        ? "Cierre la app que esté usando la cámara y vuelva a intentar, o use la cámara del celular."
         : "Abierta así, la app no puede usar la cámara en vivo. Con la cámara del celular funciona igual: tomas la foto del código y la app lo lee."}</p>
       <button class="btn cam block bigscan" id="chPhoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Usar la cámara del celular</button>
       <button class="btn block" id="chRetry">Intentar la cámara en vivo otra vez</button>
@@ -1199,10 +1202,10 @@ function camModeUI(){
 }
 function camErrorText(e){
   if (!window.isSecureContext) return "La cámara en vivo solo funciona abriendo la app desde su link (https). Así como está, se usa la cámara normal del celular.";
-  if (e && (e.name === "NotAllowedError" || e.name === "SecurityError")) return "La cámara está bloqueada para esta página. En Chrome toca los tres puntos › ⓘ (o el candado junto a la dirección) › Permisos › Cámara › Permitir, y vuelve a intentar.";
-  if (e && e.name === "NotReadableError") return "Otra app está usando la cámara. Ciérrala y vuelve a intentar.";
+  if (e && (e.name === "NotAllowedError" || e.name === "SecurityError")) return "La cámara está bloqueada para esta página. En Chrome toque los tres puntos › ⓘ (o el candado junto a la dirección) › Permisos › Cámara › Permitir, y vuelva a intentar.";
+  if (e && e.name === "NotReadableError") return "Otra app está usando la cámara. Ciérrela y vuelva a intentar.";
   if (e && e.name === "NotFoundError") return "No se encontró una cámara en este equipo.";
-  return "No se pudo abrir la cámara en vivo. Toca el recuadro para tomar una foto.";
+  return "No se pudo abrir la cámara en vivo. Toque el recuadro para tomar una foto.";
 }
 /* Toma una foto con la cámara en vivo de la app. Si ve un código de barras o QR, toma la foto sola,
    suena y devuelve también el código. Resuelve {canvas, code}, null si se cancela, o undefined si
@@ -1295,7 +1298,7 @@ function scanCode(titulo, opts = {}){
       <video id="scVideo" playsinline muted></video><canvas id="scBox" style="position:absolute;left:0;top:0;width:100%;pointer-events:none"></canvas>
       <div class="scanframe" id="scFrame"></div>
       <div class="captop"><span>${esc(titulo)}<span class="scancount" id="scCount" hidden>0</span></span><button type="button" class="capx" id="scCancel" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-      <div class="caphint" id="scHint">${soloEscrito ? "Pon el código escrito dentro del recuadro" : "Apunta al código dentro del recuadro"}</div>
+      <div class="caphint" id="scHint">${soloEscrito ? "Ponga el código escrito dentro del recuadro" : "Apunte al código dentro del recuadro"}</div>
       <div class="scanmsg" id="scMsg" style="opacity:0"></div>
       <div class="capbar scanbar"><span></span><span class="capmid">${opts.varios ? `<button class="capbtn vbtn" id="scVarios" aria-pressed="false">Varios</button>` : ""}${opts.photo ? `<button class="capbtn" id="scPhoto">Foto</button>` : ""}</span><span class="capside"><button class="capbtn" id="scTorch" aria-pressed="false" aria-label="Luz"></button></span></div></div>`;
     let done = false, cuenta = 0, msgT = 0;
@@ -1428,7 +1431,7 @@ function scanFromPhoto(opts = {}){
       }
       const code = await decodeCode(c);
       if (code){ beep(); resolve({ code }); }
-      else { toast("No se encontró un código en la foto. Acércate más, con buena luz.", 3500); resolve(null); }
+      else { toast("No se encontró un código en la foto. Acérquese más, con buena luz.", 3500); resolve(null); }
     };
     inp.click();
   });
@@ -1475,7 +1478,7 @@ async function getCam(){
       S.fsPaused = false;
       try { if (FS.requestFullscreen) await FS.requestFullscreen({ navigationUI: "hide" }); else await FS.webkitRequestFullscreen(); } catch {}
       fsUpdate();
-      if (!isFs()) toast("Toca la pantalla para volver a pantalla completa", 3000);
+      if (!isFs()) toast("Toque la pantalla para volver a pantalla completa", 3000);
     }
   }
 }
@@ -1629,7 +1632,7 @@ async function processCamCanvas(canvas){
   if (S.modoCam==="codigo"){
     camStatus("Leyendo el código…", true);
     const code = await decodeCode(canvas);
-    if (!code){ camStatus("No se encontró un código en la foto. Acércate más, con buena luz y el código derecho, o escríbelo abajo."); return; }
+    if (!code){ camStatus("No se encontró un código en la foto. Acérquese más, con buena luz y el código derecho, o escríbalo abajo."); return; }
     $("camStatus").hidden=true; handleCode(code);
   } else {
     photoSearchResult(canvas);
@@ -1681,8 +1684,8 @@ function wireNotFound(code, nombre, foto){
 document.addEventListener("click", (e) => {
   if (!e.target.closest('[data-help="nf"]')) return;
   popup("¿Qué hace cada botón?", `<div class="helpbox">
-    <div><b>Agregar</b><p>Registra este producto en tu inventario con nombre, precio, cantidad y foto, para poder venderlo.</p></div>
-    <div><b>Por comprar</b><p>Lo anota en tu lista de compras para pedirlo al proveedor. No lo agrega al inventario.</p></div>
+    <div><b>Agregar</b><p>Registra este producto en su inventario con nombre, precio, cantidad y foto, para poder venderlo.</p></div>
+    <div><b>Por comprar</b><p>Lo anota en su lista de compras para pedirlo al proveedor. No lo agrega al inventario.</p></div>
   </div>`);
 });
 /* ---------- buscar con foto en Google ---------- */
@@ -1707,7 +1710,7 @@ function photoSearchResult(canvas){
     <div class="sect">Buscar este producto</div>
     <button class="btn primary block" id="lensGo">Buscar en Google</button>
     <button class="btn block" id="lensShare">Compartir foto</button>
-    <p class="note" style="margin:0">Para buscarlo por nombre en tu inventario, usa la casilla de búsqueda del Inventario.</p>
+    <p class="note" style="margin:0">Para buscarlo por nombre en su inventario, use la casilla de búsqueda del Inventario.</p>
     <div class="row"><button class="btn ingreso grow" id="nfAdd">Agregar</button><button class="btn grow" id="nfPend">Por comprar</button></div>
   </div>`;
   $("lensGo").onclick = () => lensSearch(canvas);
@@ -1805,7 +1808,7 @@ function pendFormSheet(pre = {}, item = null){
       };
       el.querySelector("#pfOk").onclick = async () => {
         const nombre = el.querySelector("#pfN").value.trim(), codigo = el.querySelector("#pfC").value.trim();
-        if (!nombre && !codigo){ el.querySelector("#pfErr").textContent = "Escribe el nombre o el código del producto."; return; }
+        if (!nombre && !codigo){ el.querySelector("#pfErr").textContent = "Escriba el nombre o el código del producto."; return; }
         const data = { nombre: nombre || ("Producto con código " + codigo), codigo, foto: fotoData || null, cantidad: toNum(el.querySelector("#pfCant").value),
           proveedorId: sel.value && sel.value !== "__nuevo" ? sel.value : "", nota: el.querySelector("#pfNota").value.trim() };
         try {
@@ -1899,7 +1902,7 @@ $("pExport").onclick = () => {
     el.querySelector("#peTxt").onclick = async () => {
       const t = textoPorComprar(lista);
       try { if (navigator.share){ await navigator.share({ text: t }); close(); return; } } catch (e){ if (e?.name === "AbortError") return; }
-      try { await navigator.clipboard.writeText(t); toast("Lista copiada. Pégala en WhatsApp."); } catch {}
+      if (await copiarTexto(t)) toast("Lista copiada. Pégala en WhatsApp.");
       window.open("https://wa.me/?text=" + encodeURIComponent(t), "_blank"); close();
     };
     el.querySelector("#peApp").onclick = async () => {
@@ -2001,25 +2004,35 @@ function addToCart(p, cant=1){
   saveCartDraft(); renderCart();
 }
 function saveCartDraft(){ ls.set("carrito", JSON.stringify(S.carrito)); }
+function metaCarro(i){
+  const p = i.id ? S.productos.find(x=>x.id===i.id) : null;
+  const warn = p && i.cant > (Number(p.cantidad)||0) ? `<span class="stock low">Solo hay ${miles(Math.max(0, p.cantidad))}</span>` : "";
+  return `<span class="num">${fmt(i.precio)} c/u</span>${warn}`;
+}
 function renderCart(){
   const c = $("cart");
+  /* si se está escribiendo una cantidad, se redibuja al terminar (si no, se pierde lo escrito y el navegador da error) */
+  const act = document.activeElement;
+  if (act && act.matches("input") && c.contains(act)){ S.cartPend = true; actualizarTotales(); return; }
+  S.cartPend = false;
   if (!S.carrito.length){
-    c.innerHTML = `<div class="empty">La venta está vacía.<br>Escanea un código o busca el producto por nombre.</div>`;
+    c.innerHTML = `<div class="empty">La venta está vacía.<br>Escanee un código o busque el producto por nombre.</div>`;
   } else {
     c.innerHTML = `<div class="plist cart">${S.carrito.map((i,k) => {
-      const p = i.id ? S.productos.find(x=>x.id===i.id) : null;
-      const warn = p && i.cant > (Number(p.cantidad)||0) ? `<span class="stock low">Solo hay ${miles(p.cantidad)}</span>` : "";
-      return `<div class="prow" style="cursor:default;flex-wrap:wrap">
-        <span class="pinfo" style="flex-basis:60%"><span class="pname">${esc(i.nombre)}</span><span class="pmeta"><span class="num">${fmt(i.precio)} c/u</span>${warn}</span></span>
+      return `<div class="prow" style="cursor:default;flex-wrap:wrap" data-fila="${k}">
+        <span class="pinfo" style="flex-basis:60%"><span class="pname">${esc(i.nombre)}</span><span class="pmeta">${metaCarro(i)}</span></span>
         <span class="price">${fmt(i.precio*i.cant)}</span>
         <span class="qty" style="width:100%;justify-content:flex-end"><button class="btn sm danger" data-rm="${k}" style="margin-right:auto">Quitar</button><button class="qbtn" data-dec="${k}" aria-label="Menos">−</button><input class="qv" data-qv="${k}" inputmode="numeric" enterkeyhint="done" value="${i.cant}" aria-label="Cantidad"><button class="qbtn" data-inc="${k}" aria-label="Más">+</button></span></div>`;
     }).join("")}</div>`;
   }
-  const t = cartTotal();
-  $("vTotal").textContent = fmt(t);
+  actualizarTotales();
+}
+function actualizarTotales(){
+  $("vTotal").textContent = fmt(cartTotal());
   $("vCobrar").disabled = !S.carrito.length;
   updCambio();
 }
+$("cart").addEventListener("focusout", () => setTimeout(() => { if (S.cartPend) renderCart(); }, 0));
 function updCambio(){
   const r = toNum($("vRecibido").value), t = cartTotal();
   $("vCambio").textContent = r ? (r>=t ? fmt(r-t) : "Faltan "+fmt(t-r)) : "—";
@@ -2035,9 +2048,13 @@ $("cart").addEventListener("click", e => {
   else return;
   saveCartDraft(); renderCart();
 });
+/* cantidad escrita a mano: se actualiza solo esa fila (redibujar todo borraba el botón que se iba a tocar, por ejemplo "+") */
 $("cart").addEventListener("change", e => {
-  const k = e.target.dataset.qv; if (k===undefined) return;
-  S.carrito[k].cant = Math.max(1, toNum(e.target.value)||1); saveCartDraft(); renderCart();
+  const k = e.target.dataset.qv; if (k===undefined || !S.carrito[k]) return;
+  const it = S.carrito[k]; it.cant = Math.max(1, toNum(e.target.value)||1); e.target.value = it.cant; saveCartDraft();
+  const fila = e.target.closest("[data-fila]");
+  if (fila){ fila.querySelector(".price").textContent = fmt(it.precio * it.cant); fila.querySelector(".pmeta").innerHTML = metaCarro(it); }
+  actualizarTotales();
 });
 $("vScan").onclick = async () => {
   const r = await scanCode("Escanear", { varios: true, onCode: (code) => {
@@ -2063,7 +2080,7 @@ $("vScan").onclick = async () => {
 $("vQ").addEventListener("input", () => {
   const q = $("vQ").value, r = searchProducts(q, 12), d = $("vDrop");
   if (!q.trim()){ d.hidden=true; return; }
-  d.innerHTML = r.length ? r.map(p=>prowHTML(p)).join("") : `<div class="prow note" style="cursor:default">Nada con “${esc(q)}”. Usa “+ Sin código” para venderlo igual.</div>`;
+  d.innerHTML = r.length ? r.map(p=>prowHTML(p)).join("") : `<div class="prow note" style="cursor:default">Nada con “${esc(q)}”. Use “Sin código” para venderlo igual.</div>`;
   d.hidden = false;
 });
 $("vQ").addEventListener("keydown", e => {
@@ -2102,7 +2119,7 @@ $("vCobrar").onclick = async () => {
     await S.db.collection("ventas").add(venta);
     S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; setVentaCliente(null); $("vCliBox").open = false; saveCartDraft();
     openRecibo(venta);
-  } catch(e){ toast("No se pudo guardar la venta. Revisa la conexión e intenta de nuevo.", 3500); }
+  } catch(e){ toast("No se pudo guardar la venta. Revise la conexión e intente de nuevo.", 3500); }
   btn.disabled=false; btn.textContent="Cobrar";
 };
 
@@ -2189,8 +2206,7 @@ $("recPrint").onclick = () => printCanvas($("recCanvas"));
 $("recBT").onclick = () => printBT($("recCanvas"), $("recBT"));
 $("recCopiar").onclick = async () => {
   if (!S.lastVenta) return;
-  try { await navigator.clipboard.writeText(reciboTexto(S.lastVenta)); toast("Texto de la factura copiado"); }
-  catch { toast("No se pudo copiar en esta vista."); }
+  toast(await copiarTexto(reciboTexto(S.lastVenta)) ? "Texto de la factura copiado" : "No se pudo copiar en esta vista.");
 };
 $("recNueva").onclick = () => { S.hist=["home","venta"]; show("venta",false); };
 
@@ -2386,7 +2402,7 @@ function sumarSheet(p){
         if (!n) return;
         try { await sumarEntrada(p.id, n); if (pr && pr !== p.precio) await S.db.doc("productos/"+p.id).update({ precio: pr, actualizado: Date.now() });
           close(); toast(`+${miles(n)} unidades: ${p.nombre}`); back(); }
-        catch { toast("No se pudo guardar. Revisa la conexión."); }
+        catch { toast("No se pudo guardar. Revise la conexión."); }
       }; });
 }
 $("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); previewCodigo(); });
@@ -2504,7 +2520,7 @@ $("iGanMenu").onclick = () => {
     <div class="row"><input id="gnNuevo" class="inp num grow" inputmode="decimal" autocomplete="off"><button type="button" class="btn primary" id="gnAdd">Agregar</button></div>`, (el, close) => {
     let lista = ganLista();
     const guardar = () => cfgSet({ ganancias: lista.slice() });
-    const pintar = () => { el.querySelector("#gnList").innerHTML = lista.length ? lista.map(g => `<div class="ganrow"><button type="button" class="pick" data-pick="${g}">${fmtGan(g)} %</button><button type="button" class="del" data-del="${g}" aria-label="Borrar ${fmtGan(g)} %">×</button></div>`).join("") : `<div class="empty">No hay porcentajes. Agrega uno abajo.</div>`; };
+    const pintar = () => { el.querySelector("#gnList").innerHTML = lista.length ? lista.map(g => `<div class="ganrow"><button type="button" class="pick" data-pick="${g}">${fmtGan(g)} %</button><button type="button" class="del" data-del="${g}" aria-label="Borrar ${fmtGan(g)} %">×</button></div>`).join("") : `<div class="empty">No hay porcentajes. Agregue uno abajo.</div>`; };
     pintar();
     el.querySelector("#gnList").addEventListener("click", (e) => {
       const pk = e.target.closest("[data-pick]"), dl = e.target.closest("[data-del]");
@@ -2512,7 +2528,7 @@ $("iGanMenu").onclick = () => {
       else if (dl){ lista = lista.filter(g => String(g) !== dl.dataset.del); pintar(); guardar(); }
     });
     const add = () => { const v = Number(el.querySelector("#gnNuevo").value.trim().replace(",", ".").replace("%", ""));
-      if (!isFinite(v) || v < 0 || v > 899) { toast("Escribe un porcentaje válido"); return; }
+      if (!isFinite(v) || v < 0 || v > 899) { toast("Escriba un porcentaje válido"); return; }
       if (!lista.includes(v)){ lista.push(v); lista.sort((a,b) => a-b); guardar(); }
       el.querySelector("#gnNuevo").value = ""; pintar(); toast(fmtGan(v) + " % agregado"); };
     el.querySelector("#gnAdd").onclick = add;
@@ -2590,7 +2606,7 @@ async function setIngFoto(c){
     t.width = Math.round(c.width*k); t.height = Math.round(c.height*k); t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
     S.iFotoData = t.toDataURL("image/jpeg", .8); $("iFotoImg").src = S.iFotoData; $("iFotoImg").hidden = false; box.hidden = true;
   }
-  if (span) span.textContent = prev || "Toca para tomar la foto";
+  if (span) span.textContent = prev || "Toque para tomar la foto";
 }
 function useIngFoto(which){
   const o = S.iFotoOpts; if (!o) return;
@@ -2647,9 +2663,9 @@ $("ingForm").onsubmit = async (e) => {
   if (!nombre) return $("iErr").textContent = "Falta el nombre del producto.";
   if (!precio) return $("iErr").textContent = "Falta el precio de venta.";
   const dup = codigo ? byCode(codigo) : null;
-  if (dup && dup.id !== S.editId) return $("iErr").textContent = "El código original ya es de “"+dup.nombre+"”. Usa “Sumar unidades” o quítalo.";
+  if (dup && dup.id !== S.editId) return $("iErr").textContent = "El código original ya es de “"+dup.nombre+"”. Use “Sumar unidades” o quítelo.";
   const dupP = codigoPropio ? porCodigo(codigoPropio).find(x => x.id !== S.editId) : null;
-  if (dupP && !esCodigo9(codigoPropio)) return $("iErr").textContent = "Ese código propio ya es de “"+dupP.nombre+"”. Cámbialo o déjalo vacío.";
+  if (dupP && !esCodigo9(codigoPropio)) return $("iErr").textContent = "Ese código propio ya es de “"+dupP.nombre+"”. Cámbielo o déjelo vacío.";
   const gan = leerGan();
   let categoria = $("iCat").value;
   if (categoria === "__otra"){
@@ -2660,8 +2676,8 @@ $("ingForm").onsubmit = async (e) => {
   if (!codigoPropio){
     const c9 = codigo9(precio, gan);
     if (!c9){
-      if (gan === null) return $("iErr").textContent = "Escribe el % de ganancia para crear el código propio.";
-      if (precio % 100) return $("iErr").textContent = "Para crear el código 9 el precio debe terminar en 00 (ej. 9.500). Ajusta el precio o escribe el código.";
+      if (gan === null) return $("iErr").textContent = "Escriba el % de ganancia para crear el código propio.";
+      if (precio % 100) return $("iErr").textContent = "Para crear el código 9 el precio debe terminar en 00 (ej. 9.500). Ajuste el precio o escriba el código.";
       return $("iErr").textContent = "No se pudo crear el código con ese % de ganancia.";
     }
     codigoPropio = c9; auto = true; $("iCodP").value = codigoPropio;
@@ -2687,7 +2703,7 @@ $("ingForm").onsubmit = async (e) => {
     else if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
     else back();
     if (codViejo) setTimeout(() => toast("Ojo: el código 9 sigue con el precio anterior (el precio nuevo no termina en 00).", 4500), 600);
-  } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revisa la conexión."; }
+  } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revise la conexión."; }
   btn.disabled = false;
 };
 $("iBorrar").onclick = () => confirmar("¿Eliminar “"+$("iNombre").value+"” del inventario?", "Eliminar", async () => {
@@ -2841,8 +2857,8 @@ function renderInv(){
     $("sPend").onclick = () => addPend(qt, "", null);
     return;
   }
-  $("invList").innerHTML = arr.length ? listHTML(arr.slice(0,400)) + (arr.length>400?`<p class="note">Mostrando 400 de ${arr.length}. Escribe en la búsqueda para ver el resto.</p>`:"") + (qt ? `<div class="sect" style="margin-top:12px">También en internet</div>${webLinks(qt)}` : "")
-    : `<div class="empty">${S.productos.length ? "Nada coincide con este filtro." : "El inventario está vacío.<br>Toca “Ingresar” para registrar la primera mercancía."}</div>`;
+  $("invList").innerHTML = arr.length ? listHTML(arr.slice(0,400)) + (arr.length>400?`<p class="note">Mostrando 400 de ${arr.length}. Escriba en la búsqueda para ver el resto.</p>`:"") + (qt ? `<div class="sect" style="margin-top:12px">También en internet</div>${webLinks(qt)}` : "")
+    : `<div class="empty">${S.productos.length ? "Nada coincide con este filtro." : "El inventario está vacío.<br>Toque “+ Ingresar” para registrar la primera mercancía."}</div>`;
 }
 
 function renderInvChips(){
@@ -3415,7 +3431,7 @@ function confirmCodeSheet(text, ok){
   return new Promise((resolve) => {
     let answered = false;
     sheet(`<h2>Código leído</h2>
-      <p class="note" style="margin:0">${ok ? "Revisa que esté bien. Puedes corregirlo." : "No se leyó con claridad. Corrígelo o léelo otra vez con más luz y el código derecho."}</p>
+      <p class="note" style="margin:0">${ok ? "Revise que esté bien. Puede corregirlo." : "No se leyó con claridad. Corríjalo o léalo otra vez con más luz y el código derecho."}</p>
       <input id="ccTxt" class="inp num" style="font-size:24px;text-align:center" value="${esc(text)}" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
       <div class="row"><button class="btn grow" id="ccOtra">Leer otra vez</button><button class="btn primary grow" id="ccOk">Usar este código</button></div>`,
       (el, close) => {
@@ -3436,7 +3452,7 @@ async function ocrFlow(canvas){
     return await confirmCodeSheet(r.text, r.ok);
   } catch (e) {
     $("toastHost").innerHTML = "";
-    toast("No se pudo preparar el lector de letra. Revisa el internet la primera vez y vuelve a intentar.", 4500);
+    toast("No se pudo preparar el lector de letra. Revise el internet la primera vez y vuelva a intentar.", 4500);
     return null;
   }
 }
@@ -3597,7 +3613,7 @@ async function pintarCarpeta(){
   }
   const h = await leerCarpeta();
   txt.innerHTML = h ? `Las copias se guardan en la carpeta <b>${esc(h.name)}</b>: <b>${ARCH1}</b> (la más reciente) y <b>${ARCH2}</b> (la anterior). Se reescriben, no se acumulan.`
-    : "Elige una carpeta del celular y ahí quedarán solo 2 archivos: la copia <b>más reciente</b> y la <b>anterior</b>. Se reescriben cada vez.";
+    : "Elija una carpeta del celular y ahí quedarán solo 2 archivos: la copia <b>más reciente</b> y la <b>anterior</b>. Se reescriben cada vez.";
   $("aCarpeta").textContent = h ? "Cambiar carpeta" : "Elegir carpeta"; $("aCarpeta").hidden = false; $("aCarpetaQuitar").hidden = !h;
 }
 $("aCarpeta").onclick = async () => {
@@ -3719,7 +3735,7 @@ $("aCopiaYa").onclick = async () => { try { await hacerCopia(); toast("Copia gua
 function renderUltimaExp(){
   const el = $("aUltimaExp"); if (!el) return;
   const t = Number(ls.get("lastExport")) || 0;
-  el.textContent = t ? `Última copia guardada en el celular: ${fFecha(t)} ${fHora(t)}.` : "Todavía no has guardado una copia en el celular.";
+  el.textContent = t ? `Última copia guardada en el celular: ${fFecha(t)} ${fHora(t)}.` : "Todavía no ha guardado una copia en el celular.";
 }
 function recordarExport(){}   /* sin recordatorios de copia: la nube guarda todo */
 
@@ -3728,7 +3744,7 @@ function openLocalDb(){
   return new Promise((resolve, reject) => {
     if (!window.indexedDB) return reject(new Error("no idb"));
     const rq = indexedDB.open("caja-ferreteria", 1);
-    rq.onblocked = () => { toast("Cierra las otras pestañas de la app y vuelve a cargar.", 5000); };
+    rq.onblocked = () => { toast("Cierre las otras pestañas de la app y vuelva a cargar.", 5000); };
     rq.onupgradeneeded = () => rq.result.createObjectStore("docs");
     rq.onerror = () => reject(rq.error);
     rq.onsuccess = () => {
@@ -3789,6 +3805,12 @@ function openLocalDb(){
   });
 }
 
+/* Copiar al portapapeles; si el navegador no deja, se usa la forma antigua */
+async function copiarTexto(t){
+  try { await navigator.clipboard.writeText(t); return true; } catch {}
+  try { const a = document.createElement("textarea"); a.value = t; a.setAttribute("readonly", ""); a.style.cssText = "position:fixed;top:-1000px;opacity:0";
+    document.body.appendChild(a); a.select(); const ok = document.execCommand("copy"); a.remove(); return ok; } catch { return false; }
+}
 /* ---------- files out: share sheet or download ---------- */
 async function shareFile(blob, filename){
   const file = new File([blob], filename, { type: blob.type });
@@ -4019,7 +4041,7 @@ $("aImport").onchange = async (e) => {
         }
         if (Object.keys(lote).length) await S.db.putMany(lote);
         close(); toast(`Listo: ${add} nuevos, ${upd} actualizados`, 3000);
-      } catch { toast("Se cortó la carga. Revisa el inventario e intenta de nuevo."); btn.disabled = false; btn.textContent = "Cargar"; }
+      } catch { toast("Se cortó la carga. Revise el inventario e intente de nuevo."); btn.disabled = false; btn.textContent = "Cargar"; }
     });
 };
 
@@ -4048,7 +4070,7 @@ function escposRaster(c){
   return new Uint8Array(out);
 }
 async function printBT(canvas, btn){
-  if (!navigator.bluetooth){ toast("Este navegador no tiene Bluetooth. Usa “Imprimir”."); return; }
+  if (!navigator.bluetooth){ toast("Este navegador no tiene Bluetooth. Use “Imprimir”."); return; }
   const label = btn.innerHTML; btn.disabled = true; btn.textContent = "Conectando…";
   try {
     if (!btChar || !btChar.service.device.gatt.connected){
@@ -4072,7 +4094,7 @@ async function printBT(canvas, btn){
     toast("Enviado a la impresora");
   } catch(e){
     btChar = null;
-    if (e?.name !== "NotFoundError") toast(e?.message==="nochar" ? "Esa impresora no recibe datos por Bluetooth LE. Usa “Imprimir” con RawBT." : "No se pudo imprimir por Bluetooth. Revisa que la impresora esté prendida y cerca.", 4000);
+    if (e?.name !== "NotFoundError") toast(e?.message==="nochar" ? "Esa impresora no recibe datos por Bluetooth LE. Use “Imprimir” con RawBT." : "No se pudo imprimir por Bluetooth. Revise que la impresora esté prendida y cerca.", 4000);
   }
   btn.disabled = false; btn.innerHTML = label;
 }
@@ -4129,7 +4151,7 @@ $("aFs").onclick = () => {
 };
 $("aKiosco").onclick = () => {
   if (!S.kiosco){ S.kiosco = true; ls.set("kiosco","1"); enterFs(); toast("Pantalla completa bloqueada"); fsUpdate(); return; }
-  sheet(`<h2>Quitar el bloqueo</h2><p class="note" style="margin:0">Escribe la clave de la app.</p>
+  sheet(`<h2>Quitar el bloqueo</h2><p class="note" style="margin:0">Escriba la clave de la app.</p>
     <input id="kqPin" class="inp num pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off">
     <div id="kqErr" class="err"></div>
     <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn primary grow" id="kqOk">Quitar bloqueo</button></div>`,
@@ -4278,7 +4300,7 @@ async function cargarArchivoApp(f){
     };
     const rp = el.querySelector("#caRemp");
     if (rp) rp.onclick = () => { close(); confirmar(`¿Reemplazar todo con el archivo? Lo que no esté en el archivo se borra${N.lista && N.uid ? " también en TODOS los celulares conectados a la cuenta" : ""}.`, "Reemplazar", async () => {
-      try { await guardarCopia("antes-de-cargar"); await S.db.importAll(data.docs); ss.del("unlock"); toast("Copia cargada. Entra con la clave de esa copia."); setTimeout(lockNow, 800); }
+      try { await guardarCopia("antes-de-cargar"); await S.db.importAll(data.docs); ss.del("unlock"); toast("Copia cargada. Entre con la clave de esa copia."); setTimeout(lockNow, 800); }
       catch { toast("No se pudo cargar la copia."); } }); };
   });
 }
@@ -4450,13 +4472,13 @@ function usuarioAMail(u){
   return u ? u + DOM_USUARIO : "";
 }
 const mailAUsuario = (m) => String(m||"").endsWith(DOM_USUARIO) ? String(m).slice(0, -DOM_USUARIO.length) : String(m||"");
-const ERR_AUTH = { "auth/invalid-email": "El usuario no es válido. Usa letras y números.", "auth/missing-password": "Escribe la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
-  "auth/email-already-in-use": "Ese usuario ya existe. Usa Entrar.", "auth/invalid-credential": "Usuario o contraseña incorrectos.", "auth/wrong-password": "Usuario o contraseña incorrectos.",
-  "auth/user-not-found": "No existe ese usuario. Usa Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intenta de nuevo." };
+const ERR_AUTH = { "auth/invalid-email": "El usuario no es válido. Use letras y números.", "auth/missing-password": "Escriba la contraseña.", "auth/weak-password": "La contraseña debe tener al menos 6 letras o números.",
+  "auth/email-already-in-use": "Ese usuario ya existe. Use Entrar.", "auth/invalid-credential": "Usuario o contraseña incorrectos.", "auth/wrong-password": "Usuario o contraseña incorrectos.",
+  "auth/user-not-found": "No existe ese usuario. Use Crear cuenta.", "auth/too-many-requests": "Demasiados intentos. Espera un momento.", "auth/network-request-failed": "Sin internet. Intente de nuevo." };
 async function nubeEntrar(crear, f = { u: "nubeMail", c: "nubeClave", err: "nubeErr", btn: crear ? "nubeCrear" : "nubeEntrar" }){
   const mail = usuarioAMail($(f.u).value), clave = $(f.c).value, errEl = $(f.err);
   errEl.textContent = "";
-  if (!mail || !clave){ errEl.textContent = "Escribe el usuario y la contraseña."; return false; }
+  if (!mail || !clave){ errEl.textContent = "Escriba el usuario y la contraseña."; return false; }
   if (crear && mail.replace(DOM_USUARIO, "").length < 3){ errEl.textContent = "El usuario debe tener al menos 3 letras o números."; return false; }
   const b = $(f.btn); b.disabled = true; let ok = false;
   try {
@@ -4603,7 +4625,7 @@ const vigia = setTimeout(() => {
 (async () => {
   try { S.db = await openLocalDb(); envolverImportAll(); setTimeout(nubeArrancar, 300); }
   catch {
-    $("lockMsg").innerHTML = "<span>Este navegador no deja guardar datos (¿modo incógnito?). Abre la app en una ventana normal de Chrome o Safari.</span>";
+    $("lockMsg").innerHTML = "<span>Este navegador no deja guardar datos (¿modo incógnito?). Abra la app en una ventana normal de Chrome o Safari.</span>";
     return;
   }
   const db = S.db;
