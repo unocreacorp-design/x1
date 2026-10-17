@@ -180,6 +180,7 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .spin{width:20px;height:20px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.grecaptcha-badge{visibility:hidden!important}
 .ianota{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;margin:-6px 0 0;line-height:1.3}
 .ianota .spin{width:16px;height:16px;border-width:2px}
 .ianota b{color:var(--ink);font-weight:600}
@@ -671,7 +672,7 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee sola, sin tomar foto. Requiere abrir desde el link.</small></span><span class="tg"></span></button>
     <div class="sect" style="margin-top:8px">Fotos de productos</div>
     <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Recortar producto con IA<br><small class="note" style="font-weight:500">Borra el fondo de la foto.</small></span><span class="tg"></span></button>
-    <button type="button" class="switch" id="aReconocer" role="switch" aria-checked="true"><span>Reconocer el producto en la foto<br><small class="note" style="font-weight:500">Al ingresar uno nuevo llena el nombre y la categoría. Con internet lee el empaque; sin internet dice qué es (ej. candado).</small></span><span class="tg"></span></button>
+    <button type="button" class="switch" id="aReconocer" role="switch" aria-checked="true"><span>Reconocer el producto en la foto<br><small class="note" style="font-weight:500">Al ingresar uno nuevo llena el nombre y la categoría. Con internet lee el empaque (IA de Google, protegida por reCAPTCHA); sin internet dice qué es (ej. candado).</small></span><span class="tg"></span></button>
     <div class="row" style="align-items:center;gap:12px">
       <img id="aLogoImg" class="logoprev" alt="Logo" hidden>
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
@@ -2604,7 +2605,7 @@ $("iCat").addEventListener("change", () => { $("iCat").dataset.manual = "1"; $("
    La foto que se analiza va pequeña y no se guarda en ningún lado. Nunca se borra lo que ya se escribió. */
 const IA = { seq: 0, modelo: ls.get("iaModelo") || "", pausa: 0, t: 0 };
 const IA_MODELOS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash"];
-const APPCHECK_KEY = "";   /* clave del sitio de reCAPTCHA Enterprise (Firebase › App Check) */
+const APPCHECK_KEY = "6LcKUfMtAAAAAGC1p3lq_F0R1ciedjeF7yKhfjYn";   /* clave pública del sitio (reCAPTCHA Enterprise, Firebase › App Check) */
 const iaActiva = () => S.config?.reconocerFoto !== false;
 let appCheckP = null;
 function cargarAppCheck(){
@@ -2613,7 +2614,7 @@ function cargarAppCheck(){
   appCheckP = cargarFirebase().then(() => firebase.appCheck ? null : new Promise((res, rej) => {
     const sc = document.createElement("script"); sc.src = new URL("fb/firebase-app-check-compat.js", location.href).href;
     sc.onload = res; sc.onerror = () => rej(new Error("appcheck")); document.head.appendChild(sc);
-  })).then(() => { const ac = firebase.appCheck(); ac.activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(APPCHECK_KEY), true); return ac; });
+  })).then(() => { const ac = firebase.appCheck(); ac.activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(APPCHECK_KEY), false); return ac;   /* sin renovar sola: se pide solo al usar la IA */ });
   appCheckP.catch(() => { appCheckP = null; });
   return appCheckP;
 }
