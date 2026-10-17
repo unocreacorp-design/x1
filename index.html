@@ -681,7 +681,6 @@ details.card[open]>summary{margin-bottom:10px}
       <button type="button" class="switch" id="aHuella" role="switch" aria-checked="false"><span>Entrar con huella<br><small class="note" style="font-weight:500">Use el lector de huella (o la cara) del celular en vez de la clave. La clave sigue sirviendo.</small></span><span class="tg"></span></button>
       <div id="huellaErr" class="err"></div>
     </div>
-    <label class="f">Nueva clave (4 a 6 números)<input id="aPin" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
     <button type="button" class="btn" id="aPinGo">Cambiar clave</button>
     <button type="button" class="btn" id="aLock">Bloquear ahora</button>
       </div>
@@ -1402,6 +1401,7 @@ function scanFromPhoto(opts = {}){
         const cw = c.width*0.9, ch = c.height*0.45, cc = document.createElement("canvas"); cc.width = Math.round(cw); cc.height = Math.round(ch);
         cc.getContext("2d").drawImage(c, (c.width-cw)/2, (c.height-ch)/2, cw, ch, 0, 0, cc.width, cc.height);
         const r = await ocrFlow(cc);
+        if (r && r.again){ resolve(await scanFromPhoto(opts)); return; }   /* "Leer otra vez": otra foto */
         resolve(r && r.code ? { code: r.code, escrito: true } : null);
         return;
       }
@@ -2014,6 +2014,8 @@ $("vVaciar").onclick = () => { if (!S.carrito.length) return; confirmar("¿Vacia
 
 $("vCobrar").onclick = async () => {
   if (!S.carrito.length) return;
+  const rec0 = toNum($("vRecibido").value), tot0 = cartTotal();
+  if (rec0 && rec0 < tot0){ toast(`Lo recibido no alcanza: faltan ${fmt(tot0 - rec0)}. Corrija “Recibido” o déjelo vacío.`, 3500); $("vRecibido").focus(); return; }
   const btn = $("vCobrar"); btn.disabled = true; btn.textContent = "Guardando…";
   try {
     const num = sigNumero();
@@ -2549,7 +2551,7 @@ $("iFotoBtn").onclick = async () => {
   if (r.codigoPropio && !$("iCodP").value.trim()){ setCodigoLeido(r.codigoPropio, true); toast("Código propio leído: " + r.codigoPropio); }
 };
 $("iFoto").onchange = async (e) => {
-  const f = e.target.files?.[0]; if (!f) return;
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
   if (!$("iCodigo").value.trim()){
     try { const big = await fileToCanvas(f, 1600); const code = await decodeCode(big); if (code){ beep(); setIngCodigo(code); toast("Código leído: " + code); } } catch {}
   }
@@ -2789,7 +2791,7 @@ function fillAjustes(){
   try { pintarNube(); } catch {}
   try { pintarEtqAjustes(); } catch {}
   renderProvs(); renderCopias(); renderUltimaExp(); upgradeAll($("ajustes"));
-  $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3); $("aPin").value="";
+  $("aPapel").value=String(c.papel||384); $("aBajo").value = miles(c.bajo ?? 3);
 }
 $("ajForm").onsubmit = async (e) => {
   e.preventDefault();
@@ -2799,11 +2801,26 @@ $("ajForm").onsubmit = async (e) => {
 };
 $("aPapel").addEventListener("change", () => cfgSet({ papel: Number($("aPapel").value) }, "Listo"));
 $("aBajo").addEventListener("change", () => cfgSet({ bajo: Math.max(0, toNum($("aBajo").value)) }, "Listo"));
-$("aPinGo").onclick = async () => {
-  const p = $("aPin").value.trim(); if (!/^\d{4,6}$/.test(p)) { toast("La clave debe tener de 4 a 6 números."); return; }
-  const salt = randSalt(), h = await hashPin(p, salt);
-  try { await S.db.doc("config/tienda").update({ pinSalt:salt, pinHash:h }); ss.set("unlock", h); $("aPin").value=""; toast("Clave cambiada"); } catch { toast("No se pudo cambiar la clave."); }
-};
+/* Cambiar la clave pide la actual (si no, cualquiera con la app abierta la cambiaría y quitaría el bloqueo) */
+$("aPinGo").onclick = () => sheet(`<h2>Cambiar clave</h2>
+  <label class="f">Clave actual<input id="cpA" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
+  <label class="f">Clave nueva (4 a 6 números)<input id="cpN" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+  <label class="f">Repita la nueva<input id="cpN2" class="inp num" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password"></label>
+  <div id="cpErr" class="err"></div>
+  <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn primary grow" id="cpOk">Cambiar</button></div>
+  <p class="note" style="margin:0">La clave nueva sirve en todos los celulares de la cuenta.</p>`, (el, close) => {
+  setTimeout(() => el.querySelector("#cpA").focus(), 60);
+  el.querySelector("#cpOk").onclick = async () => {
+    const err = el.querySelector("#cpErr"), a = el.querySelector("#cpA").value.trim(), n1 = el.querySelector("#cpN").value.trim(), n2 = el.querySelector("#cpN2").value.trim();
+    const w = esperaPin(); if (w){ err.textContent = `Demasiados intentos. Espere ${textoEspera(w)}.`; return; }
+    if (await hashPin(a, S.config?.pinSalt || "") !== S.config?.pinHash){ pinFallo(); err.textContent = "La clave actual no es correcta."; return; }
+    pinOk();
+    if (!/^\d{4,6}$/.test(n1)){ err.textContent = "La clave nueva debe tener de 4 a 6 números."; return; }
+    if (n1 !== n2){ err.textContent = "Las dos claves nuevas no coinciden."; return; }
+    const salt = randSalt(), h = await hashPin(n1, salt);
+    try { await S.db.doc("config/tienda").update({ pinSalt:salt, pinHash:h }); ss.set("unlock", h); close(); toast("Clave cambiada"); } catch { err.textContent = "No se pudo cambiar la clave."; }
+  };
+});
 $("aLock").onclick = lockNow;
 const cfgSet = async (data, msg) => { try { await S.db.doc("config/tienda").update(data); if (msg) toast(msg); } catch { toast("No se pudo guardar."); } };
 $("aQuitarFondo").onclick = () => { const on = S.config?.quitarFondo === false; $("aQuitarFondo").setAttribute("aria-checked", on); cfgSet({ quitarFondo: on }, on ? "Se quitará el fondo de las fotos" : "Las fotos quedarán con su fondo original"); };
@@ -4136,9 +4153,23 @@ function mezclar(base, entrante){
   const res = { ...base }, cambiadas = new Set(), cuenta = { nuevos: 0, actualizados: 0, iguales: 0 }, indices = {};
   for (const [k, v] of Object.entries(base)){ const col = k.split("/")[0], f = COLS_COMB[col]; if (!f || !v) continue;
     indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => { if (!indices[col].has(x)) indices[col].set(x, k); }); }
-  for (const [k, v] of Object.entries(entrante)){
+  /* Si un producto, proveedor o cliente que llega ya existía con otro id, lo que lo nombra (ventas, entradas,
+     productos, pendientes) se pasa al id que ya existe; así lo vendido en el otro celular sí descuenta aquí. */
+  const ORDEN = { config: 0, proveedores: 1, clientes: 2, productos: 3 }, idMap = { productos: {}, proveedores: {}, clientes: {} };
+  const idDe = (k) => k.split("/").slice(1).join("/");
+  const remap = (col, v) => {
+    const P = idMap.productos, V = idMap.proveedores, C = idMap.clientes;
+    if ((col === "productos" || col === "pendientes") && v.proveedorId && V[v.proveedorId]) v = { ...v, proveedorId: V[v.proveedorId] };
+    if (col === "ventas"){ if (v.clienteId && C[v.clienteId]) v = { ...v, clienteId: C[v.clienteId] };
+      if ((v.items||[]).some(i => i.id && P[i.id])) v = { ...v, items: v.items.map(i => i.id && P[i.id] ? { ...i, id: P[i.id] } : i) }; }
+    if (col === "entradas" && v.pid && P[v.pid]) v = { ...v, pid: P[v.pid] };
+    return v;
+  };
+  const lista = Object.entries(entrante).sort((a, b) => (ORDEN[a[0].split("/")[0]] ?? 9) - (ORDEN[b[0].split("/")[0]] ?? 9));
+  for (let [k, v] of lista){
     if (!v) continue;
     const col = k.split("/")[0], f = COLS_COMB[col];
+    v = remap(col, v);
     if (col === "config"){
       const c = res["config/tienda"]; if (!c){ res["config/tienda"] = v; cambiadas.add("config/tienda"); continue; }
       const extra = {};
@@ -4150,6 +4181,7 @@ function mezclar(base, entrante){
     if (!f) continue;
     let destino = res[k] ? k : null;
     if (!destino){ for (const key of f(v).filter(Boolean)){ const m = indices[col]?.get(key); if (m){ destino = m; break; } } }
+    if (destino && destino !== k && idMap[col]) idMap[col][idDe(k)] = idDe(destino);
     if (!destino){ res[k] = v; cambiadas.add(k); cuenta.nuevos++; indices[col] = indices[col] || new Map(); f(v).filter(Boolean).forEach(x => indices[col].set(x, k)); continue; }
     const actual = res[destino];
     if (fechaDoc(v) > fechaDoc(actual)){ res[destino] = { ...actual, ...v }; cambiadas.add(destino); cuenta.actualizados++; }
