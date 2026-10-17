@@ -180,6 +180,10 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .spin{width:20px;height:20px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
+.ianota{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;margin:-6px 0 0;line-height:1.3}
+.ianota .spin{width:16px;height:16px;border-width:2px}
+.ianota b{color:var(--ink);font-weight:600}
+.ianota .linkbtn{padding:4px 6px;min-height:36px;color:var(--accent);font-weight:600}
 .found{border-left:6px solid var(--ok)}
 .missing{border-left:6px solid var(--danger)}
 .linkrow{display:flex;gap:8px;flex-wrap:wrap}
@@ -551,6 +555,7 @@ details.card[open]>summary{margin-bottom:10px}
       <div id="iCodeBox" class="codebox" hidden><svg id="iBarcode"></svg></div>
     </div>
     <label class="f">Nombre<input id="iNombre" class="inp" enterkeyhint="done" inputmode="text"></label>
+    <div class="note ianota" id="iIaNota" role="status" aria-live="polite" hidden></div>
     <div class="row" style="align-items:flex-start">
       <label class="f grow">Precio de venta<input id="iPrecio" class="inp num miles" inputmode="numeric"></label>
       <label class="f grow">Costo<input id="iCosto" class="inp num miles" inputmode="numeric"></label>
@@ -563,7 +568,7 @@ details.card[open]>summary{margin-bottom:10px}
       <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric"></label>
     </div>
     <label class="f">Categoría<select id="iCat" class="inp"></select></label>
-    <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiala.</p>
+    <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiela.</p>
     <input id="iCatOtra" class="inp" placeholder="Escriba la categoría nueva" hidden inputmode="text">
     <label class="f">Proveedor<select id="iProv" class="inp"></select></label>
     <label class="f">Foto
@@ -666,6 +671,7 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee sola, sin tomar foto. Requiere abrir desde el link.</small></span><span class="tg"></span></button>
     <div class="sect" style="margin-top:8px">Fotos de productos</div>
     <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Recortar producto con IA<br><small class="note" style="font-weight:500">Borra el fondo de la foto.</small></span><span class="tg"></span></button>
+    <button type="button" class="switch" id="aReconocer" role="switch" aria-checked="true"><span>Reconocer el producto en la foto<br><small class="note" style="font-weight:500">Al ingresar uno nuevo llena el nombre y la categoría. Con internet lee el empaque; sin internet dice qué es (ej. candado).</small></span><span class="tg"></span></button>
     <div class="row" style="align-items:center;gap:12px">
       <img id="aLogoImg" class="logoprev" alt="Logo" hidden>
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
@@ -934,7 +940,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Con internet lee el empaque (marca, referencia, medida); sin internet pone al menos qué es, por ejemplo <i>Candado</i>. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -2291,6 +2297,7 @@ $("ventasHist").onclick = async () => {
 /* ---------- ingreso ---------- */
 function openIngreso(opts={}){
   S.editId = opts.edit?.id || null; S.iFotoData = null; S.iFotoOpts = null;
+  IA.seq++; clearTimeout(IA.t); $("iIaNota").hidden = true; $("iNombre").dataset.ia = ""; $("iCatNota").textContent = "Puesta según el nombre. Si no es, cámbiela.";
   $("ingForm").reset(); $("iErr").textContent=""; $("iExiste").hidden=true; $("iCodeBox").hidden=true;
   $("iFotoImg").hidden=true; $("iFotoPh").hidden=false; $("iFotoOpts").hidden=true; $("iCatOtra").hidden=true; $("iFechas").hidden=true;
   fillCatSelect(opts.edit?.categoria || ""); fillProvSelect($("iProv"), opts.edit?.proveedorId || "");
@@ -2576,15 +2583,252 @@ function sugerirCategoria(nombre){
 }
 let catT = 0;
 $("iNombre").addEventListener("input", () => {
+  const inp = $("iNombre"), nota = $("iIaNota");
+  if (inp.dataset.ia && inp.value !== inp.dataset.ia){ inp.dataset.ia = ""; if (!nota.querySelector(".spin")) nota.hidden = true; }
   clearTimeout(catT);
   catT = setTimeout(() => {
     const sel = $("iCat"); if (sel.dataset.manual === "1") return;
     const c = sugerirCategoria($("iNombre").value);
     if (c && sel.value !== c){ sel.value = c; refreshPicker(sel); $("iCatOtra").hidden = true; }
+    $("iCatNota").textContent = "Puesta según el nombre. Si no es, cámbiela.";
     $("iCatNota").hidden = !c;
   }, 350);
 });
 $("iCat").addEventListener("change", () => { $("iCat").dataset.manual = "1"; $("iCatNota").hidden = true; });
+
+/* ---------- Reconocer el producto en la foto (solo al ingresar uno nuevo) ----------
+   Con internet: la IA de Google (Gemini, por Firebase AI Logic, plan gratis) mira la foto, lee el
+   empaque y propone el nombre (con marca, referencia y medida si se leen) y la categoría.
+   Sin internet, o si falla o se acabó el cupo: una IA pequeña que corre en el celular
+   (ai/objetos.onnx, 3 MB) dice qué objeto es, y el lector de letras busca palabras conocidas en el empaque.
+   La foto que se analiza va pequeña y no se guarda en ningún lado. Nunca se borra lo que ya se escribió. */
+const IA = { seq: 0, modelo: ls.get("iaModelo") || "", pausa: 0, t: 0 };
+const IA_MODELOS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash"];
+const APPCHECK_KEY = "";   /* clave del sitio de reCAPTCHA Enterprise (Firebase › App Check) */
+const iaActiva = () => S.config?.reconocerFoto !== false;
+let appCheckP = null;
+function cargarAppCheck(){
+  if (!APPCHECK_KEY) return Promise.resolve(null);
+  if (appCheckP) return appCheckP;
+  appCheckP = cargarFirebase().then(() => firebase.appCheck ? null : new Promise((res, rej) => {
+    const sc = document.createElement("script"); sc.src = new URL("fb/firebase-app-check-compat.js", location.href).href;
+    sc.onload = res; sc.onerror = () => rej(new Error("appcheck")); document.head.appendChild(sc);
+  })).then(() => { const ac = firebase.appCheck(); ac.activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(APPCHECK_KEY), true); return ac; });
+  appCheckP.catch(() => { appCheckP = null; });
+  return appCheckP;
+}
+function iaJpeg(src, max){
+  const k = Math.min(1, max / Math.max(src.width, src.height));
+  const c = document.createElement("canvas"); c.width = Math.round(src.width * k); c.height = Math.round(src.height * k);
+  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.8).split(",")[1];
+}
+function iaPrompt(cats){
+  const ej = S.productos.map(p => p.nombre).filter(Boolean).slice(-8);
+  return `Eres el ayudante de una ferretería en Colombia. La foto muestra UN producto que se va a registrar en el inventario. Responde con el JSON pedido:
+- objeto: qué es, en español de Colombia, singular, de 1 a 3 palabras (ej. "Candado", "Llave de paso", "Tornillo drywall", "Brocha", "Silicona").
+- marca, referencia y medida: solo si se leen con claridad en el producto o en el empaque; si no, "".
+- nombre: como iría en el inventario de la ferretería: objeto + tipo o uso + marca + medida o referencia (ej. "Candado de seguridad Yale 40 mm", "Brocha Goya 2 pulgadas", "Silicona transparente Sika 280 ml"). Máximo 60 caracteres. No inventes marcas, medidas ni números que no se vean.
+- categoria: una de esta lista, escrita igual: ${cats.join(" | ")}. Si ninguna sirve: "Ninguna".
+- seguro: true si se ve con claridad qué producto es.` + (ej.length ? `\nAsí escribe la tienda los nombres (imite el estilo, mayúsculas incluidas): ${ej.join("; ")}.` : "");
+}
+function iaSchema(cats){
+  const campos = ["objeto", "marca", "referencia", "medida", "nombre", "categoria", "seguro"];
+  return { type: "OBJECT", properties: { objeto: { type: "STRING" }, marca: { type: "STRING" }, referencia: { type: "STRING" }, medida: { type: "STRING" },
+    nombre: { type: "STRING" }, categoria: { type: "STRING", enum: [...cats, "Ninguna"] }, seguro: { type: "BOOLEAN" } }, required: campos, propertyOrdering: campos };
+}
+function iaLimpiar(o, cats){
+  o = o || {};
+  const t = (v) => String(v ?? "").replace(/["“”]/g, "").replace(/\s+/g, " ").trim();
+  let nombre = t(o.nombre) || t(o.objeto);
+  if (nombre.length > 70) nombre = nombre.slice(0, 70).replace(/\s+\S*$/, "");
+  if (nombre && nombre === nombre.toLowerCase()) nombre = nombre[0].toUpperCase() + nombre.slice(1);
+  const categoria = cats.includes(o.categoria) ? o.categoria : "";
+  return { nombre, categoria, fuente: "nube" };
+}
+async function iaNube(src){
+  if (navigator.onLine === false) throw new Error("sin internet");
+  if (Date.now() < IA.pausa) throw new Error("en pausa");
+  await cargarFirebase();
+  const headers = { "Content-Type": "application/json", "x-goog-api-key": FB_CONFIG.apiKey };
+  try { const ac = await cargarAppCheck(); if (ac){ const t = await ac.getToken(false); if (t && t.token) headers["X-Firebase-AppCheck"] = t.token; } } catch {}
+  const cats = allCats();
+  const body = JSON.stringify({ contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: iaJpeg(src, 768) } }, { text: iaPrompt(cats) }] }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 1024, responseMimeType: "application/json", responseSchema: iaSchema(cats) } });
+  const lista = IA.modelo ? [IA.modelo, ...IA_MODELOS.filter(m => m !== IA.modelo)] : IA_MODELOS;
+  let err = null;
+  for (const m of lista){
+    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
+    let r;
+    try { r = await fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${FB_CONFIG.projectId}/models/${m}:generateContent`, { method: "POST", headers, body, signal: ctl.signal }); }
+    finally { clearTimeout(t); }
+    if (r.ok){
+      const d = await r.json();
+      const txt = (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join("");
+      let o; try { o = JSON.parse(txt); } catch { o = JSON.parse((txt.match(/\{[\s\S]*\}/) || ["{}"])[0]); }
+      if (IA.modelo !== m){ IA.modelo = m; ls.set("iaModelo", m); }
+      return iaLimpiar(o, cats);
+    }
+    let msg = ""; try { msg = (await r.json())?.error?.message || ""; } catch {}
+    err = new Error(r.status + " " + msg); err.status = r.status;
+    console.warn("[IA]", m, r.status, msg);
+    if (r.status === 404) continue;                                       /* ese modelo ya no existe: probar el siguiente */
+    if (r.status === 429) IA.pausa = Date.now() + 5 * 60000;              /* se acabó el cupo por ahora */
+    else if (r.status === 401 || r.status === 403) IA.pausa = Date.now() + 10 * 60000;
+    break;
+  }
+  throw err || new Error("ia");
+}
+
+/* Sin internet: qué objeto es (clases de ImageNet que se venden en ferretería) + palabras del empaque */
+const OBJ_IA = {
+  412:["Caneca de basura","Hogar y limpieza"], 427:["Caneca","Hogar y limpieza"], 428:["Carretilla","Construcción y obra"], 462:["Escoba","Hogar y limpieza"],
+  463:["Balde","Hogar y limpieza"], 465:["Chaleco","Seguridad industrial"], 470:["Vela","Hogar y limpieza"], 477:["Juego de herramientas","Herramientas manuales"],
+  488:["Cadena","Cerrajería y seguridad"], 489:["Malla eslabonada","Construcción y obra"], 491:["Motosierra","Herramientas eléctricas"],
+  507:["Candado de clave","Cerrajería y seguridad"], 518:["Casco","Seguridad industrial"], 533:["Bayetilla","Hogar y limpieza"], 539:["Tapete","Hogar y limpieza"],
+  545:["Ventilador","Eléctricos e iluminación"], 570:["Respirador","Seguridad industrial"], 587:["Martillo","Herramientas manuales"], 589:["Pistola de calor","Herramientas eléctricas"],
+  596:["Hacha","Herramientas manuales"], 600:["Gancho","Hogar y limpieza"], 606:["Plancha","Hogar y limpieza"], 615:["Rodillera","Seguridad industrial"],
+  616:["Lazo","Hogar y limpieza"], 619:["Lámpara","Eléctricos e iluminación"], 621:["Podadora","Jardinería"], 626:["Encendedor","Hogar y limpieza"],
+  633:["Lupa","Herramientas manuales"], 644:["Fósforos","Hogar y limpieza"], 658:["Guantes","Seguridad industrial"], 669:["Toldillo","Hogar y limpieza"],
+  674:["Trampa para ratones","Hogar y limpieza"], 677:["Puntilla","Tornillería y fijación"], 686:["Filtro de aceite",""], 691:["Respirador","Seguridad industrial"],
+  695:["Candado","Cerrajería y seguridad"], 696:["Brocha","Pinturas y accesorios"], 700:["Toalla de papel","Hogar y limpieza"], 726:["Cepillo de carpintero","Herramientas manuales"],
+  728:["Bolsa plástica","Hogar y limpieza"], 731:["Destapador de baño","Plomería y grifería"], 735:["Impermeable","Seguridad industrial"], 738:["Matera","Jardinería"],
+  740:["Taladro","Herramientas eléctricas"], 756:["Tanque","Plomería y grifería"], 769:["Regla","Herramientas manuales"], 771:["Caja fuerte","Cerrajería y seguridad"],
+  778:["Báscula",""], 783:["Tornillo","Tornillería y fijación"], 784:["Destornillador","Herramientas manuales"], 790:["Canasta","Hogar y limpieza"],
+  792:["Pala","Jardinería"], 794:["Cortina de baño","Hogar y limpieza"], 804:["Dispensador de jabón","Hogar y limpieza"], 811:["Calentador","Eléctricos e iluminación"],
+  813:["Espátula","Herramientas manuales"], 818:["Reflector","Eléctricos e iluminación"], 827:["Estufa",""], 836:["Gafas","Seguridad industrial"], 837:["Gafas","Seguridad industrial"],
+  840:["Trapero","Hogar y limpieza"], 844:["Interruptor","Eléctricos e iluminación"], 846:["Lámpara","Eléctricos e iluminación"], 858:["Teja","Construcción y obra"],
+  861:["Asiento para sanitario","Plomería y grifería"], 862:["Linterna","Eléctricos e iluminación"], 876:["Platón","Hogar y limpieza"], 879:["Sombrilla",""],
+  882:["Aspiradora","Hogar y limpieza"], 896:["Lavamanos","Plomería y grifería"], 904:["Angeo","Construcción y obra"], 919:["Señal","Seguridad industrial"], 999:["Papel higiénico","Hogar y limpieza"]
+};
+const IA_MARCAS = ["Stanley","Truper","Pretul","Bosch","DeWalt","Black+Decker","Makita","Milwaukee","Yale","Sika","Pintuco","Corona","Pavco","Gerfor","Grival","Abracol","Tekbond","Pegatex","Uyustools","Irwin","Bellota","Ingco","Tolsen","Schlage","Philips","Sylvania","Osram","Legrand","Leviton","Celsa","Centelsa","Procables","3M","Dremel","Karcher","Skil","Einhell","Norton","Bticino","Tigre","Sherwin Williams","Topex","Ubermann","Total Tools"];
+const IA_ACENTOS = { lampara:"lámpara", tuberia:"tubería", griferia:"grifería", valvula:"válvula", tapon:"tapón", sifon:"sifón", desague:"desagüe", extension:"extensión", plafon:"plafón", cordon:"cordón", multimetro:"multímetro", bateria:"batería", cautin:"cautín", electrica:"eléctrica", electrico:"eléctrico", flexometro:"flexómetro", formon:"formón", espatula:"espátula", bisturi:"bisturí", angulo:"ángulo", plastico:"plástico", epoxica:"epóxica", azadon:"azadón", guadana:"guadaña", tapaoidos:"tapaoídos", jabon:"jabón", fosforo:"fósforo", inalambrico:"inalámbrico", };
+const IA_NO_NOMBRE = new Set(["union", "registro", "flexible", "cheque", "senal", "señal", "sello de agua", "bateria aa", "drywall tornillo", "cola", "tanque", "espuma", "bolsa"]);
+let ortP = null;
+function cargarOrt(){
+  if (window.ort) return Promise.resolve();
+  if (!ortP){ ortP = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = new URL("ai/ort.wasm.min.js", location.href).href; sc.onload = res; sc.onerror = () => rej(new Error("ia")); document.head.appendChild(sc); }); ortP.catch(() => { ortP = null; }); }
+  return ortP;
+}
+let clasP = null;
+function loadClasif(){
+  if (clasP) return clasP;
+  const abs = (f) => new URL(f, location.href).href;
+  clasP = cargarOrt().then(() => {
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    return ort.InferenceSession.create(abs("ai/objetos.onnx"), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
+  });
+  clasP.catch(() => { clasP = null; });
+  return clasP;
+}
+function iaTensor(img){
+  const N = 224, c = document.createElement("canvas"); c.width = c.height = N;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.fillStyle = "#fff"; x.fillRect(0, 0, N, N);
+  const w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, k = N / Math.min(w, h), dw = w * k, dh = h * k;
+  x.imageSmoothingQuality = "high"; x.drawImage(img, (N - dw) / 2, (N - dh) / 2, dw, dh);
+  const d = x.getImageData(0, 0, N, N).data, f = new Float32Array(3 * N * N), A = N * N;
+  for (let i = 0, p = 0; p < A; i += 4, p++){ f[p] = d[i] / 255; f[A + p] = d[i+1] / 255; f[2*A + p] = d[i+2] / 255; }
+  return new ort.Tensor("float32", f, [1, 3, N, N]);
+}
+async function iaObjeto(imgs){
+  const sess = await loadClasif();
+  const suma = new Float32Array(1000); let n = 0;
+  for (const im of imgs){
+    if (!im) continue;
+    const out = await sess.run({ [sess.inputNames[0]]: iaTensor(im) }), p = out[sess.outputNames[0]].data;
+    for (let i = 0; i < 1000; i++) suma[i] += p[i];
+    n++;
+  }
+  if (!n) return null;
+  let top = 0; for (let i = 0; i < 1000; i++){ suma[i] /= n; if (suma[i] > top) top = suma[i]; }
+  const por = {};
+  for (const k in OBJ_IA){ const [nombre, categoria] = OBJ_IA[k]; (por[nombre] = por[nombre] || { nombre, categoria, p: 0 }).p += suma[k]; }
+  const mejor = Object.values(por).sort((a, b) => b.p - a.p)[0];
+  return mejor && mejor.p >= 0.2 && mejor.p >= 0.6 * top ? mejor : null;
+}
+async function iaTexto(src){
+  if (!ocrDisponible()) return "";
+  const abs = (f) => new URL(f, location.href).href;
+  if (!window.Tesseract) await new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = abs("ocr/tesseract.min.js"); sc.onload = res; sc.onerror = () => rej(new Error("ocr")); document.head.appendChild(sc); });
+  const k = Math.min(1, 1200 / Math.max(src.width, src.height));
+  const c = document.createElement("canvas"); c.width = Math.round(src.width * k); c.height = Math.round(src.height * k);
+  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(src, 0, 0, c.width, c.height);
+  const w = await Tesseract.createWorker("eng", 1, { workerPath: abs("ocr/worker.min.js"), corePath: abs("ocr/"), langPath: abs("ocr/"), gzip: true, workerBlobURL: false });
+  try { await w.setParameters({ tessedit_pageseg_mode: "11" }); const { data } = await w.recognize(c); return data.text || ""; }
+  finally { try { await w.terminate(); } catch {} }
+}
+function iaPalabra(txt){
+  const t = " " + norm(txt).replace(/[^a-z0-9ñ+ ]+/g, " ").replace(/\s+/g, " ") + " ";
+  if (t.trim().length < 4) return null;
+  let best = null;
+  for (const [cat, ws] of CAT_PALABRAS){
+    for (const w0 of ws){
+      const w = w0.trim(); if (w.length < 5 || IA_NO_NOMBRE.has(w)) continue;
+      const i = t.search(new RegExp(" " + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(es|s)? ")); if (i < 0) continue;
+      if (!best || w.length > best.w.length || (w.length === best.w.length && i < best.i)) best = { w, i, cat };
+    }
+  }
+  if (!best) return null;
+  const nombre = best.w.split(" ").map(p => IA_ACENTOS[p] || p).join(" ");
+  return { nombre: nombre[0].toUpperCase() + nombre.slice(1), cat: best.cat };
+}
+function iaMarca(txt){
+  const t = " " + norm(txt).replace(/[^a-z0-9ñ+ ]+/g, " ").replace(/\s+/g, " ") + " ";
+  return IA_MARCAS.find(m => t.includes(" " + norm(m).replace(/[^a-z0-9ñ+ ]+/g, " ").trim() + " ")) || "";
+}
+const cargarImg = (src) => new Promise((res) => { if (!src) return res(null); const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+async function iaLocal(src, sinfondo){
+  let obj = null, txt = "";
+  try { obj = await iaObjeto([src, await cargarImg(sinfondo)]); } catch (e) { console.warn("[IA] objeto:", e?.message || e); }
+  if (!obj || obj.p < 0.6){ try { txt = await iaTexto(src); } catch (e) { console.warn("[IA] texto:", e?.message || e); } }
+  const pal = iaPalabra(txt), marca = iaMarca(txt);
+  let nombre = pal ? pal.nombre : obj ? obj.nombre : "";
+  if (!nombre) return null;
+  if (marca && !norm(nombre).includes(norm(marca))) nombre += " " + marca;
+  const cats = allCats(), ok = (c) => c && cats.includes(c) ? c : "";
+  return { nombre, categoria: ok(pal?.cat) || ok(obj?.categoria), fuente: "celular" };
+}
+/* Deja la IA pequeña guardada en el celular para cuando no haya internet */
+function iaPrecargar(){
+  if (!navigator.onLine || !("caches" in window)) return;
+  const u = new URL("ai/objetos.onnx", location.href).href;
+  caches.match(u).then(m => { if (!m) fetch(u).catch(() => {}); }).catch(() => {});
+}
+function iaCategoria(r){
+  const sel = $("iCat"); if (sel.dataset.manual === "1") return;
+  const c = r.categoria && allCats().includes(r.categoria) ? r.categoria : sugerirCategoria(r.nombre);
+  if (!c) return;
+  if (sel.value !== c){ sel.value = c; refreshPicker(sel); $("iCatOtra").hidden = true; }
+  $("iCatNota").textContent = "Puesta según la foto. Si no es, cámbiela."; $("iCatNota").hidden = false;
+}
+function aplicarIA(r){
+  const nota = $("iIaNota"), inp = $("iNombre");
+  clearTimeout(IA.t);
+  if (!r || !r.nombre){
+    nota.textContent = "No se reconoció el producto en la foto. Escriba el nombre.";
+    IA.t = setTimeout(() => { nota.hidden = true; }, 6000); return;
+  }
+  const poner = () => { inp.value = r.nombre; inp.dataset.ia = r.nombre; iaCategoria(r); };
+  if (!inp.value.trim() || inp.value === inp.dataset.ia){
+    poner();
+    nota.textContent = "Nombre puesto según la foto" + (r.fuente === "celular" ? " (sin internet)" : "") + ". Revíselo antes de guardar.";
+  } else {
+    nota.innerHTML = `La foto parece: <b>${esc(r.nombre)}</b> <button type="button" class="linkbtn">Usar este nombre</button>`;
+    nota.querySelector("button").onclick = () => { poner(); nota.textContent = "Nombre cambiado. Revíselo antes de guardar."; };
+  }
+}
+async function reconocerFoto(c){
+  if (S.editId || !iaActiva() || !c) return;
+  const seq = ++IA.seq, nota = $("iIaNota");
+  clearTimeout(IA.t);
+  nota.hidden = false; nota.innerHTML = `<span class="spin" aria-hidden="true"></span>Mirando la foto para llenar el nombre…`;
+  let r = null;
+  try { r = await iaNube(c); iaPrecargar(); } catch (e) { console.warn("[IA] nube:", e?.message || e); }
+  if (seq !== IA.seq) return;
+  if (!r || !r.nombre){ try { r = await iaLocal(c, S.iFotoOpts?.sinfondo); } catch (e) { console.warn("[IA] celular:", e?.message || e); r = null; } }
+  if (seq !== IA.seq) return;
+  aplicarIA(r);
+}
 
 /* Foto del producto: centrada y sin recortes; si está activo, sin fondo y sobre blanco con el logo */
 async function setIngFoto(c){
@@ -2606,6 +2850,7 @@ async function setIngFoto(c){
     S.iFotoData = t.toDataURL("image/jpeg", .8); $("iFotoImg").src = S.iFotoData; $("iFotoImg").hidden = false; box.hidden = true;
   }
   if (span) span.textContent = prev || "Toque para tomar la foto";
+  reconocerFoto(c);
 }
 function useIngFoto(which){
   const o = S.iFotoOpts; if (!o) return;
@@ -2877,6 +3122,7 @@ function fillAjustes(){
   $("aNombre").value=c.nombre||""; $("aNit").value=c.nit||""; $("aDir").value=c.direccion||""; $("aTel").value=c.telefono||""; $("aPie").value=c.pie||"";
   $("aCiudad").value=c.ciudad||""; $("aCel").value=c.celular||""; $("aMail").value=c.correo||""; $("aReg").value=c.regimen||"";
   $("aQuitarFondo").setAttribute("aria-checked", c.quitarFondo !== false);
+  $("aReconocer").setAttribute("aria-checked", c.reconocerFoto !== false);
   $("aLogoPos").value = c.logoPos || "esquina"; $("aFondo").value = c.fondoFoto || "blanco";
   if (c.logo){ $("aLogoImg").src = c.logo; $("aLogoImg").hidden = false; $("aLogoDel").hidden = false; } else { $("aLogoImg").hidden = true; $("aLogoDel").hidden = true; }
   $("aAuto").setAttribute("aria-checked", c.autoGuardado !== false);
@@ -2921,6 +3167,7 @@ $("aPinGo").onclick = () => sheet(`<h2>Cambiar clave</h2>
 $("aLock").onclick = lockNow;
 const cfgSet = async (data, msg) => { try { await S.db.doc("config/tienda").update(data); if (msg) toast(msg); } catch { toast("No se pudo guardar."); } };
 $("aQuitarFondo").onclick = () => { const on = S.config?.quitarFondo === false; $("aQuitarFondo").setAttribute("aria-checked", on); cfgSet({ quitarFondo: on }, on ? "Se quitará el fondo de las fotos" : "Las fotos quedarán con su fondo original"); };
+$("aReconocer").onclick = () => { const on = S.config?.reconocerFoto === false; $("aReconocer").setAttribute("aria-checked", on); cfgSet({ reconocerFoto: on }, on ? "La app llenará el nombre según la foto" : "La foto ya no llenará el nombre"); };
 $("aLogoPos").onchange = () => cfgSet({ logoPos: $("aLogoPos").value }, "Listo");
 $("aFondo").onchange = () => cfgSet({ fondoFoto: $("aFondo").value }, "Listo");
 $("aAuto").onclick = () => { const on = S.config?.autoGuardado === false; $("aAuto").setAttribute("aria-checked", on); cfgSet({ autoGuardado: on }, on ? "Autoguardado activado" : "Autoguardado apagado"); };
