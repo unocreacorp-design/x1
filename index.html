@@ -2652,7 +2652,11 @@ async function iaNube(src){
   if (Date.now() < IA.pausa) throw new Error("en pausa");
   await cargarFirebase();
   const headers = { "Content-Type": "application/json", "x-goog-api-key": FB_CONFIG.apiKey };
-  try { const ac = await cargarAppCheck(); if (ac){ const t = await ac.getToken(false); if (t && t.token) headers["X-Firebase-AppCheck"] = t.token; } } catch {}
+  try {   /* la prueba de que es la app (reCAPTCHA); si tarda mucho se sigue sin ella y, si la piden, se usa la IA del celular */
+    const espera = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("tiempo")), ms));
+    const ac = await Promise.race([cargarAppCheck(), espera(10000)]);
+    if (ac){ const t = await Promise.race([ac.getToken(false), espera(10000)]); if (t && t.token) headers["X-Firebase-AppCheck"] = t.token; }
+  } catch (e) { console.warn("[IA] App Check:", e?.message || e); }
   const cats = allCats();
   const body = JSON.stringify({ contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: iaJpeg(src, 768) } }, { text: iaPrompt(cats) }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 1024, responseMimeType: "application/json", responseSchema: iaSchema(cats) } });
