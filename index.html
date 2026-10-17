@@ -322,6 +322,10 @@ details.card[open]>summary{margin-bottom:10px}
 .pop[hidden]{display:none}
 .guia{display:flex;flex-direction:column;gap:8px}
 .guiaol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:16px;line-height:1.4}
+.nuevaver{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-weight:600}
+.nuevaver span{flex:1}
+.nubeaviso{background:#B45309;color:#fff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;line-height:1.35}
+.nubeaviso[hidden]{display:none}
 .ordiv{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-weight:600}
 .ordiv::before,.ordiv::after{content:"";flex:1;height:1px;background:var(--line)}
 .qwrap>.inp{width:100%;padding-right:46px}
@@ -402,6 +406,7 @@ details.card[open]>summary{margin-bottom:10px}
         <label class="f">Contraseña<input id="setNubeC" class="inp" type="password" autocomplete="current-password"></label>
         <div id="setNubeErr" class="err"></div>
         <button type="button" class="btn primary block" id="setNubeGo">Entrar</button>
+        <button type="button" class="linkbtn" id="olvidoBtn" style="align-self:center;margin-top:-4px">¿Olvidó la contraseña?</button>
         <div class="ordiv"><span>o</span></div>
         <button type="button" class="btn block" id="crearCajaBtn">Crear caja</button>
       </div>
@@ -438,6 +443,7 @@ details.card[open]>summary{margin-bottom:10px}
     <div class="brand" id="brand">Ferretería<small id="brandSub">Inventario y caja</small></div>
     <button class="fsbtn" id="fsBtn" aria-pressed="false" aria-label="Pantalla completa" hidden><svg id="fsIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg></button>
   </div>
+  <div class="nubeaviso" id="nubeAviso" hidden></div>
   <div class="toplinks">
     <button class="chip" data-go="pendientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></svg>Por comprar</button>
     <button class="chip" data-go="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Ajustes</button>
@@ -693,9 +699,10 @@ details.card[open]>summary{margin-bottom:10px}
         <p class="note" style="margin:0">Use el mismo usuario y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
       </div>
       <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
-        <div class="row"><button type="button" class="btn block" id="nubeSync">Sincronizar ahora</button></div>
+        <div class="row"><button type="button" class="btn grow" id="nubeSync">Sincronizar ahora</button><button type="button" class="btn grow" id="nubeClaveBtn">Cambiar contraseña</button></div>
         <button type="button" class="btn danger block" id="nubeSalir">Cerrar sesión</button>
         <p class="note" style="margin:0">Al cerrar sesión la app vuelve a la pantalla de inicio. Todo queda guardado en la nube y se trae de nuevo al entrar.</p>
+        <p class="note" style="margin:0">Si el navegador borra los datos al cerrarse (por ejemplo Brave), instale la app desde <b>General › Pantalla y clave</b> o quite ese borrado para esta página. Sin internet, no cierre el navegador hasta que el aviso naranja del inicio desaparezca.</p>
       </div>
     </div>
     </div>
@@ -705,7 +712,7 @@ details.card[open]>summary{margin-bottom:10px}
     <label class="f">Frecuencia
       <select id="aAutoMin" class="inp"><option value="5">5 minutos</option><option value="10">10 minutos</option><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select>
     </label>
-    <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 7 días).</p>
+    <p class="note" style="margin:0">Copia <b>reciente</b> (se reemplaza) y copia <b>diaria</b> (se guardan 3 días). Se guardan sin fotos para no llenar el celular; al restaurar, cada producto conserva su foto.</p>
     <div id="copiasList"></div>
     <button type="button" class="btn" id="aCopiaYa">Copiar ahora</button>
     <div hidden id="copiasArchivoViejas">
@@ -884,11 +891,20 @@ function buildKeypad(){
     k.appendChild(b);
   });
 }
+/* Después de 5 claves malas seguidas hay que esperar (30 s, luego 1, 2, 5 min…) */
+function esperaPin(){ const hasta = Number(ls.get("pinHasta")) || 0; return Math.max(0, hasta - Date.now()); }
+function pinFallo(){
+  const n = (Number(ls.get("pinFallos")) || 0) + 1; ls.set("pinFallos", String(n));
+  if (n >= 5){ const pasos = [30, 60, 120, 300, 600]; const seg = pasos[Math.min(pasos.length - 1, n - 5)]; ls.set("pinHasta", String(Date.now() + seg * 1000)); }
+}
+const pinOk = () => { ls.set("pinFallos", "0"); ls.set("pinHasta", "0"); };
+const textoEspera = (ms) => { const s2 = Math.ceil(ms / 1000); return s2 >= 60 ? `${Math.ceil(s2/60)} min` : `${s2} s`; };
 async function tryPin(){
   if (pinBuf.length<4){ $("pinErr").textContent="La clave tiene de 4 a 6 números."; return; }
+  const w = esperaPin(); if (w){ $("pinErr").textContent = `Demasiados intentos. Espere ${textoEspera(w)}.`; pinBuf=""; $("pinDots").textContent="····"; return; }
   const h = await hashPin(pinBuf, S.config.pinSalt);
-  if (h === S.config.pinHash){ ss.set("unlock", h); unlock(); }
-  else { $("pinErr").textContent="Clave incorrecta. Intenta de nuevo."; }
+  if (h === S.config.pinHash){ pinOk(); ss.set("unlock", h); unlock(); }
+  else { pinFallo(); const w2 = esperaPin(); $("pinErr").textContent = w2 ? `Clave incorrecta. Espere ${textoEspera(w2)} para intentar otra vez.` : "Clave incorrecta. Intenta de nuevo."; }
   pinBuf=""; $("pinDots").textContent="····";
 }
 /* al abrir una sección desplegable, mover la vista para que el título quede arriba */
@@ -901,7 +917,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>Cuando un producto queda con pocas unidades aparece en <b>Por comprar</b>.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -951,7 +967,7 @@ function pintarHuella(){
 let huellaOcupada = false;
 async function entrarConHuella(auto){
   if (huellaOcupada || S.unlocked) return; huellaOcupada = true;
-  try { if (await huellaVerificar()){ ss.set("unlock", S.config?.pinHash || ""); $("pinErr").textContent = ""; unlock(); } else if (!auto) $("pinErr").textContent = "No se reconoció la huella. Use la clave."; }
+  try { if (await huellaVerificar()){ pinOk(); ss.set("unlock", S.config?.pinHash || ""); $("pinErr").textContent = ""; unlock(); } else if (!auto) $("pinErr").textContent = "No se reconoció la huella. Use la clave."; }
   catch (e) { if (!auto) $("pinErr").textContent = e?.name === "NotAllowedError" ? "Se canceló. Puede usar la clave." : "No se pudo usar la huella. Use la clave."; }
   huellaOcupada = false;
 }
@@ -1104,8 +1120,9 @@ function productSheet(p){
       <div class="price" style="font-size:24px;margin-top:6px">${fmt(p.precio)}</div></div></div>
     <dl class="kv"><dt>Código</dt><dd class="num">${esc(p.codigo||"—")}</dd>${p.codigoPropio?`<dt>Código propio</dt><dd class="num">${esc(p.codigoPropio)}</dd>`:""}<dt>Existencias</dt><dd>${stockChip(p)}</dd>${p.costo?`<dt>Costo</dt><dd class="num">${fmt(p.costo)}</dd>`:""}${p.categoria?`<dt>Categoría</dt><dd>${esc(p.categoria)}</dd>`:""}${(() => { const pv = provById(p.proveedorId); return pv ? `<dt>Proveedor</dt><dd>${esc(pv.nombre)}${pv.telefono?`<br><span class="num" style="font-weight:500">${esc(pv.telefono)}</span> · ${telLinks(pv.telefono)}`:""}</dd>` : ""; })()}${p.creado?`<dt>Ingresado</dt><dd>${fFecha(p.creado)} ${fHora(p.creado)}</dd>`:""}${p.actualizado && p.actualizado !== p.creado?`<dt>Actualizado</dt><dd>${fFecha(p.actualizado)} ${fHora(p.actualizado)}</dd>`:""}</dl>
     <button class="btn venta block" id="psVender">Vender</button>
-    <div class="row"><button class="btn grow" id="psEditar">Editar</button><button class="btn grow" data-close>Cerrar</button></div>`,
+    <div class="row"><button class="btn grow" id="psEditar">Editar</button>${(p.codigoPropio || p.codigo) ? `<button class="btn grow" id="psEtq">Etiqueta</button>` : ""}<button class="btn grow" data-close>Cerrar</button></div>`,
     (el, close) => {
+      const et = el.querySelector("#psEtq"); if (et) et.onclick = () => { close(); etiqueta(p); };
       el.querySelector("#psVender").onclick = () => { close(); addToCart(p); show("venta"); };
       el.querySelector("#psEditar").onclick = () => { close(); openIngreso({edit:p}); };
     });
@@ -1370,12 +1387,17 @@ function scanCode(titulo, opts = {}){
 }
 /* Sin cámara en vivo: foto con la cámara normal del celular y se lee el código de la foto */
 function scanFromPhoto(opts = {}){
-  return new Promise((resolve) => {
+  return new Promise((resolve0) => {
     const inp = $("scanFile");
     inp.value = "";
+    let listo = false;
+    const resolve = (v) => { if (listo) return; listo = true; window.removeEventListener("focus", alVolver); resolve0(v); };
+    const alVolver = () => setTimeout(() => { if (!inp.files?.length) resolve(null); }, 1200);
+    inp.oncancel = () => resolve(null);
+    setTimeout(() => window.addEventListener("focus", alVolver), 300);
     inp.onchange = async () => {
       const f = inp.files?.[0]; if (!f){ resolve(null); return; }
-      const c = await fileToCanvas(f, 1600);
+      let c; try { c = await fileToCanvas(f, 1600); } catch { toast("No se pudo leer la foto."); resolve(null); return; }
       if (opts.modo === "escrito"){
         const cw = c.width*0.9, ch = c.height*0.45, cc = document.createElement("canvas"); cc.width = Math.round(cw); cc.height = Math.round(ch);
         cc.getContext("2d").drawImage(c, (c.width-cw)/2, (c.height-ch)/2, cw, ch, 0, 0, cc.width, cc.height);
@@ -1872,6 +1894,28 @@ $("pendList").addEventListener("click", e => {
   const it = S.pend.find(x => x.id === r.dataset.pend); if (it) pendFormSheet({}, it);
 });
 
+/* ---------- existencias ----------
+   Cada producto guarda una cantidad base (cantidad) y desde cuándo vale (cantT). Lo vendido y lo que entra
+   se guarda aparte (ventas y entradas) y se suma o resta al mostrar. Así dos celulares que venden a la vez
+   no se pisan: cada venta es un documento nuevo y nadie reescribe el producto. */
+S.prodRaw = []; S.entradas = [];
+function recalcStock(){
+  const mov = new Map(), add = (pid, t, d) => { if (!pid) return; let a = mov.get(pid); if (!a) mov.set(pid, a = []); a.push([Number(t)||0, Number(d)||0]); };
+  (S.ventasCache || []).forEach(v => { if (v.mov) (v.items || []).forEach(i => add(i.id, v.fecha, -(Number(i.cant)||0))); });
+  (S.entradas || []).forEach(e => add(e.pid, e.fecha, e.cant));
+  S.productos = S.prodRaw.map(p => { const base = Number(p.cantidad)||0, t0 = Number(p.cantT)||0; let n = base;
+    const m = mov.get(p.id); if (m) m.forEach(([t, d]) => { if (t > t0) n += d; });
+    return { ...p, cantBase: base, cantidad: n }; });
+  if (!$("inventario").hidden) renderInv();
+  if (!$("venta").hidden) renderCart();
+}
+/* Poner las existencias en un número exacto (al editar o cargar un archivo) */
+const fijarCant = (n) => ({ cantidad: Number(n)||0, cantT: Date.now() });
+/* Sumar unidades que llegaron, sin reescribir el producto */
+const sumarEntrada = (pid, n) => S.db.collection("entradas").add({ pid, cant: Number(n)||0, fecha: Date.now() });
+/* Número de factura: el siguiente al mayor conocido (no se guarda en los ajustes en cada venta) */
+function sigNumero(){ let m = (Number(S.config?.sigFactura)||1) - 1; (S.ventasCache || []).forEach(v => { if (Number(v.numero) > m) m = Number(v.numero); }); return m + 1; }
+
 /* ---------- venta ---------- */
 const cartTotal = () => S.carrito.reduce((a,i)=>a+i.precio*i.cant,0);
 function addToCart(p, cant=1){
@@ -1972,23 +2016,16 @@ $("vCobrar").onclick = async () => {
   if (!S.carrito.length) return;
   const btn = $("vCobrar"); btn.disabled = true; btn.textContent = "Guardando…";
   try {
-    const cfgRef = S.db.doc("config/tienda");
-    const num = Number(S.config.sigFactura)||1;
-    await cfgRef.update({ sigFactura: num+1 });
+    const num = sigNumero();
     const total = cartTotal(), recibido = toNum($("vRecibido").value);
-    const venta = { numero:num, fecha:Date.now(), items:S.carrito.map(i=>({...i})), total, recibido: recibido||total, cambio: recibido>total ? recibido-total : 0,
+    const venta = { numero:num, mov:true, dev:nubeDev, fecha:Date.now(), items:S.carrito.map(i=>({...i})), total, recibido: recibido||total, cambio: recibido>total ? recibido-total : 0,
       cliente: $("vCli").value.trim(), clienteDoc: $("vCliDoc").value.trim(), clienteId: (await clienteParaVenta()) || "" };
     await S.db.collection("ventas").add(venta);
-    for (const i of venta.items){
-      if (!i.id) continue;
-      const p = S.productos.find(x=>x.id===i.id); if (!p) continue;
-      await S.db.doc("productos/"+i.id).update({ cantidad: (Number(p.cantidad)||0) - i.cant, actualizado: Date.now() });
-    }
     S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; setVentaCliente(null); $("vCliBox").open = false; saveCartDraft();
     openRecibo(venta);
     if (archivoPendiente(true)) setTimeout(guardarArchivo, 600);
   } catch(e){ toast("No se pudo guardar la venta. Revisa la conexión e intenta de nuevo.", 3500); }
-  btn.disabled=false; btn.textContent="Cobrar e imprimir";
+  btn.disabled=false; btn.textContent="Cobrar";
 };
 
 /* ---------- recibo (thermal image) ---------- */
@@ -2175,7 +2212,7 @@ function openIngreso(opts={}){
     let cod = p.codigo||"", cp = p.codigoPropio||"";
     if (!cp && /^FR\d+$/i.test(cod)){ cp = cod; cod = ""; }   /* códigos automáticos viejos pasan a ser el código propio */
     $("iCodigo").value = cod; S.iOrigTipo = p.codigoTipo || "";
-    $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0);
+    $("iNombre").value = p.nombre||""; $("iPrecio").value = p.precio ? miles(p.precio) : ""; $("iCant").value = miles(p.cantidad ?? 0); S.editCant0 = Number(p.cantidad)||0;
     $("iCosto").value = p.costo ? miles(p.costo) : ""; $("iCodP").value = cp;
     $("iGan").value = p.ganancia != null && p.ganancia !== "" ? fmtGan(p.ganancia) : (p.precio && p.costo && p.precio >= p.costo ? fmtGan(Math.round((p.precio/p.costo - 1) * 1000) / 10) : "");
     S.calcHist = $("iGan").value.trim() ? ["G"] : [];
@@ -2252,7 +2289,9 @@ function checkExiste(){
   const code = $("iCodigo").value.trim(), cp = $("iCodP").value.trim();
   let p = code ? byCode(code) : null; if (!p || p.id === S.editId) p = cp ? byCode(cp) : null;
   if (p && p.id !== S.editId){
-    $("iExiste").hidden=false;
+    const ya = !$("iExiste").hidden && $("iExiste").dataset.pid === p.id && $("iSumar");
+    $("iExiste").hidden=false; $("iExiste").dataset.pid = p.id;
+    if (ya){ pintarOrig(); return; }   /* no se vuelve a dibujar: si no, el primer toque en "Sumar" se pierde */
     $("iExiste").innerHTML = `<div class="card found" style="display:flex;flex-direction:column;gap:8px"><div class="sect" style="color:var(--ok)">Este código ya está en inventario</div>${listHTML([p])}<button type="button" class="btn ingreso" id="iSumar">Sumar unidades a este producto</button></div>`;
     $("iSumar").onclick = () => sumarSheet(p);
   } else $("iExiste").hidden=true;
@@ -2267,7 +2306,7 @@ function sumarSheet(p){
       el.querySelector("#smOk").onclick = async () => {
         const n = toNum(el.querySelector("#smC").value), pr = toNum(el.querySelector("#smP").value);
         if (!n) return;
-        try { await S.db.doc("productos/"+p.id).update({ cantidad:(Number(p.cantidad)||0)+n, precio: pr||p.precio, actualizado:Date.now() });
+        try { await sumarEntrada(p.id, n); if (pr && pr !== p.precio) await S.db.doc("productos/"+p.id).update({ precio: pr, actualizado: Date.now() });
           close(); toast(`+${miles(n)} unidades: ${p.nombre}`); back(); }
         catch { toast("No se pudo guardar. Revisa la conexión."); }
       }; });
@@ -2343,12 +2382,24 @@ function recalcular(){
   else if (obj === "G" && P && C){ $("iGan").value = fmtGan(Math.round((P/C - 1) * 1000) / 10); }
   $("iGanX").hidden = !$("iGan").value.trim();
 }
+/* Código 9 al editar: devuelve el código nuevo, false si no se puede crear, o "" si no hay que cambiarlo */
+function codigoNuevoAlEditar(precio, gan){
+  if (!S.editId) return "";
+  const o = S.prodRaw.find(x => x.id === S.editId), cp = $("iCodP").value.trim();
+  if (!o || !esCodigo9(cp) || normCP(cp) !== normCP(o.codigoPropio)) return "";
+  const g0 = o.ganancia === "" || o.ganancia == null ? null : Number(o.ganancia);
+  if (Number(precio) === Number(o.precio) && (gan === null ? g0 === null : g0 !== null && Math.abs(gan - g0) < 0.001)) return "";
+  const c9 = codigo9(precio, gan);
+  if (!c9) return false;
+  return normCP(c9) === normCP(cp) ? "" : c9;
+}
 function previewCodigo(){
   const cp = $("iCodP"), c9 = codigo9(toNum($("iPrecio").value), leerGan());
   cp.placeholder = c9 ? "Se creará: " + c9 : "";
   const n = $("iCodNota");
   if (n){ const pr = toNum($("iPrecio").value);
-    const aviso = !cp.value.trim() && !c9 && pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "";
+    const nv = codigoNuevoAlEditar(pr, leerGan());
+    const aviso = nv ? `Al guardar, el código cambia a ${nv} (precio nuevo).` : nv === false ? "El precio nuevo no termina en 00: el código 9 quedará con el precio anterior." : !cp.value.trim() && !c9 && pr && pr % 100 ? "Para crear el código 9 el precio debe terminar en 00." : "";
     n.textContent = aviso; n.hidden = !aviso; }
 }
 $("iPrecio").addEventListener("input", () => { $("iPrecio").dataset.auto = ""; tocar("P"); });
@@ -2531,10 +2582,16 @@ $("ingForm").onsubmit = async (e) => {
     }
     codigoPropio = c9; auto = true; $("iCodP").value = codigoPropio;
   }
+  /* Al editar: si el código 9 era el del precio viejo, se cambia por el del precio nuevo */
+  let codCambio = "", codViejo = false;
+  const c9n = codigoNuevoAlEditar(precio, gan);
+  if (c9n === false) codViejo = true; else if (c9n){ codCambio = c9n; codigoPropio = c9n; $("iCodP").value = c9n; }
   const otros9 = esCodigo9(codigoPropio) ? porCodigo(codigoPropio).filter(x => x.id !== S.editId) : [];
   const provSel = $("iProv").value;
   const data = { codigo, codigoTipo: codigo ? (S.iOrigTipo === "qr" ? "qr" : tipoCodigo(codigo) === "Código QR" ? "qr" : "barras") : (S.iOrigTipo === "escrito" || esEscrito(codigoPropio) ? "escrito" : ""), nombre, precio, cantidad: cant, costo: toNum($("iCosto").value), categoria: categoria || "", proveedorId: provSel && provSel !== "__nuevo" ? provSel : "",
     codigoPropio, ganancia: gan, foto: S.iFotoData || null, actualizado: Date.now() };
+  if (S.editId){ if (cant !== S.editCant0) Object.assign(data, fijarCant(cant)); else delete data.cantidad; }
+  else Object.assign(data, fijarCant(cant));
   if (gan !== null) ls.set("ultGan", String(gan));
   const btn = $("iGuardar"); btn.disabled = true;
   try {
@@ -2542,8 +2599,10 @@ $("ingForm").onsubmit = async (e) => {
     else await S.db.collection("productos").add({ ...data, creado: Date.now() });
     toast(S.editId ? "Cambios guardados" : "Guardado: "+nombre);
     if (otros9.length) setTimeout(() => toast(`El código ${codigoPropio} también lo tiene ${otros9[0].nombre}${otros9.length > 1 ? " y otros" : ""}. Al escanearlo te preguntará cuál.`, 4500), 1600);
-    if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
+    if (codCambio){ toast(`El código propio cambió a ${codCambio} por el precio nuevo. Imprima la etiqueta nueva.`, 4500); etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: S.prodRaw.find(x => x.id === S.editId)?.creado || Date.now() }); }
+    else if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
     else back();
+    if (codViejo) setTimeout(() => toast("Ojo: el código 9 sigue con el precio anterior (el precio nuevo no termina en 00).", 4500), 600);
   } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revisa la conexión."; }
   btn.disabled = false;
 };
@@ -3315,7 +3374,7 @@ function ventasDeCliente(c){
   return S.ventasCache.filter(v => v.clienteId ? v.clienteId === c.id : ((d && norm(v.clienteDoc) === d) || (!d && n && norm(v.cliente) === n)));
 }
 S.ventasCache = [];
-async function cargarVentas(){ try { const snap = await S.db.collection("ventas").orderBy("fecha","desc").get(); S.ventasCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); } catch {} }
+async function cargarVentas(){ if (S.ventasListas) return; try { const snap = await S.db.collection("ventas").orderBy("fecha","desc").get(); S.ventasCache = snap.docs.map(d => ({ id: d.id, ...d.data() })); } catch {} }
 async function renderClientes(){
   await cargarVentas();
   const q = norm($("cliQ").value);
@@ -3494,17 +3553,36 @@ async function copiasOp(mode, fn){
   const db = await respaldoDb();
   return new Promise((res, rej) => { const t = db.transaction("copias", mode), st = t.objectStore("copias"); let out; const r = fn(st); if (r) r.onsuccess = () => { out = r.result; }; t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error("quota")); });
 }
+/* Las copias internas se guardan SIN fotos (pesan mucho). Al restaurar, cada producto recupera la foto que tiene ahora. */
+const cuentaCopia = () => N.uid || ls.get("nubeUid") || "";
+const copiasMeta = () => { try { return JSON.parse(ls.get("copiasMeta") || "{}") || {}; } catch { return {}; } };
 async function guardarCopia(clave){
-  const docs = S.db.exportAll();
+  const todo = S.db.exportAll(), docs = {};
+  for (const [k, v] of Object.entries(todo)){ docs[k] = v && typeof v === "object" && v.foto ? { ...v, foto: null, _sinFoto: 1 } : v; }
   const n = Object.keys(docs).filter(k => k.startsWith("productos/")).length;
   const v = Object.keys(docs).filter(k => k.startsWith("ventas/")).length;
-  await copiasOp("readwrite", st => st.put({ app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), t: Date.now(), productos: n, ventas: v, docs }, clave));
+  const meta = { t: Date.now(), productos: n, ventas: v, uid: cuentaCopia() };
+  await copiasOp("readwrite", st => st.put({ app:"caja-ferreteria", version:2, fecha:new Date().toISOString(), ...meta, docs }, clave));
+  const m = copiasMeta(); m[clave] = meta; ls.set("copiasMeta", JSON.stringify(m));
+}
+function docsDeCopia(c){
+  const ahora = S.db.exportAll(), out = {};
+  for (const [k, v] of Object.entries(c.docs || {})){
+    if (v && v._sinFoto){ const { _sinFoto, ...r } = v; r.foto = ahora[k]?.foto || null; out[k] = r; } else out[k] = v;
+  }
+  return out;
 }
 async function listarCopias(){
   const keys = await copiasOp("readonly", st => st.getAllKeys()) || [];
-  const out = [];
-  for (const k of keys){ const c = await copiasOp("readonly", st => st.get(k)); if (c) out.push({ clave: k, t: c.t, productos: c.productos, ventas: c.ventas }); }
-  return out.sort((a,b) => b.t - a.t);
+  const m = copiasMeta(), out = []; let falta = false;
+  for (const k of keys){
+    let x = m[k];
+    if (!x){ const c = await copiasOp("readonly", st => st.get(k)); if (!c) continue; x = { t: c.t, productos: c.productos, ventas: c.ventas, uid: c.uid || "" }; m[k] = x; falta = true; }
+    out.push({ clave: k, ...x });
+  }
+  if (falta) ls.set("copiasMeta", JSON.stringify(m));
+  const yo = cuentaCopia();
+  return out.filter(c => !c.uid || !yo || c.uid === yo).sort((a,b) => b.t - a.t);
 }
 async function hacerCopia(){
   await guardarCopia("reciente");
@@ -3512,7 +3590,9 @@ async function hacerCopia(){
   const existe = await copiasOp("readonly", st => st.get(hoyK));
   if (!existe) await guardarCopia(hoyK);
   const dias = (await copiasOp("readonly", st => st.getAllKeys()) || []).filter(k => String(k).startsWith("dia-")).sort().reverse();
-  for (const k of dias.slice(7)) await copiasOp("readwrite", st => st.delete(k));
+  const m = copiasMeta();
+  for (const k of dias.slice(3)){ await copiasOp("readwrite", st => st.delete(k)); delete m[k]; }
+  ls.set("copiasMeta", JSON.stringify(m));
   ls.set("lastAuto", String(Date.now())); S.dirty = false;
 }
 async function autoTick(force){
@@ -3527,7 +3607,7 @@ async function autoTick(force){
   } catch {}
 }
 setInterval(() => autoTick(false), 30000);
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") autoTick(true); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") autoTick(false); });
 const nombreCopia = (k) => k === "reciente" ? "Copia reciente" : k === "antes-de-cargar" ? "Antes de cargar un archivo" : k === "antes-de-restaurar" ? "Antes de restaurar" : String(k).startsWith("dia-") ? "Copia del día" : k;
 async function renderCopias(){
   const box = $("copiasList"); if (!box) return;
@@ -3538,11 +3618,14 @@ async function renderCopias(){
 $("copiasList").addEventListener("click", (e) => {
   const b = e.target.closest("[data-restaurar]"); if (!b) return;
   const k = b.dataset.restaurar;
-  confirmar(`¿Volver a la ${nombreCopia(k).toLowerCase()}? Lo de ahora se guarda antes como “Antes de restaurar”.`, "Restaurar", async () => {
+  const nube = !!(N.lista && N.uid);
+  confirmar(`¿Volver a la ${nombreCopia(k).toLowerCase()}? Lo que se hizo después (ventas, productos nuevos) se quita${nube ? " también en TODOS los celulares conectados a la cuenta" : ""}. Lo de ahora se guarda antes como “Antes de restaurar”.`, "Restaurar", async () => {
     try {
       const c = await copiasOp("readonly", st => st.get(k)); if (!c) return;
+      if (c.uid && cuentaCopia() && c.uid !== cuentaCopia()){ toast("Esa copia es de otra cuenta."); return; }
+      const docs = docsDeCopia(c);
       await guardarCopia("antes-de-restaurar");
-      await S.db.importAll(c.docs); S.dirty = false;
+      await S.db.importAll(docs); S.dirty = false;
       toast("Copia restaurada"); renderCopias();
     } catch { toast("No se pudo restaurar."); }
   }, false);
@@ -3853,12 +3936,12 @@ $("aImport").onchange = async (e) => {
             if (modo === "omitir") continue;
             const d = { actualizado: Date.now() };
             if (x.precio != null) d.precio = x.precio;
-            if (x.cantidad != null) d.cantidad = modo === "sumar" ? (Number(p.cantidad)||0) + x.cantidad : x.cantidad;
+            if (x.cantidad != null){ if (modo === "sumar"){ if (x.cantidad) await sumarEntrada(p.id, x.cantidad); } else if (x.cantidad !== p.cantidad) Object.assign(d, fijarCant(x.cantidad)); }
             if (x.codigo && !p.codigo) d.codigo = x.codigo;
             Object.assign(d, await extrasImport(x));
             await S.db.doc("productos/"+p.id).update(d); upd++;
           } else {
-            await S.db.collection("productos").add({ codigo:x.codigo, nombre:x.nombre, precio:x.precio||0, cantidad:x.cantidad||0, foto:null, ...(await extrasImport(x)), creado:Date.now(), actualizado:Date.now() });
+            await S.db.collection("productos").add({ codigo:x.codigo, nombre:x.nombre, precio:x.precio||0, ...fijarCant(x.cantidad||0), foto:null, ...(await extrasImport(x)), creado:Date.now(), actualizado:Date.now() });
             add++;
           }
         }
@@ -3973,8 +4056,10 @@ $("aKiosco").onclick = () => {
     (el, close) => {
       setTimeout(() => el.querySelector("#kqPin").focus(), 60);
       const go = async () => {
+        const w = esperaPin(); if (w){ el.querySelector("#kqErr").textContent = `Demasiados intentos. Espere ${textoEspera(w)}.`; return; }
         const h = await hashPin(el.querySelector("#kqPin").value.trim(), S.config?.pinSalt || "");
-        if (h !== S.config?.pinHash){ el.querySelector("#kqErr").textContent = "Clave incorrecta."; return; }
+        if (h !== S.config?.pinHash){ pinFallo(); el.querySelector("#kqErr").textContent = "Clave incorrecta."; return; }
+        pinOk();
         S.kiosco = false; ls.set("kiosco","0"); close(); fsUpdate(); toast("Bloqueo quitado");
       };
       el.querySelector("#kqOk").onclick = go;
@@ -4026,6 +4111,15 @@ $("aInstalar").onclick = async () => { if (!installEvt) return; installEvt.promp
 if ("serviceWorker" in navigator && location.protocol === "https:"){
   window.addEventListener("load", () => { navigator.serviceWorker.register("./sw.js").catch(() => {}); });
 }
+/* Llegó una versión nueva mientras se usaba la guardada: se ofrece actualizar sin interrumpir */
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", (e) => {
+  if (e.data?.tipo !== "nueva-version" || $("nuevaVer")) return;
+  const d = document.createElement("div"); d.id = "nuevaVer"; d.className = "nuevaver";
+  d.innerHTML = `<span>Hay una versión nueva de la app</span><button type="button" class="btn sm primary" id="nvOk">Actualizar</button><button type="button" class="btn sm" id="nvNo" aria-label="Más tarde">✕</button>`;
+  document.body.appendChild(d);
+  $("nvOk").onclick = () => { if (S.kiosco) S.kiosco = false; location.reload(); };
+  $("nvNo").onclick = () => d.remove();
+});
 
 /* ---------- combinar datos de otra persona sin repetir ---------- */
 const COLS_COMB = {
@@ -4034,6 +4128,7 @@ const COLS_COMB = {
   proveedores: (d) => [d.codigo && "c:" + norm(d.codigo), "n:" + norm(d.nombre)],
   pendientes:  (d) => ["n:" + norm(d.nombre) + "|" + String(d.codigo||"").trim()],
   ventas:      (d) => ["v:" + d.numero + "|" + d.fecha],
+  entradas:    (d) => ["e:" + d.pid + "|" + d.fecha + "|" + d.cant],
 };
 const fechaDoc = (d) => Number(d?.actualizado || d?.creado || d?.fecha || 0);
 /* Junta "entrante" sobre "base" sin repetir (por id, código de barras, NIT o nombre); gana lo más reciente */
@@ -4086,7 +4181,7 @@ async function cargarArchivoApp(f){
       catch { toast("No se pudo combinar."); }
     };
     const rp = el.querySelector("#caRemp");
-    if (rp) rp.onclick = () => { close(); confirmar(`¿Reemplazar todo lo de este celular con el archivo?`, "Reemplazar", async () => {
+    if (rp) rp.onclick = () => { close(); confirmar(`¿Reemplazar todo con el archivo? Lo que no esté en el archivo se borra${N.lista && N.uid ? " también en TODOS los celulares conectados a la cuenta" : ""}.`, "Reemplazar", async () => {
       try { await guardarCopia("antes-de-cargar"); await S.db.importAll(data.docs); ss.del("unlock"); toast("Copia cargada. Entra con la clave de esa copia."); setTimeout(lockNow, 800); }
       catch { toast("No se pudo cargar la copia."); } }); };
   });
@@ -4228,7 +4323,15 @@ async function nubeArrancar(){
     fb.auth().onAuthStateChanged((u) => { if (u && N.uid !== u.uid) nubeIniciar(u); else if (!u){ N.lista = false; N.uid = null; pintarNube(); } });
   } catch { N.err = "Sin internet: los cambios se subirán cuando vuelva."; pintarNube(); }
 }
+function pintarAvisoNube(){
+  const a = $("nubeAviso"); if (!a) return;
+  const n = N.cola.size, sinRed = navigator.onLine === false || !!N.err;
+  a.hidden = !(nubeActiva() && n && sinRed);
+  if (!a.hidden) a.textContent = `${miles(n)} cambio${n > 1 ? "s" : ""} sin subir a la nube (sin internet). No cierre el navegador hasta que se suban.`;
+}
+window.addEventListener("offline", () => pintarAvisoNube());
 function pintarNube(){
+  try { pintarAvisoNube(); } catch {}
   const est = $("nubeEstado"); if (!est) return;
   const dentro = !!(N.lista && N.uid);
   $("nubeFuera").hidden = dentro; $("nubeDentro").hidden = !dentro;
@@ -4275,7 +4378,32 @@ $("setNubeGo").onclick = async () => {
 };
 $("nubeEntrar").onclick = () => nubeEntrar(false);
 $("nubeCrear").onclick = () => nubeEntrar(true);
-$("nubeSync").onclick = async () => { if (!N.uid) return; Object.keys(S.db.exportAll()).forEach(k => N.cola.add(k)); await nubeSubir(); nubeEscuchar(); toast("Sincronizado"); };
+/* Sincronizar: sube solo lo pendiente y vuelve a escuchar (no reenvía todo: gastaría el cupo gratis) */
+$("nubeSync").onclick = async () => { if (!N.uid) return; await nubeSubir(); nubeEscuchar(); toast(N.cola.size ? `Quedan ${miles(N.cola.size)} cambios por subir` : "Sincronizado"); };
+$("nubeClaveBtn").onclick = () => sheet(`<h2>Cambiar contraseña</h2>
+  <label class="f">Contraseña actual<input id="ccA" class="inp" type="password" autocomplete="current-password"></label>
+  <label class="f">Contraseña nueva (mínimo 6)<input id="ccN" class="inp" type="password" autocomplete="new-password"></label>
+  <label class="f">Repita la nueva<input id="ccN2" class="inp" type="password" autocomplete="new-password"></label>
+  <div id="ccErr" class="err"></div>
+  <div class="row"><button class="btn grow" data-close>Cancelar</button><button class="btn primary grow" id="ccOk">Cambiar</button></div>
+  <p class="note" style="margin:0">Después, en los otros celulares se entra con la contraseña nueva.</p>`, (el, close) => {
+  el.querySelector("#ccOk").onclick = async () => {
+    const a = el.querySelector("#ccA").value, n1 = el.querySelector("#ccN").value, n2 = el.querySelector("#ccN2").value, err = el.querySelector("#ccErr");
+    err.textContent = "";
+    if (!a || !n1){ err.textContent = "Escriba la contraseña actual y la nueva."; return; }
+    if (n1.length < 6){ err.textContent = "La nueva debe tener al menos 6 letras o números."; return; }
+    if (n1 !== n2){ err.textContent = "Las dos contraseñas nuevas no coinciden."; return; }
+    try {
+      const u = firebase.auth().currentUser; if (!u) throw { code: "auth/no-user" };
+      await u.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(u.email, a));
+      await u.updatePassword(n1); close(); toast("Contraseña cambiada");
+    } catch (e) { err.textContent = e?.code === "auth/no-user" ? "Vuelva a entrar a la cuenta e intente de nuevo." : (ERR_AUTH[e?.code] || "No se pudo cambiar. Revise la contraseña actual y el internet."); }
+  };
+});
+$("olvidoBtn").onclick = () => popup("¿Olvidó la contraseña?", `<div class="helpbox" style="padding-bottom:14px">
+  <div><p>Pídasela a quien creó la cuenta de la ferretería.</p></div>
+  <div><p>Si el dueño la olvidó: entre a <b>console.firebase.google.com</b> con la cuenta de Google del proyecto, abra <b>Authentication › Users</b>, busque el usuario y use <b>Restablecer contraseña</b> o elimínelo y créelo de nuevo desde la app. Los datos no se pierden.</p></div>
+  <div><p>Como el usuario no es un correo real, la app no puede enviar un correo para recuperarla.</p></div></div>`);
 /* Cerrar sesión: sube lo pendiente, sale de la cuenta, limpia este celular y vuelve a la pantalla de inicio */
 async function borrarLocalTodo(){
   await new Promise((res) => {
@@ -4285,6 +4413,10 @@ async function borrarLocalTodo(){
       rq.onerror = () => res();
     } catch { res(); }
   });
+  try { (await respaldoDbP)?.close(); } catch {}
+  try { (await carpetaDbP)?.close(); } catch {}
+  const borrarDb = (n) => new Promise((res) => { try { const r = indexedDB.deleteDatabase(n); r.onsuccess = r.onerror = () => res(); r.onblocked = () => setTimeout(res, 800); setTimeout(res, 2500); } catch { res(); } });
+  await borrarDb("caja-respaldos"); await borrarDb("caja-carpeta");
   const guardar = ["camVivo", "luzModo", "modoCam", "fsWanted", "ultGan"];
   try { Object.keys(localStorage).forEach(k => { if (!guardar.includes(k)) localStorage.removeItem(k); }); } catch {}
   try { sessionStorage.clear(); } catch {}
@@ -4304,6 +4436,7 @@ async function terminarSalida(){
   try { if (N.unsub) N.unsub(); N.unsub = null; } catch {}
   N.lista = false; N.uid = null; try { N.cola.clear(); } catch {}
   try { await firebase.auth().signOut(); } catch {}
+  try { await firebase.firestore().terminate(); await firebase.firestore().clearPersistence(); } catch {}
   await borrarLocalTodo();
   S.kiosco = false;
   location.replace(location.pathname);
@@ -4386,9 +4519,15 @@ const vigia = setTimeout(() => {
     else if (!$("home").hidden) renderHome();
   });
   db.collection("productos").onSnapshot(snap => {
-    S.productos = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-    if (!$("inventario").hidden) renderInv();
-    if (!$("venta").hidden) renderCart();
+    S.prodRaw = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    recalcStock();
+  });
+  db.collection("ventas").onSnapshot(snap => {
+    S.ventasCache = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.fecha||0) - (a.fecha||0));
+    S.ventasListas = true; recalcStock();
+  });
+  db.collection("entradas").onSnapshot(snap => {
+    S.entradas = snap.docs.map(d => ({ id:d.id, ...d.data() })); recalcStock();
   });
   db.collection("pendientes").onSnapshot(snap => {
     S.pend = snap.docs.map(d => ({ id:d.id, ...d.data() }));

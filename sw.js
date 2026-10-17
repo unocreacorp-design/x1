@@ -14,6 +14,13 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+let sinRed = false;
+/* Si se abrió la versión guardada y llegó una nueva, se avisa a la app para que ofrezca actualizar */
+async function avisarNueva() {
+  if (!sinRed) return; sinRed = false;
+  const cs = await self.clients.matchAll({ type: "window" });
+  cs.forEach((c) => c.postMessage({ tipo: "nueva-version" }));
+}
 function conTiempo(promesa, ms) {
   return new Promise((ok, mal) => { const t = setTimeout(() => mal(new Error("tiempo")), ms); promesa.then((r) => { clearTimeout(t); ok(r); }, (e) => { clearTimeout(t); mal(e); }); });
 }
@@ -23,16 +30,28 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // La app: primero internet (versión nueva), si no hay o tarda, la guardada.
+  // La app: primero internet (versión nueva). Si tarda más de 4 s se abre la guardada,
+  // pero la descarga sigue y la deja guardada para la próxima vez (así no se queda vieja).
   if (req.mode === "navigate" || (url.origin === location.origin && url.pathname.endsWith("/index.html"))) {
-    e.respondWith((async () => {
+    const red = (async () => {
       const cache = await caches.open(CACHE);
-      try {
-        const res = await conTiempo(fetch(req, { cache: "no-store" }), 4000);
-        if (res && res.ok) { cache.put("./index.html", res.clone()); cache.put("./", res.clone()); }
-        return res;
-      } catch {
-        return (await cache.match("./index.html")) || (await cache.match("./")) || Response.error();
+      const res = await fetch(req, { cache: "no-store" });
+      if (res && res.ok) {
+        const viejo = await cache.match("./index.html");
+        const nuevo = res.clone(), texto = await nuevo.clone().text();
+        await cache.put("./index.html", nuevo.clone()); await cache.put("./", nuevo);
+        if (viejo) { const tv = await viejo.text(); if (tv !== texto) avisarNueva(); }
+      }
+      return res;
+    })();
+    e.waitUntil(red.catch(() => {}));
+    e.respondWith((async () => {
+      try { return await conTiempo(red, 4000); }
+      catch {
+        const cache = await caches.open(CACHE);
+        const g = (await cache.match("./index.html")) || (await cache.match("./"));
+        if (g) { sinRed = true; return g; }
+        return red.catch(() => Response.error());
       }
     })());
     return;
