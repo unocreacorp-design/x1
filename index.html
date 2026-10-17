@@ -324,6 +324,15 @@ details.card[open]>summary{margin-bottom:10px}
 .guiaol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px;font-size:16px;line-height:1.4}
 .nuevaver{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-weight:600}
 .nuevaver span{flex:1}
+.visor{position:fixed;inset:0;z-index:60;background:#000;display:flex;flex-direction:column;touch-action:none;user-select:none}
+.visor .vzona{flex:1;position:relative;overflow:hidden;touch-action:none}
+.visor .vzona img{position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;transform-origin:center center;will-change:transform;background:#fff;-webkit-user-drag:none}
+.visor .vtop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-end;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;z-index:2;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+.visor .vbar{display:flex;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));background:#111}
+.visor .vbar .btn{flex:1}
+.visor .vx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center}
+.visor .vx svg{width:26px;height:26px}
+.visor .vhint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font-size:13px;pointer-events:none}
 .nubeaviso{background:#B45309;color:#fff;border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;line-height:1.35}
 .nubeaviso[hidden]{display:none}
 .ordiv{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;font-weight:600}
@@ -669,11 +678,11 @@ details.card[open]>summary{margin-bottom:10px}
     <details class="ajsec acc" data-sec="pant" data-grupo="gen"><summary><span class="acct">Pantalla y clave</span><span class="accd">Pantalla completa, instalar app, clave y huella</span></summary>
       <div class="accb">
     <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
-      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa</span><span class="tg"></span></button>
+      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa<br><small class="note" style="font-weight:500">Sin barras del celular ni del navegador. Apáguelo para verlas.</small></span><span class="tg"></span></button>
       <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
     </div>
     <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
-    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app abre en pantalla completa sin el aviso del navegador.</p>
+    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app se abre desde su ícono, sin la barra del navegador.</p>
     <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, usa <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
     <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abre la app en Safari, toca Compartir › <b>Agregar a pantalla de inicio</b> y ábrela desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:8px">Clave de la app</div>
@@ -742,6 +751,7 @@ details.card[open]>summary{margin-bottom:10px}
 <button class="kiosk" id="kiosk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></svg><b>Toca la pantalla</b><span>para volver a pantalla completa</span></button>
 <div id="capHost"></div>
 <input id="scanFile" type="file" accept="image/*" capture="environment" hidden>
+<input id="fotoProdFile" type="file" accept="image/*" capture="environment" hidden>
 <div id="sheetHost"></div>
 <div id="popHost"></div>
 <div id="toastHost"></div>
@@ -778,7 +788,7 @@ const SCREENS = ["lock","home","camara","venta","recibo","ingreso","inventario",
 function show(name, push=true){
   if (name !== "camara") stopLive();
   SCREENS.forEach(s => $(s).hidden = s !== name);
-  if (push && S.hist[S.hist.length-1] !== name) S.hist.push(name);
+  if (push && S.hist[S.hist.length-1] !== name){ S.hist.push(name); if (S.hist.length > 40) S.hist.splice(1, S.hist.length - 40); }
   if (name==="home") renderHome();
   if (name==="venta") renderCart();
   if (name==="inventario") renderInv();
@@ -916,7 +926,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede poner pantalla completa, instalar la app y cambiar la clave.</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Ponga el nombre (la categoría se llena sola), el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -1114,7 +1124,7 @@ function listHTML(arr){ return arr.length ? `<div class="plist">${arr.map(p=>pro
 
 function productSheet(p){
   sheet(`
-    <div class="row" style="align-items:flex-start;gap:14px">${p.foto?`<img src="${esc(p.foto)}" alt="" style="width:110px;height:110px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line)">`:""}
+    <div class="row" style="align-items:flex-start;gap:14px">${p.foto?`<button type="button" id="psFoto" aria-label="Ver la foto en grande" style="padding:0;border:0;background:none;flex-shrink:0"><img src="${esc(p.foto)}" alt="" style="width:110px;height:110px;object-fit:contain;background:#fff;border-radius:10px;border:1px solid var(--line);display:block"></button>`:`<button type="button" class="btn sm" id="psFotoNueva" style="flex-shrink:0">+ Foto</button>`}
       <div class="grow"><h2 style="text-transform:none;font-size:24px;line-height:1.1">${esc(p.nombre)}</h2>
       <div class="price" style="font-size:24px;margin-top:6px">${fmt(p.precio)}</div></div></div>
     <dl class="kv"><dt>Código</dt><dd class="num">${esc(p.codigo||"—")}</dd>${p.codigoPropio?`<dt>Código propio</dt><dd class="num">${esc(p.codigoPropio)}</dd>`:""}<dt>Existencias</dt><dd>${stockChip(p)}</dd>${p.costo?`<dt>Costo</dt><dd class="num">${fmt(p.costo)}</dd>`:""}${p.categoria?`<dt>Categoría</dt><dd>${esc(p.categoria)}</dd>`:""}${(() => { const pv = provById(p.proveedorId); return pv ? `<dt>Proveedor</dt><dd>${esc(pv.nombre)}${pv.telefono?`<br><span class="num" style="font-weight:500">${esc(pv.telefono)}</span> · ${telLinks(pv.telefono)}`:""}</dd>` : ""; })()}${p.creado?`<dt>Ingresado</dt><dd>${fFecha(p.creado)} ${fHora(p.creado)}</dd>`:""}${p.actualizado && p.actualizado !== p.creado?`<dt>Actualizado</dt><dd>${fFecha(p.actualizado)} ${fHora(p.actualizado)}</dd>`:""}</dl>
@@ -1122,6 +1132,10 @@ function productSheet(p){
     <div class="row"><button class="btn grow" id="psEditar">Editar</button>${(p.codigoPropio || p.codigo) ? `<button class="btn grow" id="psEtq">Etiqueta</button>` : ""}<button class="btn grow" data-close>Cerrar</button></div>`,
     (el, close) => {
       const et = el.querySelector("#psEtq"); if (et) et.onclick = () => { close(); etiqueta(p); };
+      const pf = el.querySelector("#psFoto"); if (pf) pf.onclick = () => verFoto(p.foto, {
+        cambiar: () => { close(); cambiarFotoProducto(p); },
+        borrar: async () => { close(); try { await S.db.doc("productos/" + p.id).update({ foto: null, actualizado: Date.now() }); toast("Foto borrada"); } catch { toast("No se pudo borrar la foto."); } } });
+      const pn = el.querySelector("#psFotoNueva"); if (pn) pn.onclick = () => { close(); cambiarFotoProducto(p); };
       el.querySelector("#psVender").onclick = () => { close(); addToCart(p); show("venta"); };
       el.querySelector("#psEditar").onclick = () => { close(); openIngreso({edit:p}); };
     });
@@ -1797,6 +1811,10 @@ function pendFormSheet(pre = {}, item = null){
       if (del) del.onclick = async () => { try { await S.db.doc("pendientes/"+item.id).delete(); close(); toast("Quitado de por comprar"); } catch { toast("No se pudo quitar."); } };
     });
 }
+$("fotoProdFile").onchange = async (e) => {
+  const f = e.target.files?.[0]; e.target.value = ""; if (!f || !S.fotoProdCb) return;
+  const cb = S.fotoProdCb; S.fotoProdCb = null; try { cb(await fileToCanvas(f, 1600)); } catch { toast("No se pudo leer la foto."); }
+};
 $("pFotoFile").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
   const c = await fileToCanvas(f, 1600);
@@ -1893,6 +1911,58 @@ $("pendList").addEventListener("click", e => {
   const r = e.target.closest("[data-pend]"); if (!r) return;
   const it = S.pend.find(x => x.id === r.dataset.pend); if (it) pendFormSheet({}, it);
 });
+
+/* ---------- ver foto en grande: pellizcar o doble toque para ampliar, arrastrar para mover ---------- */
+function verFoto(src, acciones = {}){
+  if (!src) return;
+  cerrarVisor();
+  const v = document.createElement("div"); v.className = "visor"; v.id = "visor"; v.setAttribute("role", "dialog"); v.setAttribute("aria-modal", "true");
+  v.innerHTML = `<div class="vzona"><img alt="Foto del producto" draggable="false"><div class="vhint">Pellizque o toque dos veces para ampliar</div></div>
+    <div class="vtop"><button type="button" class="vx" id="vCerrar" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="vbar">${acciones.cambiar ? `<button type="button" class="btn" id="vCambiar">Cambiar foto</button>` : ""}${acciones.borrar ? `<button type="button" class="btn danger" id="vBorrar">Borrar foto</button>` : ""}<button type="button" class="btn primary" id="vListo">Cerrar</button></div>`;
+  document.body.appendChild(v);
+  const zona = v.querySelector(".vzona"), img = v.querySelector("img"); img.src = src;
+  let sc = 1, tx = 0, ty = 0;
+  const lim = () => { sc = Math.min(6, Math.max(1, sc)); const r = zona.getBoundingClientRect(), w = img.offsetWidth * sc, h = img.offsetHeight * sc;
+    const mx = Math.max(0, (w - r.width) / 2), my = Math.max(0, (h - r.height) / 2); tx = Math.min(mx, Math.max(-mx, tx)); ty = Math.min(my, Math.max(-my, ty)); if (sc === 1){ tx = 0; ty = 0; } };
+  const pintar = () => { img.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(${sc})`; };
+  pintar();
+  const zoomEn = (nuevo, cx, cy) => { const r = zona.getBoundingClientRect(), ox = cx - (r.left + r.width/2), oy = cy - (r.top + r.height/2), k = nuevo / sc;
+    tx = ox - (ox - tx) * k; ty = oy - (oy - ty) * k; sc = nuevo; lim(); pintar(); };
+  const pts = new Map(); let pinch = null, arrastre = null, ultTap = 0;
+  zona.addEventListener("pointerdown", (e) => { zona.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2){ const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x-b.x, a.y-b.y), sc, cx: (a.x+b.x)/2, cy: (a.y+b.y)/2 }; arrastre = null; }
+    else if (pts.size === 1){ arrastre = { x: e.clientX, y: e.clientY, tx, ty };
+      const ahora = performance.now(); if (ahora - ultTap < 300){ zoomEn(sc > 1.05 ? 1 : 2.5, e.clientX, e.clientY); ultTap = 0; arrastre = null; } else ultTap = ahora; } });
+  zona.addEventListener("pointermove", (e) => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pts.size >= 2){ const [a, b] = [...pts.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y); zoomEn(pinch.sc * d / Math.max(1, pinch.d), (a.x+b.x)/2, (a.y+b.y)/2); }
+    else if (arrastre && sc > 1){ tx = arrastre.tx + e.clientX - arrastre.x; ty = arrastre.ty + e.clientY - arrastre.y; lim(); pintar(); } });
+  const soltar = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; if (pts.size === 1){ const [a] = [...pts.values()]; arrastre = { x: a.x, y: a.y, tx, ty }; } if (!pts.size) arrastre = null; };
+  zona.addEventListener("pointerup", soltar); zona.addEventListener("pointercancel", soltar);
+  zona.addEventListener("wheel", (e) => { e.preventDefault(); zoomEn(sc * (e.deltaY < 0 ? 1.15 : 1/1.15), e.clientX, e.clientY); }, { passive: false });
+  v.querySelector("#vCerrar").onclick = cerrarVisor; v.querySelector("#vListo").onclick = cerrarVisor;
+  const cb = v.querySelector("#vCambiar"); if (cb) cb.onclick = () => { cerrarVisor(); acciones.cambiar(); };
+  /* la pregunta de borrar sale en la misma barra (una ventana aparte quedaría detrás de la foto) */
+  const bb = v.querySelector("#vBorrar"); if (bb) bb.onclick = () => {
+    const bar = v.querySelector(".vbar"), antes = bar.innerHTML;
+    bar.innerHTML = `<span style="color:#fff;font-weight:700;align-self:center;flex:1.4">¿Borrar la foto?</span><button type="button" class="btn" id="vNo">No</button><button type="button" class="btn danger" id="vSi">Borrar</button>`;
+    bar.querySelector("#vSi").onclick = () => { cerrarVisor(); acciones.borrar(); };
+    bar.querySelector("#vNo").onclick = () => { cerrarVisor(); verFoto(src, acciones); };
+  };
+}
+function cerrarVisor(){ const v = $("visor"); if (v) v.remove(); }
+/* Foto nueva para un producto ya guardado (desde la ficha): se recorta igual que en el formulario */
+async function cambiarFotoProducto(p){
+  const aplicar = async (c) => {
+    if (!c) return; toast("Preparando la foto…", 6000);
+    try { const o = await processPhoto(c); const foto = (S.config?.quitarFondo !== false && o.sinfondo) ? o.sinfondo : o.original;
+      await S.db.doc("productos/" + p.id).update({ foto, actualizado: Date.now() }); toast("Foto cambiada"); }
+    catch { toast("No se pudo cambiar la foto."); }
+  };
+  S.fotoProdCb = aplicar;
+  const r = await capturePhoto("Foto del producto", $("fotoProdFile"));
+  if (r){ S.fotoProdCb = null; await aplicar(r.canvas); }
+}
 
 /* ---------- existencias ----------
    Cada producto guarda una cantidad base (cantidad) y desde cuándo vale (cantT). Lo vendido y lo que entra
@@ -2543,13 +2613,19 @@ function fillProvSelect(sel, val){
     provForm(null, (id) => { fillProvSelect(sel, id); });
   };
 }
-$("iFotoBtn").onclick = async () => {
+$("iFotoBtn").onclick = () => {
+  if (S.iFotoData && !$("iFotoImg").hidden) return verFoto(S.iFotoData, {
+    cambiar: () => tomarFotoIngreso(),
+    borrar: () => { S.iFotoData = null; S.iFotoOpts = null; $("iFotoImg").hidden = true; $("iFotoImg").removeAttribute("src"); $("iFotoPh").hidden = false; $("iFotoOpts").hidden = true; toast("Foto quitada. Toque Guardar para confirmar."); } });
+  tomarFotoIngreso();
+};
+async function tomarFotoIngreso(){
   const r = await capturePhoto("Foto del producto", $("iFoto"));
   if (!r) return;
   await setIngFoto(r.canvas);
   if (r.code && !$("iCodigo").value.trim()){ setIngCodigo(r.code); toast("Código leído: " + r.code); }
   if (r.codigoPropio && !$("iCodP").value.trim()){ setCodigoLeido(r.codigoPropio, true); toast("Código propio leído: " + r.codigoPropio); }
-};
+}
 $("iFoto").onchange = async (e) => {
   const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
   if (!$("iCodigo").value.trim()){
@@ -3693,17 +3769,19 @@ function openLocalDb(){
         if (val === undefined) o.delete(path); else o.put(val, path);
         t.oncomplete = res; t.onerror = () => rej(t.error); t.onabort = () => rej(t.error || new Error("quota"));
       });
-      const notify = () => subs.forEach(f => f());
+      /* paths = rutas cambiadas; null = todo (al cargar una copia) */
+      const notify = (paths) => { const ps = paths ? [...paths] : null;
+        subs.slice().forEach(s => { if (!ps || ps.some(k => s.path ? k === s.path : k.startsWith(s.col + "/"))) s.f(); }); };
       const snapDoc = (path) => { const v = mem.get(path); return { id: path.split("/").pop(), exists: v!==undefined, data: () => v===undefined ? undefined : structuredClone(v) }; };
       const docsIn = (col) => [...mem.keys()].filter(k => k.startsWith(col+"/") && k.split("/").length === col.split("/").length+1).map(snapDoc);
       const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
       const docRef = (path) => ({
         id: path.split("/").pop(), path,
         get: async () => snapDoc(path),
-        set: async (d) => { const v = structuredClone(d); await persist(path, v); mem.set(path, v); notify(); dbChanged(path); },
-        update: async (d) => { if (!mem.has(path)) throw Object.assign(new Error("No existe"), {code:"not_found"}); const v = { ...mem.get(path), ...structuredClone(d) }; await persist(path, v); mem.set(path, v); notify(); dbChanged(path); },
-        delete: async () => { await persist(path, undefined); mem.delete(path); notify(); dbChanged(path); },
-        onSnapshot: (fn) => { const f = () => fn(snapDoc(path)); subs.push(f); setTimeout(f,0); return () => subs.splice(subs.indexOf(f),1); }
+        set: async (d) => { const v = structuredClone(d); await persist(path, v); mem.set(path, v); notify([path]); dbChanged(path); },
+        update: async (d) => { if (!mem.has(path)) throw Object.assign(new Error("No existe"), {code:"not_found"}); const v = { ...mem.get(path), ...structuredClone(d) }; await persist(path, v); mem.set(path, v); notify([path]); dbChanged(path); },
+        delete: async () => { await persist(path, undefined); mem.delete(path); notify([path]); dbChanged(path); },
+        onSnapshot: (fn) => { const s = { path, f: () => fn(snapDoc(path)) }; subs.push(s); setTimeout(s.f,0); return () => subs.splice(subs.indexOf(s),1); }
       });
       const query = (col, ord=null, lim=Infinity) => ({
         orderBy: (field, dir="asc") => query(col, {field, dir}, lim),
@@ -3714,7 +3792,7 @@ function openLocalDb(){
           d = d.slice(0, lim);
           return { docs: d, size: d.length, empty: !d.length };
         },
-        onSnapshot: (fn) => { const f = () => { const d = docsIn(col); fn({ docs:d, size:d.length, empty:!d.length }); }; subs.push(f); setTimeout(f,0); return () => subs.splice(subs.indexOf(f),1); }
+        onSnapshot: (fn) => { const s = { col, f: () => { const d = docsIn(col); fn({ docs:d, size:d.length, empty:!d.length }); } }; subs.push(s); setTimeout(s.f,0); return () => subs.splice(subs.indexOf(s),1); }
       });
       const api = {
         doc: docRef,
@@ -3722,15 +3800,15 @@ function openLocalDb(){
         exportAll: () => Object.fromEntries(mem),
         deleteMany: async (paths) => {
           await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); paths.forEach(k => o.delete(k)); t.oncomplete=res; t.onerror=()=>rej(t.error); });
-          paths.forEach(k => { mem.delete(k); dbChanged(k); }); notify();
+          paths.forEach(k => { mem.delete(k); dbChanged(k); }); notify(paths);
         },
         putMany: async (obj) => {
           await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); for (const [k,v] of Object.entries(obj)) o.put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); });
-          for (const [k,v] of Object.entries(obj)){ mem.set(k,v); dbChanged(k); } notify();
+          for (const [k,v] of Object.entries(obj)){ mem.set(k,v); dbChanged(k); } notify(Object.keys(obj));
         },
         importAll: async (obj) => {
           await new Promise((res, rej) => { const t = idb.transaction("docs","readwrite"), o = t.objectStore("docs"); o.clear(); for (const [k,v] of Object.entries(obj)) o.put(v,k); t.oncomplete=res; t.onerror=()=>rej(t.error); });
-          mem.clear(); for (const [k,v] of Object.entries(obj)) mem.set(k,v); notify();
+          mem.clear(); for (const [k,v] of Object.entries(obj)) mem.set(k,v); notify(null);
         }
       };
     };
@@ -3947,21 +4025,25 @@ $("aImport").onchange = async (e) => {
       btn.disabled = true; btn.textContent = "Cargando…";
       let add = 0, upd = 0;
       try {
+        /* todo se junta y se guarda de una vez (antes se guardaba producto por producto y con listas grandes se ponía lento) */
+        const todo = S.db.exportAll(), lote = {}, ahora = Date.now(), nuevosImp = new Map();
         for (const x of items){
           const p = match(x);
           if (p){
             if (modo === "omitir") continue;
-            const d = { actualizado: Date.now() };
+            const d = { actualizado: ahora };
             if (x.precio != null) d.precio = x.precio;
-            if (x.cantidad != null){ if (modo === "sumar"){ if (x.cantidad) await sumarEntrada(p.id, x.cantidad); } else if (x.cantidad !== p.cantidad) Object.assign(d, fijarCant(x.cantidad)); }
+            if (x.cantidad != null){ if (modo === "sumar"){ if (x.cantidad) lote[S.db.collection("entradas").doc().path] = { pid: p.id, cant: x.cantidad, fecha: ahora }; } else if (x.cantidad !== p.cantidad) Object.assign(d, fijarCant(x.cantidad)); }
             if (x.codigo && !p.codigo) d.codigo = x.codigo;
             Object.assign(d, await extrasImport(x));
-            await S.db.doc("productos/"+p.id).update(d); upd++;
+            const k = "productos/" + p.id; lote[k] = { ...(lote[k] || todo[k] || {}), ...d }; upd++;
           } else {
-            await S.db.collection("productos").add({ codigo:x.codigo, nombre:x.nombre, precio:x.precio||0, ...fijarCant(x.cantidad||0), foto:null, ...(await extrasImport(x)), creado:Date.now(), actualizado:Date.now() });
-            add++;
+            const clave = x.codigo ? "c:" + x.codigo : "n:" + norm(x.nombre);   /* la misma fila repetida en el archivo no crea dos productos */
+            if (!nuevosImp.has(clave)){ nuevosImp.set(clave, S.db.collection("productos").doc().path); add++; }
+            lote[nuevosImp.get(clave)] = { codigo:x.codigo, nombre:x.nombre, precio:x.precio||0, ...fijarCant(x.cantidad||0), foto:null, ...(await extrasImport(x)), creado:ahora, actualizado:ahora };
           }
         }
+        if (Object.keys(lote).length) await S.db.putMany(lote);
         close(); toast(`Listo: ${add} nuevos, ${upd} actualizados`, 3000);
       } catch { toast("Se cortó la carga. Revisa el inventario e intenta de nuevo."); btn.disabled = false; btn.textContent = "Cargar"; }
     });
@@ -4025,44 +4107,51 @@ async function printBT(canvas, btn){
 const FS = document.documentElement;
 const fsSupported = !!(FS.requestFullscreen || FS.webkitRequestFullscreen) && (document.fullscreenEnabled !== false);
 const isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
-const standalone = () => { try { return matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches || navigator.standalone === true; } catch { return false; } };
+const standalone = () => { try { return matchMedia("(display-mode: standalone)").matches || (!isFs() && matchMedia("(display-mode: fullscreen)").matches) || navigator.standalone === true; } catch { return false; } };
+/* App instalada con la versión anterior (siempre en pantalla completa): eso lo decide el celular, no se puede quitar desde aquí */
+const fsFijo = () => { try { return !isFs() && matchMedia("(display-mode: fullscreen)").matches; } catch { return false; } };   /* (con pantalla completa normal esa consulta también da verdadero) */
+const enFs = () => isFs() || fsFijo();
 S.kiosco = ls.get("kiosco") === "1";
-S.wantFs = ls.get("fsWanted") === "1";
+/* Preferencia de pantalla completa: en la app instalada viene prendida; en el navegador, apagada */
+S.wantFs = ls.get("fsWanted") === "1" || (ls.get("fsWanted") === null && standalone());
 let wakeLock = null;
 async function keepAwake(){ try { if ("wakeLock" in navigator && document.visibilityState === "visible" && !wakeLock){ wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => wakeLock = null); } } catch {} }
 async function enterFs(){
   S.wantFs = true; ls.set("fsWanted","1");
-  try { if (FS.requestFullscreen) await FS.requestFullscreen({ navigationUI: "hide" }); else await FS.webkitRequestFullscreen(); } catch {}
+  if (!fsFijo()){ try { if (FS.requestFullscreen) await FS.requestFullscreen({ navigationUI: "hide" }); else await FS.webkitRequestFullscreen(); } catch {} }
   try { await screen.orientation?.lock?.("portrait"); } catch {}
   keepAwake(); fsUpdate();
 }
-async function exitFs(){ S.wantFs = false; ls.set("fsWanted","0"); try { if (document.exitFullscreen) await document.exitFullscreen(); else await document.webkitExitFullscreen(); } catch {} fsUpdate(); }
+async function exitFs(){ S.wantFs = false; ls.set("fsWanted","0"); try { if (isFs()){ if (document.exitFullscreen) await document.exitFullscreen(); else await document.webkitExitFullscreen(); } } catch {} fsUpdate(); }
 function fsUpdate(){
-  const on = isFs();
+  const on = enFs(), puede = fsSupported || fsFijo();
   $("fsBtn").hidden = !fsSupported || standalone();
   $("fsBtn").setAttribute("aria-pressed", on);
   $("fsBtn").setAttribute("aria-label", on ? "Salir de pantalla completa" : "Pantalla completa");
   $("fsIco").innerHTML = on ? '<path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6"/>' : '<path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/>';
-  $("aFs").setAttribute("aria-checked", on); $("aKiosco").setAttribute("aria-checked", S.kiosco);
-  $("fsSettings").hidden = !fsSupported || standalone();
-  $("fsIos").hidden = fsSupported || standalone();
-  $("kiosk").hidden = !(S.kiosco && fsSupported && !standalone() && !on && !S.fsPaused);
+  $("aFs").setAttribute("aria-checked", on || (S.wantFs && !!S.fsPaused)); $("aKiosco").setAttribute("aria-checked", S.kiosco);
+  $("fsSettings").hidden = !puede;
+  $("fsIos").hidden = puede;
+  $("kiosk").hidden = !(S.kiosco && fsSupported && !on && !S.fsPaused);
 }
 document.addEventListener("fullscreenchange", fsUpdate);
 document.addEventListener("webkitfullscreenchange", fsUpdate);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible"){ keepAwake(); fsUpdate(); } });
 $("kiosk").addEventListener("click", enterFs);
 /* Si la pantalla completa se cayó (al abrir la cámara, otra app o una pestaña), vuelve sola con el siguiente toque */
-const fsRestore = () => { if (!S.fsPaused && (S.wantFs || S.kiosco) && fsSupported && !standalone() && !isFs()) enterFs(); };
+const fsRestore = () => { if (!S.fsPaused && (S.wantFs || S.kiosco) && fsSupported && !enFs()) enterFs(); };
 document.addEventListener("pointerup", fsRestore, true);
 document.addEventListener("click", fsRestore, true);
 $("fsBtn").onclick = () => {
-  if (isFs()){ if (S.kiosco){ toast("La pantalla completa está bloqueada. Se quita en Ajustes con la clave.", 3500); return; } exitFs(); }
+  if (enFs()){ if (S.kiosco){ toast("La pantalla completa está bloqueada. Se quita en Ajustes con la clave.", 3500); return; } exitFs(); }
   else enterFs();
 };
 $("aFs").onclick = () => {
-  if (isFs()){ if (S.kiosco){ toast("Primero quita el bloqueo de pantalla completa.", 3000); return; } exitFs(); }
-  else enterFs();
+  if (enFs() || S.wantFs){
+    if (S.kiosco){ toast("Primero quita el bloqueo de pantalla completa.", 3000); return; }
+    if (fsFijo()){ toast("La app instalada se abre en pantalla completa. Para quitarla, desinstale la app y vuelva a instalarla desde el navegador (Ajustes › Instalar como app).", 6000); return; }
+    exitFs(); toast("Pantalla completa apagada");
+  } else { enterFs(); toast("Pantalla completa prendida"); }
 };
 $("aKiosco").onclick = () => {
   if (!S.kiosco){ S.kiosco = true; ls.set("kiosco","1"); enterFs(); toast("Pantalla completa bloqueada"); fsUpdate(); return; }
@@ -4087,6 +4176,7 @@ $("aKiosco").onclick = () => {
 try { history.pushState({ caja: 1 }, ""); } catch {}
 window.addEventListener("popstate", () => {
   try { history.pushState({ caja: 1 }, ""); } catch {}
+  if ($("visor")){ cerrarVisor(); return; }
   const cap = $("capCancel") || $("scCancel"); if (cap){ cap.click(); return; }
   const host = $("sheetHost");
   if (host.innerHTML){ host.innerHTML = ""; return; }
@@ -4230,7 +4320,7 @@ async function compartirTodo(){
    celular se suben solos; los de los otros celulares llegan solos. Si no hay internet, se
    guardan y se suben cuando vuelva. */
 const FB_CONFIG = { apiKey: "AIzaSyAVv8aa6HAdYt13G8IDNHPQKneO51RNEZo", authDomain: "caja-ferreteria-x1.firebaseapp.com", projectId: "caja-ferreteria-x1", storageBucket: "caja-ferreteria-x1.firebasestorage.app", messagingSenderId: "264772442595", appId: "1:264772442595:web:ac6dd01094aa7d1bdf68d6" };
-const N = { lista: false, uid: null, mail: "", unsub: null, cola: new Set(), aplicando: false, t: 0, sub: 0, ult: 0, err: "" };
+const N = { ver: new Map(), lista: false, uid: null, mail: "", unsub: null, cola: new Set(), aplicando: false, t: 0, sub: 0, ult: 0, err: "" };
 try { JSON.parse(ls.get("nubeCola") || "[]").forEach(x => N.cola.add(x)); } catch {}
 const nubeActiva = () => ls.get("nube") === "1";
 const nubeDev = (() => { let d = ls.get("nubeDev"); if (!d){ d = Math.random().toString(36).slice(2, 10); ls.set("nubeDev", d); } return d; })();
@@ -4250,6 +4340,7 @@ function cargarFirebase(){
 }
 function nubeCambio(path){
   if (!nubeActiva() || N.aplicando) return;
+  N.ver.set(path, (N.ver.get(path) || 0) + 1);
   N.cola.add(path); ls.set("nubeCola", JSON.stringify([...N.cola]));
   clearTimeout(N.t); N.t = setTimeout(nubeSubir, 900); pintarNube();
 }
@@ -4257,7 +4348,7 @@ async function nubeSubir(){
   if (!N.lista || !N.uid || !N.cola.size || N.sub) return;
   N.sub = 1;
   try {
-    const db = firebase.firestore(), col = db.collection("tiendas").doc(N.uid).collection("docs"), mios = S.db.exportAll();
+    const db = firebase.firestore(), col = db.collection("tiendas").doc(N.uid).collection("docs"), mios = S.db.exportAll(), vers = new Map(N.ver);
     /* se sube en tandas de máx. 400 documentos y ~4 MB (las fotos pesan), para no pasar el límite de Firebase */
     const rutas = [...N.cola]; let tanda = [], peso = 0;
     const enviar = async () => {
@@ -4265,20 +4356,21 @@ async function nubeSubir(){
       const b = db.batch();
       tanda.forEach(([p, j]) => b.set(col.doc(idNube(p)), { p, j, dev: nubeDev, t: firebase.firestore.FieldValue.serverTimestamp() }));
       await b.commit();
-      tanda.forEach(([p]) => N.cola.delete(p)); ls.set("nubeCola", JSON.stringify([...N.cola]));
+      /* si ese documento cambió otra vez mientras se subía, queda en la cola para subir la versión nueva */
+      tanda.forEach(([p, , ver]) => { if ((N.ver.get(p) || 0) === ver) N.cola.delete(p); }); ls.set("nubeCola", JSON.stringify([...N.cola]));
       tanda = []; peso = 0;
     };
     for (const p of rutas){
       const v = mios[p], j = v === undefined ? null : JSON.stringify(v), n = j ? j.length : 50;
       if (n > 1000000){ N.cola.delete(p); continue; }   /* un solo producto no puede pasar de 1 MB */
       if (tanda.length && (tanda.length >= 400 || peso + n > 4000000)) await enviar();
-      tanda.push([p, j]); peso += n;
+      tanda.push([p, j, vers.get(p) || 0]); peso += n;
     }
     await enviar();
     N.ult = Date.now(); N.err = "";
   } catch (e) { N.err = "No se pudo subir: " + (e?.code || e?.message || "sin internet"); }
   N.sub = 0; pintarNube();
-  if (N.cola.size) setTimeout(nubeSubir, 5000);
+  if (N.cola.size) setTimeout(nubeSubir, N.err ? 5000 : 300);
 }
 async function aplicarRemotos(cambios, borrar){
   N.aplicando = true;
