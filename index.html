@@ -46,7 +46,8 @@ img{max-width:100%}
   --cam:#F2B705; --cam-ink:#1B1A10;
   --venta:#1E7A46; --venta-ink:#FFFFFF;
   --ingreso:#2D5C9E; --ingreso-ink:#FFFFFF;
-  --accent:#2D5C9E; --danger:#B3261E; --ok:#1E7A46; --warn:#9A6B00; --warn-bg:#FFF3CC;
+  --accent:#2D5C9E; --danger:#B3261E; --ok:#1E7A46; --warn:#7A5500; --warn-bg:#FFF3CC;
+  --primary-bg:#2D5C9E; --danger-solid:#B3261E;
   --f-display:"Barlow Condensed Local","Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -56,17 +57,19 @@ img{max-width:100%}
   --bg:#141714; --surface:#1E221E; --sunk:#262B26; --line:#3A413A;
   --ink:#ECEFEA; --muted:#A3AB9F;
   --cam:#E8B00C; --cam-ink:#17160E;
-  --venta:#2A9A5A; --venta-ink:#FFFFFF;
+  --venta:#1F7F48; --venta-ink:#FFFFFF;
   --ingreso:#3D72BF; --ingreso-ink:#FFFFFF;
   --accent:#7FA8E6; --danger:#FF8A80; --ok:#5BCB8A; --warn:#F2C14E; --warn-bg:#3A3015;
+  --primary-bg:#3D72BF; --danger-solid:#C62828;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141714; --surface:#1E221E; --sunk:#262B26; --line:#3A413A;
   --ink:#ECEFEA; --muted:#A3AB9F;
   --cam:#E8B00C; --cam-ink:#17160E;
-  --venta:#2A9A5A; --venta-ink:#FFFFFF;
+  --venta:#1F7F48; --venta-ink:#FFFFFF;
   --ingreso:#3D72BF; --ingreso-ink:#FFFFFF;
   --accent:#7FA8E6; --danger:#FF8A80; --ok:#5BCB8A; --warn:#F2C14E; --warn-bg:#3A3015;
+  --primary-bg:#3D72BF; --danger-solid:#C62828;
   color-scheme:dark}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.4;overflow:hidden}
@@ -135,7 +138,7 @@ body.kb .foot:not(:focus-within){display:none}
 .row>*{min-width:0}
 .grow{flex:1}
 .btn{border:0;border-radius:var(--r);padding:13px 16px;font-weight:700;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--sunk);color:var(--ink);border:1px solid var(--line);text-decoration:none}
-.btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.btn.primary{background:var(--primary-bg);color:#fff;border-color:transparent}
 .btn.venta{background:var(--venta);color:var(--venta-ink);border-color:transparent}
 .btn.cam{background:var(--cam);color:var(--cam-ink);border-color:transparent}
 .btn.ingreso{background:var(--ingreso);color:var(--ingreso-ink);border-color:transparent}
@@ -165,7 +168,7 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .price{font-family:var(--f-mono);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
 .stock{font-size:12px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--sunk)}
 .stock.low{background:var(--warn-bg);color:var(--warn)}
-.stock.out{background:var(--danger);color:#fff}
+.stock.out{background:var(--danger-solid);color:#fff}
 
 /* Camera */
 .shot{flex-shrink:0;position:relative;border-radius:14px;overflow:hidden;background:var(--sunk);aspect-ratio:4/3;max-width:100%;display:grid;place-items:center;border:2px dashed var(--line)}
@@ -235,8 +238,9 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .thumb{background:#fff}
 .thumb img{object-fit:contain!important}
 #iFotoBtn{background:#fff}
+#iFotoBtn .ph,#pfFoto .ph{color:#5E665B}
 #iFotoBtn img{object-fit:contain;background:#fff}
-details.card>summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.card>summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:40px}
 details.card>summary::after{content:"+";font-size:22px;font-weight:600;color:var(--muted)}
 details.card[open]>summary::after{content:"–"}
 details.card[open]>summary{margin-bottom:10px}
@@ -255,7 +259,7 @@ details.card[open]>summary{margin-bottom:10px}
 .poplist{overflow-y:auto;padding-bottom:14px;display:flex;flex-direction:column;gap:6px}
 .popopt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:17px;font-weight:600;text-align:left;width:100%}
 .popopt[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.popopt .ct{color:var(--muted);font-weight:500;font-size:14px}
+.popopt .ct{color:var(--muted);font-weight:500;font-size:14px;white-space:nowrap;flex-shrink:0}
 .popsec{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:8px}
 .iconbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex-shrink:0;color:var(--ink)}
 .iconbtn svg{width:20px;height:20px}
@@ -268,7 +272,7 @@ details.card[open]>summary{margin-bottom:10px}
 .scanmsg{position:absolute;left:12px;right:12px;top:calc(56px + env(safe-area-inset-top,0px));background:rgba(20,120,60,.92);color:#fff;font-weight:700;font-size:17px;padding:12px 14px;border-radius:12px;text-align:center;transition:opacity .25s;pointer-events:none}
 .scanmsg.mal{background:rgba(179,38,30,.92)}
 .scancount{background:var(--cam);color:var(--cam-ink);border-radius:999px;padding:2px 9px;margin-left:6px;font-size:14px}
-#ajSave{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;padding:14px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);font-size:17px}
+#ajSave{position:static;width:100%;box-shadow:none!important;border-radius:var(--r)!important;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;padding:14px 26px;border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.28);font-size:17px}
 #ajForm{padding-bottom:96px}
 .tabsbar{background:var(--surface);border-bottom:1px solid var(--line);padding-block:8px}
 .ajgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--sunk);border-radius:12px;padding:4px}
@@ -293,10 +297,11 @@ details.card[open]>summary{margin-bottom:10px}
 .seg3 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
 .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stats3 .num{font-size:20px;font-weight:600}
-.helpq{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--muted);background:var(--surface);color:var(--muted);font-weight:800;font-size:15px;display:grid;place-items:center;padding:0;line-height:1}
+.helpq{position:absolute;top:6px;right:6px;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--muted);background:var(--surface);color:var(--muted);font-weight:800;font-size:15px;display:grid;place-items:center;padding:0;line-height:1}
 .helpbox{display:flex;flex-direction:column;gap:12px;padding-bottom:16px}
 .helpbox b{display:block;font-size:17px;margin-bottom:2px}
 .helpbox p{margin:0;color:var(--muted);font-size:15px;line-height:1.4}
+.helpbox p b{display:inline;font-size:inherit;margin:0;color:var(--ink)}
 .codebox{background:#fff;border-radius:10px;padding:10px;display:flex;justify-content:center;border:1px solid var(--line)}
 .codebox svg{max-width:100%;height:auto}
 #printArea{display:none}
@@ -329,7 +334,7 @@ details.card[open]>summary{margin-bottom:10px}
 .visor .vzona img{position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;transform-origin:center center;will-change:transform;background:#fff;-webkit-user-drag:none}
 .visor .vtop{position:absolute;top:0;left:0;right:0;display:flex;justify-content:flex-end;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;z-index:2;background:linear-gradient(rgba(0,0,0,.55),transparent)}
 .visor .vbar{display:flex;gap:10px;padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));background:#111}
-.visor .vbar .btn{flex:1}
+.visor .vbar .btn{flex:1;min-width:0;padding:13px 8px;white-space:normal;line-height:1.15;font-size:15px}
 .visor .vx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center}
 .visor .vx svg{width:26px;height:26px}
 .visor .vhint{position:absolute;bottom:10px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);font-size:13px;pointer-events:none}
@@ -344,7 +349,7 @@ details.card[open]>summary{margin-bottom:10px}
 .ganbox{position:relative}
 .ganwrap{position:relative;display:flex}
 .ganwrap .inp{width:100%;padding-right:104px}
-.ganx{position:absolute;right:76px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;border:0;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+.ganx{position:absolute;right:74px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
 .ganx svg{width:13px;height:13px}
 .ganx[hidden]{display:none}
 .gansuf{position:absolute;right:54px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
@@ -360,10 +365,11 @@ details.card[open]>summary{margin-bottom:10px}
 .origbox[hidden]{display:none}
 .origbox{border:1px dashed var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
 .origtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#iOrigQuitar{min-height:36px;padding:6px 10px}
 .origtxt{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
 .origtxt .num{font-size:18px;font-weight:700}
 .origtipo{font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--line)}
-.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:14px;padding:4px}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:14px;padding:10px 8px;min-height:40px}
 .pmeta .cod2{color:var(--muted);font-size:.9em}
 .capx{width:48px;height:48px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto}
 .capx svg{width:24px;height:24px}
@@ -523,7 +529,8 @@ details.card[open]>summary{margin-bottom:10px}
   </div>
   <div class="foot gut">
     <div class="row"><button class="btn venta grow" id="recBT"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7l10 10-5 5V2l5 5L7 17"/></svg>Bluetooth</button><button class="btn venta grow" id="recPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="2" y="9" width="20" height="9" rx="2"/><path d="M6 14h12v8H6z"/></svg>Imprimir</button></div>
-    <div class="row"><button class="btn grow" id="recGuardar">Compartir</button><button class="btn grow" id="recCopiar">Copiar texto</button><button class="btn primary grow" id="recNueva">Nueva venta</button></div>
+    <div class="row"><button class="btn grow" id="recGuardar">Compartir</button><button class="btn grow" id="recCopiar">Copiar texto</button></div>
+    <button class="btn primary block" id="recNueva">Nueva venta</button>
   </div>
 </section>
 
@@ -601,7 +608,7 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--danger)"></span><h1>Por comprar</h1></div>
   <div class="body gut">
     <div class="row"><button type="button" class="btn cam grow" id="pScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button type="button" class="btn ingreso grow" id="pFoto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>Tomar foto</button></div>
-    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Nombre del producto" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button class="btn primary" type="submit">Agregar</button></form>
+    <form id="pendForm" class="row"><input id="pendQ" class="inp grow" placeholder="Producto" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button class="btn primary" type="submit">Agregar</button></form>
     <div class="row"><button type="button" class="btn grow" id="pFiltro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="width:20px;height:20px"><path d="M4 6h16M7 12h10M10 18h4"/></svg>Filtro</button><button type="button" class="btn grow" id="pExport">Exportar</button><label class="btn grow" for="aImport">Cargar</label></div>
     <div class="fchips" id="pendChips" hidden></div>
     <div class="sect" id="pendCount"></div>
@@ -615,11 +622,11 @@ details.card[open]>summary{margin-bottom:10px}
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--muted)"></span><h1>Ajustes</h1></div>
   <div class="tabsbar gut"><div class="ajgrid ajg4" id="ajTabs" role="tablist"><button type="button" data-tab="gen" aria-pressed="true">General</button><button type="button" data-tab="cli" aria-pressed="false">Clientes</button><button type="button" data-tab="prov" aria-pressed="false">Proveedores</button><button type="button" data-tab="cuenta" aria-pressed="false">Cuenta</button></div></div>
   <div class="body gut" id="tabCli" hidden>
-    <div class="row"><input id="cliQ" class="inp grow" placeholder="Nombre, NIT o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
+    <div class="row"><input id="cliQ" class="inp grow" placeholder="Buscar cliente" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="cliNuevo">+ Cliente</button></div>
     <div id="cliList"></div>
   </div>
   <div class="body gut" id="tabProv" hidden>
-    <div class="row"><input id="provQ" class="inp grow" placeholder="Nombre, código o teléfono" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
+    <div class="row"><input id="provQ" class="inp grow" placeholder="Buscar proveedor" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false"><button type="button" class="btn ingreso" id="provNuevo">+ Proveedor</button></div>
     <div id="provList"></div>
   </div>
   <form class="body gut" id="ajForm" autocomplete="off">
@@ -707,7 +714,8 @@ details.card[open]>summary{margin-bottom:10px}
         <p class="note" style="margin:0">Use el mismo usuario y contraseña en los celulares de la ferretería y todos verán lo mismo: productos, ventas, clientes, proveedores y por comprar.</p>
       </div>
       <div id="nubeDentro" hidden style="display:flex;flex-direction:column;gap:8px">
-        <div class="row"><button type="button" class="btn grow" id="nubeSync">Sincronizar ahora</button><button type="button" class="btn grow" id="nubeClaveBtn">Cambiar contraseña</button></div>
+        <button type="button" class="btn block" id="nubeSync">Sincronizar ahora</button>
+        <button type="button" class="btn block" id="nubeClaveBtn">Cambiar contraseña</button>
         <button type="button" class="btn danger block" id="nubeSalir">Cerrar sesión</button>
         <p class="note" style="margin:0">Al cerrar sesión la app vuelve a la pantalla de inicio. Todo queda guardado en la nube y se trae de nuevo al entrar.</p>
         <p class="note" style="margin:0">Si el navegador borra los datos al cerrarse (por ejemplo Brave), instale la app desde <b>General › Pantalla y clave</b> o quite ese borrado para esta página. Sin internet, no cierre el navegador hasta que el aviso naranja del inicio desaparezca.</p>
@@ -888,7 +896,7 @@ function buildKeypad(){
   const k = $("keypad"); k.innerHTML = "";
   ["1","2","3","4","5","6","7","8","9","⌫","0","OK"].forEach(x => {
     const b = document.createElement("button"); b.type="button"; b.textContent=x;
-    if (x==="OK"){ b.style.background="var(--accent)"; b.style.color="#fff"; b.style.fontFamily="var(--f-body)"; b.style.fontWeight="700"; }
+    if (x==="OK"){ b.style.background="var(--primary-bg)"; b.style.color="#fff"; b.style.fontFamily="var(--f-body)"; b.style.fontWeight="700"; }
     b.onclick = () => {
       if (x==="⌫") pinBuf = pinBuf.slice(0,-1);
       else if (x==="OK") return tryPin();
@@ -1035,13 +1043,13 @@ function setModo(m){
 }
 $("cCodigo").onclick = () => { setModo("codigo"); resetCam(); };
 $("cObjeto").onclick = () => { setModo("objeto"); resetCam(); };
-const goI = $("goIngreso"); if (goI) goI.onclick = () => openIngreso();
 
 function fitBig(){
   document.querySelectorAll(".big .t").forEach(t => {
     t.style.fontSize = "";
     const box = t.parentElement, icon = box.querySelector("svg");
-    const avail = box.clientWidth - (icon ? icon.getBoundingClientRect().width : 0) - 14 - 36 - 8;
+    const rayas = box.classList.contains("b-cam") ? 52 : 0;
+    const avail = box.clientWidth - (icon ? icon.getBoundingClientRect().width : 0) - 14 - 36 - 8 - rayas;
     let fs = parseFloat(getComputedStyle(t).fontSize);
     while (t.scrollWidth > avail && fs > 24){ fs -= 2; t.style.fontSize = fs + "px"; }
   });
@@ -1052,7 +1060,6 @@ function renderHome(){
   requestAnimationFrame(fitBig);
   const c = S.config||{};
   $("brand").firstChild.textContent = c.nombre || "Ferretería";
-  const items = S.carrito.reduce((a,i)=>a+i.cant,0);
 }
 
 /* ---------- images ---------- */
@@ -1129,7 +1136,7 @@ function productSheet(p){
       <div class="price" style="font-size:24px;margin-top:6px">${fmt(p.precio)}</div></div></div>
     <dl class="kv"><dt>Código</dt><dd class="num">${esc(p.codigo||"—")}</dd>${p.codigoPropio?`<dt>Código propio</dt><dd class="num">${esc(p.codigoPropio)}</dd>`:""}<dt>Existencias</dt><dd>${stockChip(p)}</dd>${p.costo?`<dt>Costo</dt><dd class="num">${fmt(p.costo)}</dd>`:""}${p.categoria?`<dt>Categoría</dt><dd>${esc(p.categoria)}</dd>`:""}${(() => { const pv = provById(p.proveedorId); return pv ? `<dt>Proveedor</dt><dd>${esc(pv.nombre)}${pv.telefono?`<br><span class="num" style="font-weight:500">${esc(pv.telefono)}</span> · ${telLinks(pv.telefono)}`:""}</dd>` : ""; })()}${p.creado?`<dt>Ingresado</dt><dd>${fFecha(p.creado)} ${fHora(p.creado)}</dd>`:""}${p.actualizado && p.actualizado !== p.creado?`<dt>Actualizado</dt><dd>${fFecha(p.actualizado)} ${fHora(p.actualizado)}</dd>`:""}</dl>
     <button class="btn venta block" id="psVender">Vender</button>
-    <div class="row"><button class="btn grow" id="psEditar">Editar</button>${(p.codigoPropio || p.codigo) ? `<button class="btn grow" id="psEtq">Etiqueta</button>` : ""}<button class="btn grow" data-close>Cerrar</button></div>`,
+    <div class="row"><button class="btn grow" id="psEditar">Editar</button>${(p.codigoPropio || p.codigo) ? `<button class="btn grow" id="psEtq">Etiqueta</button>` : ""}</div>`,
     (el, close) => {
       const et = el.querySelector("#psEtq"); if (et) et.onclick = () => { close(); etiqueta(p); };
       const pf = el.querySelector("#psFoto"); if (pf) pf.onclick = () => verFoto(p.foto, {
@@ -1761,7 +1768,7 @@ function pendFormSheet(pre = {}, item = null){
   const prod = pre.codigo ? byCode(pre.codigo) : null;
   const nombre0 = it.nombre || pre.nombre || prod?.nombre || "";
   const prov0 = it.proveedorId || prod?.proveedorId || "";
-  sheet(`<h2>${item ? "Editar" : "Por comprar"}</h2>
+  sheet(`<h2>${item ? "Editar pendiente" : "Por comprar"}</h2>
     <button type="button" class="shot" id="pfFoto" style="aspect-ratio:16/10;max-height:220px;width:100%;padding:0;background:#fff">
       <div class="ph" id="pfPh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><span>Tomar foto</span></div>
       <img id="pfImg" alt="Foto" hidden style="object-fit:contain;background:#fff">
@@ -2095,7 +2102,6 @@ $("vCobrar").onclick = async () => {
     await S.db.collection("ventas").add(venta);
     S.lastVenta = venta; S.carrito=[]; $("vRecibido").value=""; setVentaCliente(null); $("vCliBox").open = false; saveCartDraft();
     openRecibo(venta);
-    if (archivoPendiente(true)) setTimeout(guardarArchivo, 600);
   } catch(e){ toast("No se pudo guardar la venta. Revisa la conexión e intenta de nuevo.", 3500); }
   btn.disabled=false; btn.textContent="Cobrar";
 };
@@ -2212,12 +2218,12 @@ $("ventasHist").onclick = async () => {
       <label class="f grow" id="hAnioL" hidden style="flex-basis:60%">Año<select id="hAnio" class="inp">${optAnio}</select></label>
     </div>
     <div class="row">
-      <label class="f grow">Desde<select id="hDesde" class="inp">${optHora("Cualquier hora")}</select></label>
-      <label class="f grow">Hasta<select id="hHasta" class="inp">${optHora("Cualquier hora")}</select></label>
+      <label class="f grow">Desde<select id="hDesde" class="inp">${optHora("Inicio")}</select></label>
+      <label class="f grow">Hasta<select id="hHasta" class="inp">${optHora("Final")}</select></label>
     </div>
     <input id="hCli" class="inp" placeholder="Cliente o NIT" autocomplete="off" inputmode="search" autocorrect="off" spellcheck="false">
     <div id="hRes"></div>
-    <div class="row"><button class="btn grow" data-close>Cerrar</button><button class="btn grow" id="hExcel">Exportar</button></div>`,
+    <button class="btn block" id="hExcel">Exportar a Excel</button>`,
     (el, close) => {
       let filtradas = [];
       const q = (id) => el.querySelector(id);
@@ -3474,7 +3480,7 @@ async function renderClientes(){
   const cs = [...S.clientes].filter(c => !q || norm(c.nombre).includes(q) || norm(c.doc).includes(q) || norm(c.telefono).includes(q))
     .map(c => { const vs = ventasDeCliente(c); return { c, n: vs.length, tot: vs.reduce((a,v) => a + (v.total||0), 0), ult: vs[0]?.fecha || 0 }; })
     .sort((a,b) => (b.ult - a.ult) || norm(a.c.nombre).localeCompare(norm(b.c.nombre)));
-  $("cliList").innerHTML = cs.length ? `<div class="plist">${cs.map(x => `<button type="button" class="provrow" data-cli="${esc(x.c.id)}"><span class="pinfo"><span class="pname">${esc(x.c.nombre)}</span><span class="pmeta">${x.c.doc ? `<span class="num">${esc(x.c.doc)}</span>` : ""}<span>${miles(x.n)} compra${x.n === 1 ? "" : "s"}</span>${x.ult ? `<span>Última: ${fFecha(x.ult)}</span>` : ""}</span></span><span class="price">${fmt(x.tot)}</span></button>`).join("")}</div>`
+  $("cliList").innerHTML = cs.length ? `<div class="plist">${cs.map(x => `<button type="button" class="provrow" data-cli="${esc(x.c.id)}"><span class="pinfo"><span class="pname">${esc(x.c.nombre)}</span><span class="pmeta">${x.c.doc ? `<span class="num">${esc(x.c.doc)}</span>` : ""}<span>${miles(x.n)} compra${x.n === 1 ? "" : "s"}</span>${x.ult ? `<span>Última: ${fFecha(x.ult)}</span>` : ""}</span></span>${x.tot ? `<span class="price">${fmt(x.tot)}</span>` : ""}</button>`).join("")}</div>`
     : `<div class="empty">${S.clientes.length ? "Ningún cliente coincide." : "Sin clientes. Se agregan aquí o al poner el cliente en una venta."}</div>`;
 }
 $("cliQ").addEventListener("input", () => renderClientes());
@@ -3618,21 +3624,7 @@ async function guardarArchivo(){
     toast("Copia guardada en Descargas", 1800);
   } catch {}
 }
-function archivoPendiente(trasVenta){
-  return false;   /* las copias en archivo se quitaron: ahora todo queda en la nube */
-  if (!S.db || !S.unlocked || !S.fileDirty) return false;
-  const modo = S.config?.copiaArchivo || "hora", last = Number(ls.get("lastExport")) || 0;
-  if (modo === "no") return false;
-  if (modo === "venta") return !!trasVenta;
-  if (modo === "hora") return Date.now() - last >= 3600e3;
-  if (modo === "horafija"){ const [hh, mm] = String(S.config?.copiaHora || "18:00").split(":").map(Number); const t = new Date(); t.setHours(hh||0, mm||0, 0, 0);
-    return Date.now() >= t.getTime() && last < t.getTime(); }
-  const dia = (t) => { const x = new Date(t); return x.getFullYear()*1e4 + x.getMonth()*100 + x.getDate(); };
-  return !last || dia(last) !== dia(Date.now());
-}
-/* se revisa al tocar la pantalla (las descargas necesitan un toque del usuario) */
-let archivoT = 0;
-document.addEventListener("click", () => { clearTimeout(archivoT); archivoT = setTimeout(() => { if (archivoPendiente(false)) guardarArchivo(); }, 1500); }, true);
+/* (las copias en archivo automáticas se quitaron: ahora todo queda en la nube) */
 let respaldoDbP = null;
 function respaldoDb(){
   if (!respaldoDbP) respaldoDbP = new Promise((res, rej) => {
@@ -3723,31 +3715,13 @@ $("copiasList").addEventListener("click", (e) => {
     } catch { toast("No se pudo restaurar."); }
   }, false);
 });
-if ($("aNube")) $("aNube").onclick = async () => {
-  try {
-    const data = { app:"caja-ferreteria", version:1, fecha:new Date().toISOString(), docs:S.db.exportAll() };
-    const d = new Date(), hm = String(d.getHours()).padStart(2,"0") + String(d.getMinutes()).padStart(2,"0");
-    await shareFile(new Blob([JSON.stringify(data)], { type:"application/json" }), `copia-ferreteria-${stamp()}-${hm}.json`);
-    ls.set("lastExport", String(Date.now())); S.fileDirty = false; renderUltimaExp();
-  } catch { toast("No se pudo preparar la copia."); }
-};
 $("aCopiaYa").onclick = async () => { try { await hacerCopia(); toast("Copia guardada"); renderCopias(); } catch { toast("No se pudo guardar la copia."); } };
 function renderUltimaExp(){
   const el = $("aUltimaExp"); if (!el) return;
   const t = Number(ls.get("lastExport")) || 0;
   el.textContent = t ? `Última copia guardada en el celular: ${fFecha(t)} ${fHora(t)}.` : "Todavía no has guardado una copia en el celular.";
 }
-function recordarExport(){
-  return;   /* sin recordatorios de copia: la nube guarda todo */
-  const dias = S.config?.recordarDias ?? 7; if (!dias) return;
-  if ((S.config?.copiaArchivo || "hora") !== "no") return;
-  const t = Number(ls.get("lastExport")) || 0, hoyK = stamp();
-  if (ls.get("lastRemind") === hoyK) return;
-  if (t && Date.now() - t < dias * 864e5) return;
-  if (!S.productos.length) return;
-  ls.set("lastRemind", hoyK);
-  setTimeout(() => toast(t ? `Hace ${Math.floor((Date.now()-t)/864e5)} días no guardas una copia en el celular. Ve a Ajustes › Exportar datos.` : "Guarda una copia en el celular: Ajustes › Exportar datos › Copia completa.", 5000), 1500);
-}
+function recordarExport(){}   /* sin recordatorios de copia: la nube guarda todo */
 
 /* ---------- local database (IndexedDB, same API shape the app uses) ---------- */
 function openLocalDb(){
