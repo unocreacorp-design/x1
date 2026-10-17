@@ -685,11 +685,11 @@ details.card[open]>summary{margin-bottom:10px}
     <details class="ajsec acc" data-sec="pant" data-grupo="gen"><summary><span class="acct">Pantalla y clave</span><span class="accd">Pantalla completa, instalar app, clave y huella</span></summary>
       <div class="accb">
     <div id="fsSettings" style="display:flex;flex-direction:column;gap:10px">
-      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa<br><small class="note" style="font-weight:500">Sin barras del celular ni del navegador. Apáguelo para verlas.</small></span><span class="tg"></span></button>
+      <button type="button" class="switch" id="aFs" role="switch" aria-checked="false"><span>Pantalla completa<br><small class="note" style="font-weight:500">Sin barras del celular ni del navegador. Con la app instalada se abre directo así, sin avisos.</small></span><span class="tg"></span></button>
       <button type="button" class="switch" id="aKiosco" role="switch" aria-checked="false"><span>Bloquear pantalla completa<br><small class="note" style="font-weight:500">Vuelve con un toque. Para quitarlo pide la clave.</small></span><span class="tg"></span></button>
     </div>
     <button type="button" class="btn ingreso" id="aInstalar" hidden>Instalar como app</button>
-    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app se abre desde su ícono, sin la barra del navegador.</p>
+    <p class="note" style="margin:0" id="aInstNota" hidden>Instalada, la app se abre desde su ícono directo en pantalla completa, sin barras ni avisos.</p>
     <p class="note" style="margin:0" id="fsNote">Para bloquear del todo, use <b>Fijar app</b> (Android) o <b>Acceso guiado</b> (iPhone).</p>
     <p class="note" style="margin:0" id="fsIos" hidden>En iPhone el navegador no tiene pantalla completa. Abra la app en Safari, toque Compartir › <b>Agregar a pantalla de inicio</b> y ábrala desde ese ícono: se ve sin barras del navegador.</p>
     <div class="sect" style="margin-top:8px">Clave de la app</div>
@@ -4137,7 +4137,7 @@ document.addEventListener("click", fsRestore, true);
 $("aFs").onclick = () => {
   if (enFs() || S.wantFs){
     if (S.kiosco){ toast("Primero quita el bloqueo de pantalla completa.", 3000); return; }
-    if (fsFijo()){ toast("La app instalada se abre en pantalla completa. Para quitarla, desinstale la app y vuelva a instalarla desde el navegador (Ajustes › Instalar como app).", 6000); return; }
+    if (fsFijo()){ toast("La app instalada siempre abre en pantalla completa (así no sale el aviso cada vez). Para verla con barras, ábrala desde el navegador en vez del ícono.", 6000); return; }
     exitFs(); toast("Pantalla completa apagada");
   } else { enterFs(); toast("Pantalla completa prendida"); }
 };
