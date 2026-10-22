@@ -180,7 +180,6 @@ label.f,div.f{display:flex;flex-direction:column;gap:5px;font-size:13px;font-wei
 .spin{width:20px;height:20px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:3s}}
-.grecaptcha-badge{visibility:hidden!important}
 .ianota{display:flex;align-items:center;gap:4px 8px;flex-wrap:wrap;margin:-6px 0 0;line-height:1.3}
 .ianota .spin{width:16px;height:16px;border-width:2px}
 .ianota b{color:var(--ink);font-weight:600}
@@ -672,7 +671,7 @@ details.card[open]>summary{margin-bottom:10px}
     <button type="button" class="switch" id="aCamVivo" role="switch" aria-checked="true"><span>Cámara en vivo<br><small class="note" style="font-weight:500">Lee sola, sin tomar foto. Requiere abrir desde el link.</small></span><span class="tg"></span></button>
     <div class="sect" style="margin-top:8px">Fotos de productos</div>
     <button type="button" class="switch" id="aQuitarFondo" role="switch" aria-checked="true"><span>Recortar producto con IA<br><small class="note" style="font-weight:500">Borra el fondo de la foto.</small></span><span class="tg"></span></button>
-    <button type="button" class="switch" id="aReconocer" role="switch" aria-checked="true"><span>Reconocer el producto en la foto<br><small class="note" style="font-weight:500">Al ingresar uno nuevo llena el nombre y la categoría. Con internet lee el empaque (IA de Google, protegida por reCAPTCHA); sin internet dice qué es (ej. candado).</small></span><span class="tg"></span></button>
+    <button type="button" class="switch" id="aReconocer" role="switch" aria-checked="true"><span>Reconocer el producto en la foto<br><small class="note" style="font-weight:500">Al ingresar uno nuevo llena el nombre y la categoría (ej. candado). Funciona en el celular, sin enviar la foto a ningún lado.</small></span><span class="tg"></span></button>
     <div class="row" style="align-items:center;gap:12px">
       <img id="aLogoImg" class="logoprev" alt="Logo" hidden>
       <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
@@ -941,7 +940,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Con internet lee el empaque (marca, referencia, medida); sin internet pone al menos qué es, por ejemplo <i>Candado</i>. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -2329,6 +2328,7 @@ function openIngreso(opts={}){
     if (opts.nombre){ const c = sugerirCategoria(opts.nombre); if (c){ $("iCat").value = c; refreshPicker($("iCat")); $("iCatNota").hidden = false; } }
     if (opts.codigoPropio) setCodigoLeido(opts.codigoPropio, true);
     pintarOrig();
+    if (iaActiva()) setTimeout(iaPrecargar, 1500);
   }
   $("iGanX").hidden = !$("iGan").value.trim();
   previewCodigo();
@@ -2598,94 +2598,12 @@ $("iNombre").addEventListener("input", () => {
 $("iCat").addEventListener("change", () => { $("iCat").dataset.manual = "1"; $("iCatNota").hidden = true; });
 
 /* ---------- Reconocer el producto en la foto (solo al ingresar uno nuevo) ----------
-   Con internet: la IA de Google (Gemini, por Firebase AI Logic, plan gratis) mira la foto, lee el
-   empaque y propone el nombre (con marca, referencia y medida si se leen) y la categoría.
-   Sin internet, o si falla o se acabó el cupo: una IA pequeña que corre en el celular
-   (ai/objetos.onnx, 3 MB) dice qué objeto es, y el lector de letras busca palabras conocidas en el empaque.
-   La foto que se analiza va pequeña y no se guarda en ningún lado. Nunca se borra lo que ya se escribió. */
-const IA = { seq: 0, modelo: ls.get("iaModelo") || "", pausa: 0, t: 0 };
-const IA_MODELOS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.5-flash"];
-const APPCHECK_KEY = "6LcKUfMtAAAAAGC1p3lq_F0R1ciedjeF7yKhfjYn";   /* clave pública del sitio (reCAPTCHA Enterprise, Firebase › App Check) */
+   Todo corre en el celular, gratis y sin enviar la foto a ningún lado: una IA pequeña
+   (ai/objetos.onnx, 3 MB) dice qué objeto es, y el lector de letras busca palabras conocidas
+   en el empaque (ej. "silicona", marca Sika). Nunca se borra lo que ya se escribió. */
+const IA = { seq: 0, t: 0 };
 const iaActiva = () => S.config?.reconocerFoto !== false;
-let appCheckP = null;
-function cargarAppCheck(){
-  if (!APPCHECK_KEY) return Promise.resolve(null);
-  if (appCheckP) return appCheckP;
-  appCheckP = cargarFirebase().then(() => firebase.appCheck ? null : new Promise((res, rej) => {
-    const sc = document.createElement("script"); sc.src = new URL("fb/firebase-app-check-compat.js", location.href).href;
-    sc.onload = res; sc.onerror = () => rej(new Error("appcheck")); document.head.appendChild(sc);
-  })).then(() => { const ac = firebase.appCheck(); ac.activate(new firebase.appCheck.ReCaptchaEnterpriseProvider(APPCHECK_KEY), false); return ac;   /* sin renovar sola: se pide solo al usar la IA */ });
-  appCheckP.catch(() => { appCheckP = null; });
-  return appCheckP;
-}
-function iaJpeg(src, max){
-  const k = Math.min(1, max / Math.max(src.width, src.height));
-  const c = document.createElement("canvas"); c.width = Math.round(src.width * k); c.height = Math.round(src.height * k);
-  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.imageSmoothingQuality = "high"; x.drawImage(src, 0, 0, c.width, c.height);
-  return c.toDataURL("image/jpeg", 0.8).split(",")[1];
-}
-function iaPrompt(cats){
-  const ej = S.productos.map(p => p.nombre).filter(Boolean).slice(-8);
-  return `Eres el ayudante de una ferretería en Colombia. La foto muestra UN producto que se va a registrar en el inventario. Responde con el JSON pedido:
-- objeto: qué es, en español de Colombia, singular, de 1 a 3 palabras (ej. "Candado", "Llave de paso", "Tornillo drywall", "Brocha", "Silicona").
-- marca, referencia y medida: solo si se leen con claridad en el producto o en el empaque; si no, "".
-- nombre: como iría en el inventario de la ferretería: objeto + tipo o uso + marca + medida o referencia (ej. "Candado de seguridad Yale 40 mm", "Brocha Goya 2 pulgadas", "Silicona transparente Sika 280 ml"). Máximo 60 caracteres. No inventes marcas, medidas ni números que no se vean.
-- categoria: una de esta lista, escrita igual: ${cats.join(" | ")}. Si ninguna sirve: "Ninguna".
-- seguro: true si se ve con claridad qué producto es.` + (ej.length ? `\nAsí escribe la tienda los nombres (imite el estilo, mayúsculas incluidas): ${ej.join("; ")}.` : "");
-}
-function iaSchema(cats){
-  const campos = ["objeto", "marca", "referencia", "medida", "nombre", "categoria", "seguro"];
-  return { type: "OBJECT", properties: { objeto: { type: "STRING" }, marca: { type: "STRING" }, referencia: { type: "STRING" }, medida: { type: "STRING" },
-    nombre: { type: "STRING" }, categoria: { type: "STRING", enum: [...cats, "Ninguna"] }, seguro: { type: "BOOLEAN" } }, required: campos, propertyOrdering: campos };
-}
-function iaLimpiar(o, cats){
-  o = o || {};
-  const t = (v) => String(v ?? "").replace(/["“”]/g, "").replace(/\s+/g, " ").trim();
-  let nombre = t(o.nombre) || t(o.objeto);
-  if (nombre.length > 70) nombre = nombre.slice(0, 70).replace(/\s+\S*$/, "");
-  if (nombre && nombre === nombre.toLowerCase()) nombre = nombre[0].toUpperCase() + nombre.slice(1);
-  const categoria = cats.includes(o.categoria) ? o.categoria : "";
-  return { nombre, categoria, fuente: "nube" };
-}
-async function iaNube(src){
-  if (navigator.onLine === false) throw new Error("sin internet");
-  if (Date.now() < IA.pausa) throw new Error("en pausa");
-  await cargarFirebase();
-  const headers = { "Content-Type": "application/json", "x-goog-api-key": FB_CONFIG.apiKey };
-  try {   /* la prueba de que es la app (reCAPTCHA); si tarda mucho se sigue sin ella y, si la piden, se usa la IA del celular */
-    const espera = (ms) => new Promise((_, rej) => setTimeout(() => rej(new Error("tiempo")), ms));
-    const ac = await Promise.race([cargarAppCheck(), espera(10000)]);
-    if (ac){ const t = await Promise.race([ac.getToken(false), espera(10000)]); if (t && t.token) headers["X-Firebase-AppCheck"] = t.token; }
-  } catch (e) { console.warn("[IA] App Check:", e?.message || e); }
-  const cats = allCats();
-  const body = JSON.stringify({ contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: iaJpeg(src, 768) } }, { text: iaPrompt(cats) }] }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 1024, responseMimeType: "application/json", responseSchema: iaSchema(cats) } });
-  const lista = IA.modelo ? [IA.modelo, ...IA_MODELOS.filter(m => m !== IA.modelo)] : IA_MODELOS;
-  let err = null;
-  for (const m of lista){
-    const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 20000);
-    let r;
-    try { r = await fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${FB_CONFIG.projectId}/models/${m}:generateContent`, { method: "POST", headers, body, signal: ctl.signal }); }
-    finally { clearTimeout(t); }
-    if (r.ok){
-      const d = await r.json();
-      const txt = (d.candidates?.[0]?.content?.parts || []).filter(p => p.text && !p.thought).map(p => p.text).join("");
-      let o; try { o = JSON.parse(txt); } catch { o = JSON.parse((txt.match(/\{[\s\S]*\}/) || ["{}"])[0]); }
-      if (IA.modelo !== m){ IA.modelo = m; ls.set("iaModelo", m); }
-      return iaLimpiar(o, cats);
-    }
-    let msg = ""; try { msg = (await r.json())?.error?.message || ""; } catch {}
-    err = new Error(r.status + " " + msg); err.status = r.status;
-    console.warn("[IA]", m, r.status, msg);
-    if (r.status === 404) continue;                                       /* ese modelo ya no existe: probar el siguiente */
-    if (r.status === 429) IA.pausa = Date.now() + 5 * 60000;              /* se acabó el cupo por ahora */
-    else if (r.status === 401 || r.status === 403) IA.pausa = Date.now() + 10 * 60000;
-    break;
-  }
-  throw err || new Error("ia");
-}
-
-/* Sin internet: qué objeto es (clases de ImageNet que se venden en ferretería) + palabras del empaque */
+/* Qué objeto es (clases de ImageNet que se venden en ferretería) + palabras del empaque */
 const OBJ_IA = {
   412:["Caneca de basura","Hogar y limpieza"], 427:["Caneca","Hogar y limpieza"], 428:["Carretilla","Construcción y obra"], 462:["Escoba","Hogar y limpieza"],
   463:["Balde","Hogar y limpieza"], 465:["Chaleco","Seguridad industrial"], 470:["Vela","Hogar y limpieza"], 477:["Juego de herramientas","Herramientas manuales"],
@@ -2791,9 +2709,9 @@ async function iaLocal(src, sinfondo){
   if (!nombre) return null;
   if (marca && !norm(nombre).includes(norm(marca))) nombre += " " + marca;
   const cats = allCats(), ok = (c) => c && cats.includes(c) ? c : "";
-  return { nombre, categoria: ok(pal?.cat) || ok(obj?.categoria), fuente: "celular" };
+  return { nombre, categoria: ok(pal?.cat) || ok(obj?.categoria) };
 }
-/* Deja la IA pequeña guardada en el celular para cuando no haya internet */
+/* Deja la IA pequeña guardada en el celular para usarla también sin internet */
 function iaPrecargar(){
   if (!navigator.onLine || !("caches" in window)) return;
   const u = new URL("ai/objetos.onnx", location.href).href;
@@ -2816,7 +2734,7 @@ function aplicarIA(r){
   const poner = () => { inp.value = r.nombre; inp.dataset.ia = r.nombre; iaCategoria(r); };
   if (!inp.value.trim() || inp.value === inp.dataset.ia){
     poner();
-    nota.textContent = "Nombre puesto según la foto" + (r.fuente === "celular" ? " (sin internet)" : "") + ". Revíselo antes de guardar.";
+    nota.textContent = "Nombre puesto según la foto. Revíselo antes de guardar.";
   } else {
     nota.innerHTML = `La foto parece: <b>${esc(r.nombre)}</b> <button type="button" class="linkbtn">Usar este nombre</button>`;
     nota.querySelector("button").onclick = () => { poner(); nota.textContent = "Nombre cambiado. Revíselo antes de guardar."; };
@@ -2828,9 +2746,7 @@ async function reconocerFoto(c){
   clearTimeout(IA.t);
   nota.hidden = false; nota.innerHTML = `<span class="spin" aria-hidden="true"></span>Mirando la foto para llenar el nombre…`;
   let r = null;
-  try { r = await iaNube(c); iaPrecargar(); } catch (e) { console.warn("[IA] nube:", e?.message || e); }
-  if (seq !== IA.seq) return;
-  if (!r || !r.nombre){ try { r = await iaLocal(c, S.iFotoOpts?.sinfondo); } catch (e) { console.warn("[IA] celular:", e?.message || e); r = null; } }
+  try { r = await iaLocal(c, S.iFotoOpts?.sinfondo); } catch (e) { console.warn("[IA] celular:", e?.message || e); r = null; }
   if (seq !== IA.seq) return;
   aplicarIA(r);
 }
