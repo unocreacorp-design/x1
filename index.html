@@ -3149,7 +3149,7 @@ function preguntar(titulo, texto, botones){
    el PDF (vectores, negro puro CMYK 0/0/0/100) y las imágenes PNG/JPG en alta resolución. */
 const HB_W = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
 /* Diseños: "grande" (letra grande, barras bajitas y angostas), "qr" (QR al lado y letra grande), "clasica" (como antes) */
-const ETQ_DISENOS = [["grande", "Letra grande"], ["qr", "QR al lado"], ["clasica", "Clásica"]];
+const ETQ_DISENOS = [["grande", "Número grande"], ["qr", "QR al lado"], ["clasica", "Clásica"]];
 const etqFam = (mono) => mono ? '"IBM Plex Mono", monospace' : '"Barlow Condensed", "IBM Plex Mono", sans-serif';
 function etqEnvolver(cx, t, maxw){   /* parte el texto en renglones; una palabra muy larga se parte por letras */
   const ls = []; let cur = "";
@@ -3192,25 +3192,36 @@ function etiquetaOps(p, o = etqOpts()){
     let mods = null;
     try { const q = ZXing.QRCodeEncoder.encode(cod, ZXing.QRCodeDecoderErrorCorrectionLevel.M, new Map()).getMatrix(); mods = { n: q.getWidth(), get: (a, b) => q.get(a, b) === 1 }; } catch {}
     const Q = 150, qx = pad, xt = pad + Q + 14, maxw = W - xt - pad;
-    if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 12 });
-    if (o.nombre && p.nombre) texto(p.nombre, 34, 700, false, { x: xt, align: "left", maxw, lineas: 2, min: 28, luego: { lineas: 4, min: 20 } });
-    if (o.precio && p.precio) texto(fmt(p.precio), 42, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 24 });
-    if (o.codigo && cod) texto(cod, 30, 700, true, { x: xt, align: "left", maxw, lineas: 1, min: 14 });
-    const pt = pieTxt(); if (pt) texto(pt, 17, 600, true, { x: xt, align: "left", maxw, lineas: 2, min: 11 });
+    cx.font = `800 80px ${etqFam(false)}`;
+    const codCabe = false;   /* el número va siempre debajo, a todo lo ancho, bien grande */
+    if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 18, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 12 });
+    if (o.nombre && p.nombre) texto(p.nombre, 28, 700, false, { x: xt, align: "left", maxw, lineas: 2, min: 22, luego: { lineas: 3, min: 18 } });
+    if (codCabe) texto(cod, 80, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 20 });
+    if (o.precio && p.precio) texto(fmt(p.precio), 34, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 20 });
+    const pt = pieTxt(); if (pt) texto(pt, 16, 600, true, { x: xt, align: "left", maxw, lineas: 2, min: 11 });
     const yTxt = y, alto = Math.max(Q, yTxt - pad), qy = pad + (alto - Q) / 2;
     if (mods){ const m = Q / mods.n;
       for (let r = 0; r < mods.n; r++){ let c = 0; while (c < mods.n){ if (!mods.get(c, r)){ c++; continue; } let e = c; while (e < mods.n && mods.get(e, r)) e++; ops.push({ t: "rect", x: qx + c * m, y: qy + r * m, w: (e - c) * m, h: m + 0.05 }); c = e; } } }
     if (yTxt - pad < Q){ const dy = (Q - (yTxt - pad)) / 2; ops.forEach(op => { if (op.t === "txt") op.y += dy; }); }
     y = pad + alto;
+    if (o.codigo && cod && !codCabe){ y += 4; texto(cod, 80, 800, false, { lineas: 1, min: 20 }); y -= 3; }
     if (S.config?.etqExtra){ y += 4; texto(S.config.etqExtra, 18, 600, false, { lineas: 1, min: 11 }); y -= 3; }
     return { W, H: y + pad, ops };
   }
   const G = d !== "clasica";
-  if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), G ? 22 : 20, 800, false, { lineas: 1, min: 12 });
-  if (o.nombre && p.nombre) texto(p.nombre, G ? 40 : 24, 700, false, G ? { lineas: 2, min: 32, luego: { lineas: 3, min: 24 } } : { lineas: 2, min: 16 });
-  if (o.precio && p.precio) texto(fmt(p.precio), G ? 48 : 32, 800, false, { lineas: 1, min: 24 });
-  if (o.barras && cod && window.JsBarcode) barras(G ? 44 : 70, G ? W * 0.8 : W - 2*pad);
-  if (o.codigo && cod) texto(cod, G ? 38 : 24, G ? 700 : 600, true, { lineas: 1, min: 14 });
+  if (G){   /* el número del código es lo más grande; el nombre se ve bien pero más pequeño */
+    if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { lineas: 1, min: 12 });
+    if (o.nombre && p.nombre) texto(p.nombre, 32, 700, false, { lineas: 2, min: 26, luego: { lineas: 3, min: 20 } });
+    if (o.codigo && cod){ y -= 2; texto(cod, 96, 800, false, { lineas: 1, min: 24 }); y -= 4; }
+    if (o.precio && p.precio) texto(fmt(p.precio), 40, 800, false, { lineas: 1, min: 22 });
+    if (o.barras && cod && window.JsBarcode) barras(38, W * 0.78);
+  } else {
+    if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { lineas: 1, min: 12 });
+    if (o.nombre && p.nombre) texto(p.nombre, 24, 700, false, { lineas: 2, min: 16 });
+    if (o.precio && p.precio) texto(fmt(p.precio), 32, 800, false, { lineas: 1, min: 24 });
+    if (o.barras && cod && window.JsBarcode) barras(70, W - 2*pad);
+    if (o.codigo && cod) texto(cod, 24, 600, true, { lineas: 1, min: 14 });
+  }
   const pt = pieTxt(); if (pt) texto(pt, G ? 20 : 18, 600, true, { lineas: 1, min: 11 });
   if (S.config?.etqExtra) texto(S.config.etqExtra, G ? 20 : 18, 600, false, { lineas: 1, min: 11 });
   return { W, H: y - 3 + pad, ops };
