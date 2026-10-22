@@ -80,6 +80,9 @@ button{cursor:pointer}
 .screen{height:100%;display:flex;flex-direction:column;min-height:0}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.codp{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,88px);align-items:center;gap:8px}
+.codp .inp{text-align:center;font-size:20px;letter-spacing:.06em;padding-left:6px;padding-right:6px}
+.codx{font:700 26px var(--f-mono);color:var(--ink);text-transform:none;line-height:1}
 
 /* Home */
 #home{gap:12px;padding-block:12px}
@@ -316,7 +319,17 @@ details.card[open]>summary{margin-bottom:10px}
   #app,#sheetHost,#toastHost{display:none!important}
   #printArea{display:block!important}
   #printArea img{width:100%;max-width:none}
+  #printHoja{display:grid;grid-template-columns:repeat(var(--cols,3),1fr);width:100%}
+  #printHoja .hc{border:.2mm dashed #aaa;padding:1.5mm;display:flex;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid}
+  #printHoja .hc img{width:100%;height:auto;display:block}
 }
+.hojabox{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
+.hjrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hjlbl{font-weight:600;color:var(--muted);font-size:15px}
+.hjstep{display:flex;align-items:center;gap:6px}
+.hjstep .btn{min-width:44px;padding:8px 0;font-size:20px;font-weight:700}
+.hjstep .inp{width:64px;text-align:center;padding:9px 4px}
+.hojabox .linkbtn{padding:0 2px;min-height:0;color:var(--accent);font-weight:600}
 .shot video{width:100%;height:100%;object-fit:cover;background:#000}
 .bigscan{font-size:19px;padding:16px;gap:10px}
 .camrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -542,9 +555,14 @@ details.card[open]>summary{margin-bottom:10px}
 <section id="ingreso" class="screen" hidden>
   <div class="bar gut"><button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg></button><span class="stripe" style="background:var(--ingreso)"></span><h1 id="ingTitle">Ingresar producto</h1></div>
   <form class="body gut" id="ingForm" autocomplete="off">
-    <label class="f">Código propio
-      <input id="iCodP" class="inp num" enterkeyhint="done" autocomplete="off" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false">
-    </label>
+    <div class="f"><label for="iCodA">Código propio</label>
+      <div class="codp">
+        <input id="iCodA" class="inp num" inputmode="numeric" enterkeyhint="next" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="14" aria-label="Código propio: números antes de la x">
+        <span class="codx" aria-hidden="true">x</span>
+        <input id="iCodB" class="inp num" inputmode="numeric" enterkeyhint="done" autocomplete="off" autocorrect="off" spellcheck="false" maxlength="4" aria-label="Código propio: números después de la x">
+      </div>
+      <input id="iCodP" hidden tabindex="-1" aria-hidden="true">
+    </div>
     <p class="note" id="iCodInfo" style="margin:-6px 0 0;color:var(--ok)" hidden></p>
     <p class="note" id="iCodNota" style="margin:-6px 0 0" hidden></p>
     <div id="iExiste" hidden></div>
@@ -940,7 +958,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li><b>Varias en hoja carta:</b> en la etiqueta elija el tamaño y cuántas copias (o <b>Hoja llena</b>). Con <b>Agregar a la hoja</b> junta etiquetas de varios productos; luego <b>Imprimir hoja</b>. Salen con líneas para cortar.</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -1083,12 +1101,49 @@ async function fileToCanvas(file, max){
 }
 const canvasBlob = (c, q=.85) => new Promise(r => c.toBlob(r, "image/jpeg", q));
 
+/* El lector básico de códigos (ZXing) tarda: corre en un trabajador aparte para que se pueda seguir escribiendo */
+let zxW = null, zxSeq = 0; const zxPend = new Map();
+function zxTrabajador(){
+  /* corre dentro del trabajador */
+  const Z = self.ZXing, hints = new Map(); hints.set(Z.DecodeHintType.TRY_HARDER, true);
+  const r = new Z.MultiFormatReader(); r.setHints(hints);
+  const lee = (g, w, h) => { try { return r.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.RGBLuminanceSource(g, w, h))), hints).getText(); } catch { return null; } finally { r.reset(); } };
+  self.onmessage = (e) => {
+    const { id, w, h, data } = e.data, n = w * h, g = new Uint8ClampedArray(n);
+    for (let i = 0, k = 0; k < n; i += 4, k++) g[k] = (data[i] * 306 + data[i+1] * 601 + data[i+2] * 117) >> 10;
+    let t = lee(g, w, h);
+    if (!t){ const rr = new Uint8ClampedArray(n); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) rr[x * h + (h - 1 - y)] = g[y * w + x]; t = lee(rr, h, w); }   /* código de lado */
+    self.postMessage({ id, text: t });
+  };
+}
+function zxWorker(){
+  if (zxW !== null) return zxW;
+  try {
+    const lib = [...document.scripts].find(sc => !sc.src && sc.textContent.includes("@zxing/library"))?.textContent;
+    if (!lib || !window.Worker) return (zxW = false);
+    zxW = new Worker(URL.createObjectURL(new Blob([lib, "\n;(" + zxTrabajador.toString() + ")();"], { type: "text/javascript" })));
+    zxW.onmessage = (e) => { const f = zxPend.get(e.data.id); if (f){ zxPend.delete(e.data.id); f(e.data.text || null); } };
+    zxW.onerror = () => { zxPend.forEach(f => f(undefined)); zxPend.clear(); try { zxW.terminate(); } catch {} zxW = false; };
+  } catch { zxW = false; }
+  return zxW;
+}
 async function decodeCode(canvas){
   if ("BarcodeDetector" in window){
     try {
       const det = new BarcodeDetector();
       const r = await det.detect(canvas);
       if (r && r.length) return r[0].rawValue;
+    } catch {}
+  }
+  const w = window.ZXing && zxWorker();
+  if (w){
+    try {
+      const d = canvas.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, canvas.width, canvas.height), id = ++zxSeq;
+      const t = await new Promise((res) => {
+        zxPend.set(id, res); w.postMessage({ id, w: d.width, h: d.height, data: d.data }, [d.data.buffer]);
+        setTimeout(() => { if (zxPend.has(id)){ zxPend.delete(id); res(null); } }, 25000);
+      });
+      if (t !== undefined) return t;   /* undefined = el trabajador falló: se intenta aquí mismo */
     } catch {}
   }
   if (window.ZXing){
@@ -2371,6 +2426,7 @@ function setCodigoLeido(code, escrito){
   checkExiste();
 }
 function pintarOrig(){
+  pintarCodP();
   aplicarCodigoPropio();
   const cod = $("iCodigo").value.trim(), cp = $("iCodP").value.trim(), box = $("iOrigTxt");
   if (cod){ box.innerHTML = `<span class="num">${esc(cod)}</span><span class="origtipo">${tipoCodigo(cod, S.iOrigTipo)}</span>`; $("iOrigQuitar").hidden = false; }
@@ -2415,7 +2471,28 @@ function sumarSheet(p){
 $("iCodP").addEventListener("input", () => { if (S.iOrigTipo === "escrito" && !esEscrito($("iCodP").value)) S.iOrigTipo = ""; pintarOrig(); previewCodigo(); });
 $("iCodP").addEventListener("change", checkExiste);
 ["iCosto","iPrecio"].forEach(id => $(id).addEventListener("input", () => { $(id).dataset.auto = ""; }));
-$("iCodP").addEventListener("keydown", e => { if (e.key==="Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); } });
+/* Los dos cuadros (números antes y después de la x) arman el código propio de siempre (ej. 9158x21) */
+const soloNum = (v) => /[a-z]/i.test(v) ? v.trim() : v.replace(/\D/g, "");   /* códigos viejos con letras (FR12) se respetan */
+const codJunto = () => { const a = soloNum($("iCodA").value), b = soloNum($("iCodB").value); return b ? a + "x" + b : a; };
+function pintarCodP(){
+  const v = $("iCodP").value.trim(); if (v === codJunto()) return;
+  const m = v.match(/^(\d*)\s*[xX×*]\s*(\d*)$/);
+  $("iCodA").value = m ? m[1] : v; $("iCodB").value = m ? m[2] : "";
+}
+function codDesdeCuadros(){ $("iCodP").value = codJunto(); $("iCodP").dispatchEvent(new Event("input")); }
+$("iCodA").addEventListener("input", () => {
+  const a = $("iCodA"), m = a.value.match(/^([^.,\-x×* ]*)[.,\-x×* ]+(.*)$/i);   /* si el teclado tiene x, punto o guion, salta al otro cuadro */
+  if (m && !/[a-wyz]/i.test(m[1])){ a.value = m[1].replace(/\D/g, ""); const b = $("iCodB"); b.value = (m[2] + b.value).replace(/\D/g, "").slice(0, 4); codDesdeCuadros(); b.focus(); return; }
+  const v = soloNum(a.value); if (v !== a.value) a.value = v;
+  codDesdeCuadros();
+});
+$("iCodB").addEventListener("input", () => { const b = $("iCodB"), v = b.value.replace(/\D/g, "").slice(0, 4); if (v !== b.value) b.value = v; codDesdeCuadros(); });
+["iCodA","iCodB"].forEach(id => $(id).addEventListener("change", checkExiste));
+$("iCodA").addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); $("iCodB").focus(); } });
+$("iCodB").addEventListener("keydown", e => {
+  if (e.key === "Enter"){ e.preventDefault(); checkExiste(); $("iNombre").focus(); }
+  else if (e.key === "Backspace" && !$("iCodB").value){ e.preventDefault(); const a = $("iCodA"); a.focus(); try { a.setSelectionRange(a.value.length, a.value.length); } catch {} }
+});
 $("iOrigQuitar").onclick = () => { $("iCodigo").value = ""; S.iOrigTipo = ""; checkExiste(); };
 $("iScan").onclick = async () => {
   const r = await scanCode("Escanear código");
@@ -2496,7 +2573,9 @@ function codigoNuevoAlEditar(precio, gan){
 }
 function previewCodigo(){
   const cp = $("iCodP"), c9 = codigo9(toNum($("iPrecio").value), leerGan());
-  cp.placeholder = c9 ? "Se creará: " + c9 : "";
+  const [pa, pb] = c9 ? c9.split("x") : ["", ""];
+  $("iCodA").placeholder = pa || ""; $("iCodB").placeholder = pb || "";
+  $("iCodA").title = c9 ? "Se creará: " + c9 : "";
   const n = $("iCodNota");
   if (n){ const pr = toNum($("iPrecio").value);
     const nv = codigoNuevoAlEditar(pr, leerGan());
@@ -2638,7 +2717,7 @@ function loadClasif(){
   if (clasP) return clasP;
   const abs = (f) => new URL(f, location.href).href;
   clasP = cargarOrt().then(() => {
-    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = true; ort.env.wasm.wasmPaths = abs("ai/");
     return ort.InferenceSession.create(abs("ai/objetos.onnx"), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
   });
   clasP.catch(() => { clasP = null; });
@@ -2885,8 +2964,8 @@ function etqTexto(x, t, maxW){ if (x.measureText(t).width <= maxW) return [t];
   const ws = String(t).split(/\s+/), ls = []; let cur = "";
   for (const w of ws){ const n = cur ? cur + " " + w : w; if (x.measureText(n).width <= maxW) cur = n; else { if (cur) ls.push(cur); cur = w; } }
   if (cur) ls.push(cur); return ls.slice(0, 2); }
-function etiquetaCanvas(p, o = etqOpts()){
-  const W = Number(S.config?.papel)||384, big = W >= 576 ? 1.4 : 1, pad = 10;
+function etiquetaCanvas(p, o = etqOpts(), ancho){
+  const W = ancho || Number(S.config?.papel)||384, big = W >= 576 ? 1.4 : 1, pad = 10;
   const c = document.createElement("canvas"); c.width = W; c.height = 900; const x = c.getContext("2d");
   x.fillStyle = "#fff"; x.fillRect(0, 0, W, c.height); x.fillStyle = "#000"; x.textAlign = "center"; x.textBaseline = "top";
   let y = pad; const linea = (txt, size, peso = 700, fam = '"Barlow Condensed", "IBM Plex Mono", sans-serif') => {
@@ -2928,8 +3007,17 @@ function etiqueta(p){
   if (!(p.codigoPropio || p.codigo) || !window.JsBarcode){ if (!$("ingreso").hidden) back(); return; }
   const o = etqOpts();
   sheet(`<h2>Etiqueta</h2><div class="tabs" id="etqOpts"></div><div class="recibo-wrap" id="etqWrap" style="flex-shrink:0"></div>
-    <div class="row"><button class="btn grow" id="etqCerrar">Listo</button><button class="btn ingreso grow" id="etqPrint">Imprimir</button></div>
-    <div class="row">${navigator.bluetooth?`<button class="btn grow" id="etqBT">Bluetooth</button>`:""}<button class="btn grow" id="etqSave">Compartir</button></div>`,
+    <div class="row"><button class="btn grow" id="etqCerrar">Listo</button><button class="btn ingreso grow" id="etqPrint">Imprimir una</button></div>
+    <div class="row">${navigator.bluetooth?`<button class="btn grow" id="etqBT">Bluetooth</button>`:""}<button class="btn grow" id="etqSave">Compartir</button></div>
+    <div class="hojabox">
+      <div class="sect">Varias en hoja carta</div>
+      <div class="seg3" id="hjTam" role="group" aria-label="Tamaño de la etiqueta"><button type="button" data-c="4">Pequeña</button><button type="button" data-c="3">Mediana</button><button type="button" data-c="2">Grande</button></div>
+      <div class="hjrow"><span class="hjlbl">Copias de esta</span>
+        <div class="hjstep"><button type="button" class="btn" id="hjMenos" aria-label="Una menos">−</button><input id="hjN" class="inp num" inputmode="numeric" pattern="[0-9]*" value="1" aria-label="Copias"><button type="button" class="btn" id="hjMas" aria-label="Una más">+</button></div>
+        <button type="button" class="btn" id="hjLlena">Hoja llena</button></div>
+      <p class="note" id="hjInfo" style="margin:0"></p>
+      <div class="row"><button type="button" class="btn grow" id="hjAdd">Agregar a la hoja</button><button type="button" class="btn ingreso grow" id="hjPrint">Imprimir hoja</button></div>
+    </div>`,
     (el, close) => {
       let c;
       const pintar = () => { const w = el.querySelector("#etqWrap"); w.innerHTML = ""; c = etiquetaCanvas(p, o); c.style.maxWidth = "100%"; w.appendChild(c); };
@@ -2939,7 +3027,61 @@ function etiqueta(p){
       el.querySelector("#etqSave").onclick = async () => { const b = await new Promise(r=>c.toBlob(r,"image/png")); shareFile(b, `etiqueta-${p.codigoPropio || p.codigo}.png`); };
       el.querySelector("#etqPrint").onclick = () => printCanvas(c);
       const bt = el.querySelector("#etqBT"); if (bt) bt.onclick = () => printBT(c, bt);
+      hojaControles(el, p, () => c);
     });
+}
+/* ---------- varias etiquetas en una hoja carta (para cortar con tijera) ----------
+   La lista de la hoja queda guardada en este celular hasta que se imprime. */
+const HOJA = { ancho: 199.9, alto: 263.4 };   /* hoja carta (215,9 × 279,4 mm) menos 8 mm de margen */
+const hojaLista = () => { try { const l = JSON.parse(ls.get("hojaEtq") || "[]"); return Array.isArray(l) ? l : []; } catch { return []; } };
+const hojaGuardar = (l) => ls.set("hojaEtq", JSON.stringify(l));
+const hojaCols = () => [2, 3, 4].includes(Number(ls.get("hojaCols"))) ? Number(ls.get("hojaCols")) : 3;
+const etqClave = (p) => p.codigoPropio || p.codigo || p.nombre || "";
+function hojaCaben(c, cols){   /* cuántas de esta etiqueta caben en una hoja */
+  const w = HOJA.ancho / cols, h = w * c.height / c.width + 1;
+  return cols * Math.max(1, Math.floor(HOJA.alto / h));
+}
+function hojaControles(el, p, canvas){
+  const n = el.querySelector("#hjN"), info = el.querySelector("#hjInfo");
+  const leerN = () => Math.max(1, Math.min(500, Math.round(toNum(n.value)) || 1));
+  const pintar = () => {
+    const cols = hojaCols(), l = hojaLista(), otras = l.filter(x => x.k !== etqClave(p)), ya = l.find(x => x.k === etqClave(p));
+    el.querySelectorAll("#hjTam [data-c]").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.c) === cols));
+    const caben = hojaCaben(canvas(), cols), tot = otras.reduce((a, x) => a + x.n, 0) + leerN();
+    info.innerHTML = `Caben unas <b>${caben}</b> por hoja de este tamaño.` + (otras.length ? ` Ya hay ${otras.length} producto${otras.length > 1 ? "s" : ""} más en la hoja (${miles(tot - leerN())} etiqueta${tot - leerN() > 1 ? "s" : ""}). <button type="button" class="linkbtn" id="hjVaciar">Vaciar la hoja</button>` : "")
+      + (tot > caben ? ` Se usarán ${Math.ceil(tot / caben)} hojas.` : "");
+    el.querySelector("#hjAdd").textContent = ya ? "Cambiar en la hoja" : "Agregar a la hoja";
+    const v = info.querySelector("#hjVaciar"); if (v) v.onclick = () => { hojaGuardar(l.filter(x => x.k === etqClave(p))); pintar(); toast("Hoja vaciada"); };
+  };
+  const ya = hojaLista().find(x => x.k === etqClave(p)); if (ya) n.value = ya.n;
+  el.querySelector("#hjTam").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; ls.set("hojaCols", b.dataset.c); pintar(); };
+  el.querySelector("#hjMenos").onclick = () => { n.value = Math.max(1, leerN() - 1); pintar(); };
+  el.querySelector("#hjMas").onclick = () => { n.value = leerN() + 1; pintar(); };
+  n.addEventListener("input", pintar); n.addEventListener("change", () => { n.value = leerN(); pintar(); });
+  el.querySelector("#hjLlena").onclick = () => {   /* completa lo que falta para llenar la hoja */
+    const caben = hojaCaben(canvas(), hojaCols()), otras = hojaLista().filter(x => x.k !== etqClave(p)).reduce((a, x) => a + x.n, 0);
+    n.value = Math.max(1, caben - (otras % caben || 0) || caben); pintar();
+  };
+  const conEsta = () => [...hojaLista().filter(x => x.k !== etqClave(p)), { k: etqClave(p), n: leerN(), p: { codigoPropio: p.codigoPropio || "", codigo: p.codigo || "", nombre: p.nombre || "", precio: p.precio || 0, proveedorId: p.proveedorId || "", creado: p.creado || Date.now() } }];
+  el.querySelector("#hjAdd").onclick = () => { hojaGuardar(conEsta()); pintar(); toast("Agregada. Abra la etiqueta de otro producto para sumarla, o toque Imprimir hoja.", 3500); };
+  el.querySelector("#hjPrint").onclick = () => { const l = conEsta(); hojaGuardar(l); imprimirHoja(l, () => { hojaGuardar([]); pintar(); }); };
+  pintar();
+}
+function imprimirHoja(lista, alTerminar){
+  const cols = hojaCols(), o = etqOpts(), ancho = cols <= 2 ? 768 : 576;
+  const imgs = []; lista.forEach(x => { const u = etiquetaCanvas(x.p, o, ancho).toDataURL("image/png"); for (let i = 0; i < x.n; i++) imgs.push(u); });
+  if (!imgs.length) return;
+  let h = $("printHoja"); if (!h){ h = document.createElement("div"); h.id = "printHoja"; $("printArea").appendChild(h); }
+  h.style.setProperty("--cols", cols);
+  h.innerHTML = imgs.map(u => `<div class="hc"><img src="${u}" alt=""></div>`).join("");
+  let st = $("pageHoja"); if (!st){ st = document.createElement("style"); st.id = "pageHoja"; document.head.appendChild(st); }
+  st.textContent = "@media print{@page{size:letter;margin:8mm}#printImg{display:none!important}}";
+  $("printImg").removeAttribute("src");
+  const limpiar = () => { window.removeEventListener("afterprint", limpiar); setTimeout(() => { const s2 = $("pageHoja"); if (s2) s2.remove(); const h2 = $("printHoja"); if (h2) h2.remove(); }, 500); };
+  window.addEventListener("afterprint", limpiar);
+  Promise.all([...h.querySelectorAll("img")].map(i => i.decode ? i.decode().catch(() => {}) : null)).then(() => {
+    setTimeout(() => { window.print(); if (alTerminar) alTerminar(); toast(`${miles(imgs.length)} etiqueta${imgs.length > 1 ? "s" : ""} enviada${imgs.length > 1 ? "s" : ""} a imprimir en hoja carta`, 3000); }, 120);
+  });
 }
 
 /* ---------- inventario ---------- */
@@ -3230,7 +3372,7 @@ function loadAI(){
     if (window.ort) return res();
     const sc = document.createElement("script"); sc.src = abs("ai/ort.wasm.min.js"); sc.onload = res; sc.onerror = () => rej(new Error("ia")); document.head.appendChild(sc);
   }).then(async () => {
-    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = true; ort.env.wasm.wasmPaths = abs("ai/");
     return ort.InferenceSession.create(abs("ai/u2netp.onnx"), { executionProviders: ["wasm"], graphOptimizationLevel: "all" });
   });
   aiP.catch(() => { aiP = null; });
@@ -3393,7 +3535,7 @@ function loadDigitos(){
     if (window.ort) return res();
     const sc = document.createElement("script"); sc.src = abs("ai/ort.wasm.min.js"); sc.onload = res; sc.onerror = () => rej(new Error("ia")); document.head.appendChild(sc);
   }).then(() => {
-    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = false; ort.env.wasm.wasmPaths = abs("ai/");
+    ort.env.wasm.numThreads = 1; ort.env.wasm.proxy = true; ort.env.wasm.wasmPaths = abs("ai/");
     return ort.InferenceSession.create(abs("ocr/digitos.onnx"), { executionProviders: ["wasm"] });
   });
   digP.catch(() => { digP = null; });
@@ -4214,6 +4356,7 @@ $("aImport").onchange = async (e) => {
 
 /* ---------- printing ---------- */
 function printCanvas(c){
+  { const s2 = $("pageHoja"); if (s2) s2.remove(); const h2 = $("printHoja"); if (h2) h2.remove(); }
   $("printImg").src = c.toDataURL("image/png");
   $("printImg").style.width = (Number(S.config?.papel)>=576 ? "80mm" : "58mm");
   setTimeout(() => window.print(), 150);
