@@ -3208,6 +3208,25 @@ $("iSello").addEventListener("change", () => { selloPintar(); if ($("iSello").ch
 $("iSelloN").addEventListener("input", () => { $("iSelloN").value = $("iSelloN").value.replace(/\D/g, "").slice(0, 5); selloPintar(); });
 $("iPrecio").addEventListener("input", selloPintar);
 $("iSelloChips").onclick = (e) => { const b = e.target.closest("[data-n]"); if (!b) return; $("iSelloN").value = b.dataset.n === "1" ? "" : b.dataset.n; selloPintar(); };
+/* Recorta la etiqueta al borde de lo que tiene (texto y barras), con un margen pequeño */
+function etqRecortar(r, cx){
+  const P = 3; let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  cx.textBaseline = "top";
+  r.ops.forEach(op => {
+    if (op.t === "rect"){ x0 = Math.min(x0, op.x); x1 = Math.max(x1, op.x + op.w); y0 = Math.min(y0, op.y); y1 = Math.max(y1, op.y + op.h); return; }
+    cx.font = `${op.peso} ${op.size}px ${etqFam(op.mono)}`; cx.textAlign = op.align === "left" ? "left" : "center";
+    const m = cx.measureText(op.s), ax = op.x ?? r.W / 2, w = m.width;
+    const l = op.align === "left" ? ax : ax - w / 2;
+    const top = op.y - (Number.isFinite(m.actualBoundingBoxAscent) ? m.actualBoundingBoxAscent : -op.size * 0.15);
+    const bot = op.y + (Number.isFinite(m.actualBoundingBoxDescent) ? m.actualBoundingBoxDescent : op.size * 0.85);
+    op.maxw = Math.min(op.maxw || w, w + 0.5);   /* el PDF no se sale de este ancho */
+    x0 = Math.min(x0, l); x1 = Math.max(x1, l + w); y0 = Math.min(y0, top); y1 = Math.max(y1, bot);
+  });
+  if (!Number.isFinite(x0)) return r;
+  const dx = P - x0, dy = P - y0;
+  r.ops.forEach(op => { op.x = (op.x ?? r.W / 2) + dx; op.y += dy; });
+  return { W: Math.max(40, x1 - x0 + 2*P), H: Math.max(20, y1 - y0 + 2*P), ops: r.ops };
+}
 function etiquetaOps(p, o = etqOpts()){
   const W = 384, pad = 10, ops = [], cx = document.createElement("canvas").getContext("2d"), d = o.diseno || "grande";
   const cod = p.codigoPropio || p.codigo || "", se = selloInfo(p);
@@ -3253,12 +3272,14 @@ function etiquetaOps(p, o = etqOpts()){
     y = pad + alto;
     if (o.codigo && cod && !codCabe){ y += 4; texto(cod, 80, 800, false, { lineas: 1, min: 20 }); y -= 3; }
     if (S.config?.etqExtra){ y += 4; texto(S.config.etqExtra, 18, 600, false, { lineas: 1, min: 11 }); y -= 3; }
-    return { W, H: y + pad, ops };
+    return etqRecortar({ W, H: y + pad, ops }, cx);
   }
   const G = d !== "clasica";
   if (G){   /* el número del código es lo más grande; el nombre se ve bien pero más pequeño */
     if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { lineas: 1, min: 12 });
-    if (o.nombre && p.nombre) texto(p.nombre, 32, 700, false, { lineas: 2, min: 26, luego: { lineas: 3, min: 20 } });
+    cx.font = `800 96px ${etqFam(false)}`;
+    const nucleo = Math.min(W - 2*pad, Math.max(o.codigo && cod ? cx.measureText(cod).width : 0, o.barras && cod ? W * 0.78 : 0, 240));
+    if (o.nombre && p.nombre) texto(p.nombre, 32, 700, false, { maxw: nucleo, lineas: 2, min: 26, luego: { lineas: 3, min: 20 } });
     if (o.codigo && cod){ y -= 2; texto(cod, 96, 800, false, { lineas: 1, min: 24 }); y -= 4; }
     if ((o.precio || se?.n > 1) && p.precio){ if (se?.nota) texto(se.nota, 22, 700, false, { lineas: 1, min: 12 }); texto(fmt(se ? se.precio : p.precio), 40, 800, false, { lineas: 1, min: 22 }); }
     if (o.barras && cod && window.JsBarcode) barras(38, W * 0.78);
@@ -3271,7 +3292,7 @@ function etiquetaOps(p, o = etqOpts()){
   }
   const pt = pieTxt(); if (pt) texto(pt, G ? 20 : 18, 600, true, { lineas: 1, min: 11 });
   if (S.config?.etqExtra) texto(S.config.etqExtra, G ? 20 : 18, 600, false, { lineas: 1, min: 11 });
-  return { W, H: y - 3 + pad, ops };
+  return etqRecortar({ W, H: y - 3 + pad, ops }, cx);
 }
 /* dibuja la etiqueta (ops) en un canvas: x0,y0 y ancho en pixeles */
 function opsEnCanvas(x, v, x0, y0, ancho){
@@ -3289,7 +3310,7 @@ function hojaSVG(g, celdas, cfg){
   let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${g.pw}mm" height="${g.ph}mm" viewBox="0 0 ${g.pw} ${g.ph}" shape-rendering="crispEdges"><rect width="${g.pw}" height="${g.ph}" fill="#fff"/>`;
   celdas.forEach((v, i) => {
     const cx = g.x0 + (i % g.cols) * (g.w + g.sep), cy = g.y0 + Math.floor(i / g.cols) * (g.h + g.sep);
-    const iw = g.w - 2*g.pad, k = iw / v.W, ih = v.H * k, ox = cx + g.pad, oy = cy + (g.h - ih) / 2;
+    const k = g.u, iw = v.W * k, ih = v.H * k, ox = cx + (g.w - iw) / 2, oy = cy + (g.h - ih) / 2;
     s += `<g transform="translate(${r(ox)} ${r(oy)}) scale(${r(k)})">`;
     v.ops.forEach(op => {
       if (op.t === "rect") s += `<rect x="${r(op.x)}" y="${r(op.y)}" width="${r(op.w)}" height="${r(op.h)}" fill="#000"/>`;
@@ -3332,7 +3353,7 @@ function pdfVectorial(hojas, g, cfg){
     const Y = (mm) => PH - mm * MM;
     celdas.forEach((v, i) => {
       const cx = g.x0 + (i % g.cols) * (g.w + g.sep), cy = g.y0 + Math.floor(i / g.cols) * (g.h + g.sep);
-      const iw = g.w - 2*g.pad, k = iw / v.W, ih = v.H * k, ox = cx + g.pad, oy = cy + (g.h - ih) / 2;
+      const k = g.u, iw = v.W * k, ih = v.H * k, ox = cx + (g.w - iw) / 2, oy = cy + (g.h - ih) / 2;
       v.ops.forEach(op => {
         if (op.t === "rect"){ c += `${f((ox + op.x * k) * MM)} ${f(Y(oy + (op.y + op.h) * k))} ${f(op.w * k * MM)} ${f(op.h * k * MM)} re f\n`; return; }
         const size = op.size * k * MM, disp = (op.maxw || v.W - 20) * k * MM, raw = ancho(op.s, op.mono) / 1000 * size;
@@ -3376,13 +3397,14 @@ const hojaGuardar = (l) => ls.set("hojaEtq", JSON.stringify(l.map(x => ({ id: x.
 function hojaGeo(cfg, lienzos){
   const [, pw0, ph0] = PAPELES[cfg.papel] || PAPELES.carta;
   const pw = cfg.orient === "h" ? ph0 : pw0, ph = cfg.orient === "h" ? pw0 : ph0;
-  const m = Number(cfg.margen) || 8, sep = Number(cfg.sep) || 0, pad = sep ? 1 : 1.5;
-  const w = (HOJA_TAM.find(t => t[0] === cfg.tam) || HOJA_TAM[2])[2];
-  const ratio = Math.max(0.15, ...lienzos.map(c => c.ops ? c.H / c.W : c.height / c.width));
-  const h = (w - 2*pad) * ratio + 2*pad;
+  const m = Number(cfg.margen) || 8, sep = Number(cfg.sep) || 0, pad = sep ? 0.5 : 0.7;
+  const wTam = (HOJA_TAM.find(t => t[0] === cfg.tam) || HOJA_TAM[2])[2];
+  const u = (wTam - 3) / 384;   /* mm por unidad: el tamaño elegido fija qué tan grande sale la letra */
+  const dims = lienzos.map(c => c.ops ? [c.W, c.H] : [384, 384 * c.height / c.width]);
+  const w = Math.max(10, ...dims.map(d => d[0])) * u + 2*pad, h = Math.max(6, ...dims.map(d => d[1])) * u + 2*pad;
   const cols = Math.max(1, Math.floor((pw - 2*m + sep) / (w + sep))), rows = Math.max(1, Math.floor((ph - 2*m + sep) / (h + sep)));
   const gw = cols * w + (cols - 1) * sep;
-  return { pw, ph, m, sep, pad, w, h, cols, rows, porHoja: cols * rows, x0: (pw - gw) / 2, y0: m };
+  return { pw, ph, m, sep, pad, u, w, h, cols, rows, porHoja: cols * rows, x0: (pw - gw) / 2, y0: m };
 }
 /* celdas = lista de lienzos (uno por etiqueta); devuelve hojas = listas de lienzos */
 const hojaPartir = (celdas, g) => { const out = []; for (let i = 0; i < celdas.length; i += g.porHoja) out.push(celdas.slice(i, i + g.porHoja)); return out; };
@@ -3392,9 +3414,9 @@ function hojaDibujar(g, celdas, cfg, k){   /* k = puntos por mm */
   x.imageSmoothingQuality = "high";
   celdas.forEach((c, i) => {
     const cx = g.x0 + (i % g.cols) * (g.w + g.sep), cy = g.y0 + Math.floor(i / g.cols) * (g.h + g.sep);
-    const iw = g.w - 2*g.pad, ih = iw * (c.ops ? c.H / c.W : c.height / c.width);
-    if (c.ops) opsEnCanvas(x, c, (cx + g.pad) * k, (cy + (g.h - ih) / 2) * k, iw * k);
-    else x.drawImage(c, (cx + g.pad) * k, (cy + (g.h - ih) / 2) * k, iw * k, ih * k);
+    const iw = (c.ops ? c.W : 384) * g.u, ih = iw * (c.ops ? c.H / c.W : c.height / c.width), ox = cx + (g.w - iw) / 2;
+    if (c.ops) opsEnCanvas(x, c, ox * k, (cy + (g.h - ih) / 2) * k, iw * k);
+    else x.drawImage(c, ox * k, (cy + (g.h - ih) / 2) * k, iw * k, ih * k);
     if (cfg.guia === "punteada"){ x.save(); x.setLineDash([1.2 * k, 1.2 * k]); x.strokeStyle = "#9a9a9a"; x.lineWidth = Math.max(1, 0.15 * k); x.strokeRect(cx * k, cy * k, g.w * k, g.h * k); x.restore(); }
   });
   const marcas = hojaMarcas(g, celdas.length, cfg);
@@ -3536,7 +3558,7 @@ function etiquetasSeccion(){
         const tam = HOJA_TAM.find(t => t[0] === hojaCfg().tam) || HOJA_TAM[2], cfg = hojaCfg();
         $e("#etTabN").textContent = tot ? miles(tot) : "";
         const falta = tot ? pags * g.porHoja - tot : 0;
-        $e("#etSum").innerHTML = `<b>${tot ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags} hoja${pags > 1 ? "s" : ""}` : "Hoja vacía"}</b><small>${g.porHoja} por hoja · ${tam[1]}${tot ? (falta ? ` · faltan ${falta}` : " · llenas ✓") : ` ${tam[2]} mm`}</small>`;
+        $e("#etSum").innerHTML = `<b>${tot ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags} hoja${pags > 1 ? "s" : ""}` : "Hoja vacía"}</b><small>${g.porHoja} por hoja · ${tam[1]}${tot ? (falta ? ` · faltan ${falta}` : " · llenas ✓") : ` ${Math.round(g.w)}×${Math.round(g.h)} mm`}</small>`;
         $e("#hjPrint").disabled = !tot; $e("#hjExp").disabled = !tot;
         return { its, tot, g };
       }
