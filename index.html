@@ -379,6 +379,21 @@ details.card[open]>summary{margin-bottom:10px}
 .cfgrow>span{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .cfgrow .segn button{font-size:13.5px;padding:9px 2px}
 .etpaneh .hjpage.h canvas{max-height:34vh}
+.hjcar{display:flex;width:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.hjcar::-webkit-scrollbar{display:none}
+.hjslide{flex:0 0 100%;scroll-snap-align:center;display:flex;justify-content:center;align-items:flex-start;padding:4px 2px 8px;min-height:120px}
+.hjslide canvas{max-width:100%;max-height:46vh;width:auto;height:auto;box-shadow:0 1px 8px rgba(0,0,0,.28);border-radius:2px}
+.hjcar.h .hjslide canvas{max-height:34vh}
+.hjnav{display:flex;align-items:center;justify-content:center;gap:14px;font-size:14px;font-weight:700;color:var(--ink)}
+.hjarr{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:26px;line-height:1;padding:0 0 3px}
+.hjarr:disabled{opacity:.3}
+.hjdots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.hjdots button{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:var(--line)}
+.hjdots button[aria-current="true"]{background:var(--primary-bg);width:20px;border-radius:5px}
+.hjfalta{margin:0;text-align:center;font-size:14px;color:var(--muted)}
+.hjfalta b{color:var(--ink)}
+.hjfalta .etok{color:var(--ok)}
+.hjprev #hjPg.hjpag{display:block;text-align:center}
 .etexp{width:52px;padding:0;flex-shrink:0}
 .etexp svg{width:24px;height:24px}
 .etexp:disabled{opacity:.45}
@@ -3365,7 +3380,7 @@ function etiquetasSeccion(){
   const o = etqOpts(), cache = new Map();
   const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || ""); if (!cache.has(key)) cache.set(key, etiquetaOps(p, o)); return cache.get(key); };
   const prod = (id) => S.productos.find(q => q.id === id);
-  let tab = "productos", chip = etqPendientes().length ? "recientes" : "todos", verMas = 150, verCfg = false;
+  let tab = "productos", chip = etqPendientes().length ? "recientes" : "todos", verMas = 150, verCfg = false, pagVista = 0;
   const CHIPS = [["recientes", "Nuevos"], ["faltan", "Faltan"], ["impresas", "Impresas"], ["todos", "Todos"]];
   const ICON_TAG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L3 13V3h10l7.6 7.6a2 2 0 010 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>`;
   const ICON_CFG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>`;
@@ -3481,7 +3496,8 @@ function etiquetasSeccion(){
         const its = items(), tot = its.reduce((a, x) => a + x.n, 0), g = geo(its), pags = tot ? Math.ceil(tot / g.porHoja) : 0;
         const tam = HOJA_TAM.find(t => t[0] === hojaCfg().tam) || HOJA_TAM[2], cfg = hojaCfg();
         $e("#etTabN").textContent = tot ? miles(tot) : "";
-        $e("#etSum").innerHTML = `<b>${tot ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags} hoja${pags > 1 ? "s" : ""}` : "Hoja vacía"}</b><small>Caben ${g.porHoja} por hoja · ${tam[1]} ${tam[2]} mm${cfg.orient === "h" ? " · horizontal" : ""}</small>`;
+        const falta = tot ? pags * g.porHoja - tot : 0;
+        $e("#etSum").innerHTML = `<b>${tot ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags} hoja${pags > 1 ? "s" : ""}` : "Hoja vacía"}</b><small>${g.porHoja} por hoja · ${tam[1]}${tot ? (falta ? ` · faltan ${falta}` : " · llenas ✓") : ` ${tam[2]} mm`}</small>`;
         $e("#hjPrint").disabled = !tot; $e("#hjExp").disabled = !tot;
         return { its, tot, g };
       }
@@ -3500,11 +3516,32 @@ function etiquetasSeccion(){
           : `<div class="hjvacio">La hoja está vacía.<br><button type="button" class="btn" id="hjIr" style="margin-top:10px">Elegir productos</button></div>`;
         const ir = $e("#hjIr"); if (ir) ir.onclick = () => verTab("productos");
         const v = $e("#hjVaciar"); if (v) v.onclick = () => preguntar("Vaciar la hoja", "Se quitan todas las etiquetas de la hoja (no se borra nada del inventario).", [{ t: "Vaciar", clase: "primary", fn: () => { hojaGuardar([]); pintarHoja(); } }]);
-        /* una sola hoja de muestra (la primera); vacía: se muestra llena de ejemplo */
-        const celdas = its.length ? celdasDe(its) : Array(g.porHoja).fill(muestraC()), hojas = hojaPartir(celdas, g);
-        const pv = $e("#hjPrev"); pv.innerHTML = "";
-        const w = document.createElement("div"); w.className = "hjpage" + (cfg.orient === "h" ? " h" : ""); w.appendChild(hojaDibujar(g, hojas[0] || [], cfg, 2.4));
-        w.insertAdjacentHTML("beforeend", `<span class="hjpag">${!its.length ? "Ejemplo de hoja llena" : hojas.length > 1 ? `Hoja 1 de ${hojas.length} (muestra)` : "Así queda la hoja"}</span>`); pv.appendChild(w);
+        /* todas las hojas, deslizando de lado; se dibujan solo las que se están viendo. Vacía: ejemplo de hoja llena */
+        const celdas = its.length ? celdasDe(its) : Array(g.porHoja).fill(muestraC()), hojas = hojaPartir(celdas, g), n = hojas.length;
+        const tot = its.reduce((a, x) => a + x.n, 0), falta = its.length ? n * g.porHoja - tot : 0;
+        pagVista = Math.min(pagVista, n - 1);
+        const pv = $e("#hjPrev");
+        pv.innerHTML = `<div class="hjcar${cfg.orient === "h" ? " h" : ""}" id="hjCar">${hojas.map((_, i) => `<div class="hjslide" data-i="${i}"></div>`).join("")}</div>`
+          + (n > 1 ? `<div class="hjnav"><button type="button" class="hjarr" data-d="-1" aria-label="Hoja anterior">‹</button><span id="hjPg"></span><button type="button" class="hjarr" data-d="1" aria-label="Hoja siguiente">›</button></div>`
+                   + (n <= 15 ? `<div class="hjdots">${hojas.map((_, i) => `<button type="button" data-p="${i}" aria-label="Hoja ${i + 1}"></button>`).join("")}</div>` : "") : `<span class="hjpag" id="hjPg"></span>`)
+          + `<p class="hjfalta" id="hjFalta"></p>`;
+        const car = $e("#hjCar");
+        const dibujar = (i) => { const sl = car.children[i]; if (sl && !sl.firstChild) sl.appendChild(hojaDibujar(g, hojas[i], cfg, 2.4)); };
+        const marcar = () => {
+          const i = Math.max(0, Math.min(n - 1, Math.round(car.scrollLeft / Math.max(1, car.clientWidth)))); pagVista = i;
+          [i - 1, i, i + 1].forEach(j => j >= 0 && j < n && dibujar(j));
+          const enEsta = hojas[i].length, libres = g.porHoja - enEsta;
+          $e("#hjPg").textContent = !its.length ? "Ejemplo de hoja llena" : n > 1 ? `Hoja ${i + 1} de ${n} · ${enEsta} de ${g.porHoja}` : `Así queda la hoja · ${enEsta} de ${g.porHoja}`;
+          el.querySelectorAll(".hjdots [data-p]").forEach(b => b.setAttribute("aria-current", Number(b.dataset.p) === i));
+          el.querySelectorAll(".hjarr").forEach(b => { b.disabled = (b.dataset.d === "-1" && i === 0) || (b.dataset.d === "1" && i === n - 1); });
+          $e("#hjFalta").innerHTML = !its.length ? "" : falta === 0 ? `<b class="etok">✓ ${n > 1 ? "Todas las hojas quedan llenas" : "La hoja queda llena"}</b>`
+            : `Faltan <b>${falta}</b> espacio${falta > 1 ? "s" : ""} para llenar ${n > 1 ? `la hoja ${n}` : "la hoja"}` + (libres > 0 && i < n - 1 ? "" : "");
+        };
+        let tm = 0; car.addEventListener("scroll", () => { clearTimeout(tm); tm = setTimeout(marcar, 60); }, { passive: true });
+        pv.querySelectorAll(".hjarr").forEach(b => b.onclick = () => car.scrollTo({ left: (pagVista + Number(b.dataset.d)) * car.clientWidth, behavior: "smooth" }));
+        pv.querySelectorAll(".hjdots [data-p]").forEach(b => b.onclick = () => car.scrollTo({ left: Number(b.dataset.p) * car.clientWidth, behavior: "smooth" }));
+        dibujar(pagVista);
+        requestAnimationFrame(() => { car.scrollLeft = pagVista * car.clientWidth; marcar(); });
       }
       nombreLargo($e("#hjList"));
       el.querySelectorAll(".segn[data-k]").forEach(sg => sg.addEventListener("click", (e) => {
