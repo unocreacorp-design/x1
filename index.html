@@ -426,7 +426,8 @@ details.card[open]>summary{margin-bottom:10px}
 .etchip .num{color:var(--muted);font-weight:600;margin-left:2px}
 .etchip[aria-pressed="true"]{background:var(--primary-bg);border-color:transparent;color:#fff}
 .etchip[aria-pressed="true"] .num{color:rgba(255,255,255,.85)}
-.etall{border-style:dashed}
+.etall{border-style:dashed;width:100%}
+.etacc2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.etacc2 .etall{padding-left:8px;padding-right:8px;font-size:14px;line-height:1.15;white-space:normal}
 .etlist2{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow:hidden}
 .etrow2{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 2px;border-top:1px solid var(--line);min-height:62px}
 .etrow2:first-child{border-top:0}
@@ -3474,9 +3475,15 @@ function etiquetasSeccion(){
         if (q) arr = arr.filter(p => norm(p.nombre).includes(q) || norm(codEtq(p)).includes(q) || norm(p.codigo || "").includes(q));
         if (chip !== "recientes" || q) arr = [...arr].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre)));
         const sinAgregar = arr.filter(p => !etqHecha(p) && !enHoja.has(p.id));
-        $e("#etAccion").innerHTML = (chip === "faltan" || chip === "recientes") && sinAgregar.length > 1 && !q
-          ? `<button type="button" class="btn block etall" id="etAll">+ Agregar ${chip === "faltan" ? "todas las que faltan" : "los nuevos que faltan"} (${miles(sinAgregar.length)})</button>` : "";
+        const todoFuera = conCod.filter(p => !enHoja.has(p.id));   /* todo: impresas y nuevas que aún no están en la hoja */
+        const bFalt = (chip === "faltan" || chip === "recientes") && sinAgregar.length > 1 && !q
+          ? `<button type="button" class="btn etall" id="etAll">+ ${chip === "faltan" ? "Las que faltan" : "Nuevos que faltan"} (${miles(sinAgregar.length)})</button>` : "";
+        const bTodo = !q && todoFuera.length > 1 && (chip === "todos" || chip === "impresas" || todoFuera.length !== sinAgregar.length)
+          ? `<button type="button" class="btn etall" id="etTodo">+ Todo: impresas y nuevas (${miles(todoFuera.length)})</button>` : "";
+        $e("#etAccion").className = bFalt && bTodo ? "etacc2" : "";
+        $e("#etAccion").innerHTML = bFalt + bTodo;
         const all = $e("#etAll"); if (all) all.onclick = () => pedirCopias(chip === "faltan" ? "Las que faltan" : "Nuevos", sinAgregar.map(p => p.id));
+        const todo = $e("#etTodo"); if (todo) todo.onclick = () => pedirCopias("Todo el inventario", todoFuera.map(p => p.id));
         $e("#etList").innerHTML = arr.length ? arr.slice(0, verMas).map(p => {
           const k = enHoja.get(p.id), hecha = etqHecha(p);
           const estado = hecha ? `<span class="etok">✓ Impresa ${corta(p.etqT)}</span>` : `<span class="etfal">Falta</span>`;
