@@ -339,6 +339,9 @@ details.card[open]>summary{margin-bottom:10px}
 .ckl{display:flex;flex-direction:column}
 .ck{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--line);font-weight:600;font-size:16px;text-transform:none;letter-spacing:0;color:var(--ink);cursor:pointer}
 .ck input{width:22px;height:22px;margin:0;accent-color:var(--primary-bg);flex-shrink:0}
+.sellobox{flex:0 0 auto;border:1px solid var(--line);border-radius:14px;overflow:hidden}.sellobox .ck{border-top:0}.sellobox .ck span{display:flex;flex-direction:column;gap:2px}.sellobox .ck small{font-weight:500;font-size:13px;color:var(--muted)}
+.sellon{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}.sellochips{display:flex;flex-wrap:wrap;gap:8px}.sellochips button{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);font:inherit;font-weight:700;font-size:14px}.sellochips button[aria-pressed=true]{background:var(--primary-bg);color:var(--primary-ink,#fff);border-color:transparent}
+.etsello{display:inline-block;font-size:11px;font-weight:800;padding:1px 6px;border-radius:999px;background:var(--sunk);margin-left:4px}
 .hjpaso{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--ink);margin-top:4px}
 .hjpaso .ct{margin-left:auto}
 .hjnum{width:24px;height:24px;border-radius:50%;background:var(--primary-bg);color:#fff;display:grid;place-items:center;font-size:13px;flex-shrink:0}
@@ -719,6 +722,14 @@ details.card[open]>summary{margin-bottom:10px}
         <div class="gansug" id="iGanSug" hidden></div>
       </div>
       <label class="f grow"><span id="iCantLbl">Cantidad</span><input id="iCant" class="inp num miles" inputmode="numeric"></label>
+    </div>
+    <div class="sellobox" id="iSelloBox">
+      <label class="ck"><input type="checkbox" id="iSello"><span>Sello único<small>Una sola etiqueta para todo el producto (ej. caja de tornillos)</small></span></label>
+      <div class="sellon" id="iSelloOpc" hidden>
+        <label class="f grow">Unidades que dice el sello<input id="iSelloN" class="inp num" inputmode="numeric" maxlength="5" placeholder="Ej. 12" autocomplete="off" enterkeyhint="done"></label>
+        <div class="sellochips" id="iSelloChips" role="group" aria-label="Rápido"><button type="button" data-n="1">Unidad</button><button type="button" data-n="6">Media docena</button><button type="button" data-n="12">Docena</button><button type="button" data-n="100">Ciento</button></div>
+        <p class="note" id="iSelloVer" style="margin:0"></p>
+      </div>
     </div>
     <label class="f">Categoría<select id="iCat" class="inp"></select></label>
     <p class="note" id="iCatNota" style="margin:-6px 0 0" hidden>Puesta según el nombre. Si no es, cámbiela.</p>
@@ -2499,6 +2510,7 @@ function openIngreso(opts={}){
   $("iGuardar").textContent = p ? "Guardar cambios" : "Guardar";
   $("iCodigo").value = ""; S.iOrigTipo = ""; $("iCosto").dataset.auto = ""; $("iPrecio").dataset.auto = ""; $("iCodInfo").hidden = true;
   $("iCosto").dataset.manual = ""; $("iCat").dataset.manual = opts.edit?.categoria ? "1" : ""; $("iCatNota").hidden = true; $("iGanSug").hidden = true;
+  $("iSello").checked = !!p?.sello; $("iSelloN").value = p?.sello && p.selloN > 1 ? String(p.selloN) : ""; selloPintar();
   if (p){
     let cod = p.codigo||"", cp = p.codigoPropio||"";
     if (!cp && /^FR\d+$/i.test(cod)){ cp = cod; cod = ""; }   /* códigos automáticos viejos pasan a ser el código propio */
@@ -3081,7 +3093,8 @@ $("ingForm").onsubmit = async (e) => {
   const otros9 = esCodigo9(codigoPropio) ? porCodigo(codigoPropio).filter(x => x.id !== S.editId) : [];
   const provSel = $("iProv").value;
   const data = { codigo, codigoTipo: codigo ? (S.iOrigTipo === "qr" ? "qr" : tipoCodigo(codigo) === "Código QR" ? "qr" : "barras") : (S.iOrigTipo === "escrito" || esEscrito(codigoPropio) ? "escrito" : ""), nombre, precio, cantidad: cant, costo: toNum($("iCosto").value), categoria: categoria || "", proveedorId: provSel && provSel !== "__nuevo" ? provSel : "",
-    codigoPropio, ganancia: gan, foto: S.iFotoData || null, actualizado: Date.now() };
+    codigoPropio, ganancia: gan, foto: S.iFotoData || null, actualizado: Date.now(),
+    sello: $("iSello").checked, selloN: $("iSello").checked ? Math.max(0, Math.min(99999, toNum($("iSelloN").value) || 0)) : 0 };
   if (S.editId){ if (cant !== S.editCant0) Object.assign(data, fijarCant(cant)); else delete data.cantidad; }
   else Object.assign(data, fijarCant(cant));
   if (gan !== null) ls.set("ultGan", String(gan));
@@ -3176,9 +3189,27 @@ function etqEnvolver(cx, t, maxw){   /* parte el texto en renglones; una palabra
   }
   if (cur) ls.push(cur); return ls;
 }
+/* Sello único: una sola etiqueta para todo el producto; puede decir el precio por docena, ciento, etc. */
+const SELLO_NOM = { 6: "Media docena", 12: "Docena", 24: "Dos docenas", 25: "Veinticinco", 50: "Cincuenta", 100: "Ciento", 1000: "Mil" };
+function selloInfo(p){
+  if (!p || !p.sello) return null;
+  const n = Math.round(Number(p.selloN) || 0), pr = Number(p.precio) || 0;
+  if (n > 1) return { n, precio: pr * n, nota: `${SELLO_NOM[n] ? SELLO_NOM[n] + " · " : ""}${miles(n)} und${pr ? ` · ${fmt(pr)} c/u` : ""}` };
+  return { n: 1, precio: pr, nota: "" };
+}
+function selloPintar(){
+  const on = $("iSello").checked, n = Math.round(toNum($("iSelloN").value) || 0), pr = toNum($("iPrecio").value) || 0;
+  $("iSelloOpc").hidden = !on;
+  $("iSelloChips").querySelectorAll("[data-n]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.n === n || (b.dataset.n === "1" && n <= 1))));
+  $("iSelloVer").textContent = !on ? "" : n > 1 ? `El sello dirá: ${SELLO_NOM[n] || miles(n) + " unidades"}${pr ? ` ${fmt(pr * n)} (${fmt(pr)} c/u)` : ""}. Se vende igual por unidad.` : `El sello dirá el precio de una unidad${pr ? ` (${fmt(pr)})` : ""}.`;
+}
+$("iSello").addEventListener("change", () => { selloPintar(); if ($("iSello").checked && !$("iSelloN").value) setTimeout(() => $("iSelloN").focus(), 50); });
+$("iSelloN").addEventListener("input", () => { $("iSelloN").value = $("iSelloN").value.replace(/\D/g, "").slice(0, 5); selloPintar(); });
+$("iPrecio").addEventListener("input", selloPintar);
+$("iSelloChips").onclick = (e) => { const b = e.target.closest("[data-n]"); if (!b) return; $("iSelloN").value = b.dataset.n === "1" ? "" : b.dataset.n; selloPintar(); };
 function etiquetaOps(p, o = etqOpts()){
   const W = 384, pad = 10, ops = [], cx = document.createElement("canvas").getContext("2d"), d = o.diseno || "grande";
-  const cod = p.codigoPropio || p.codigo || "";
+  const cod = p.codigoPropio || p.codigo || "", se = selloInfo(p);
   let y = pad;
   /* texto que se achica hasta caber en "lineas" renglones; si no cabe, se corta con … */
   const texto = (txt, size, peso, mono, { x = W / 2, align = "center", maxw = W - 2*pad, lineas = 2, min = Math.round(size * 0.6), luego } = {}) => {
@@ -3212,7 +3243,7 @@ function etiquetaOps(p, o = etqOpts()){
     if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 18, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 12 });
     if (o.nombre && p.nombre) texto(p.nombre, 28, 700, false, { x: xt, align: "left", maxw, lineas: 2, min: 22, luego: { lineas: 3, min: 18 } });
     if (codCabe) texto(cod, 80, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 20 });
-    if (o.precio && p.precio) texto(fmt(p.precio), 34, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 20 });
+    if ((o.precio || se?.n > 1) && p.precio){ if (se?.nota) texto(se.nota, 18, 700, false, { x: xt, align: "left", maxw, lineas: 1, min: 11 }); texto(fmt(se ? se.precio : p.precio), 34, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 20 }); }
     const pt = pieTxt(); if (pt) texto(pt, 16, 600, true, { x: xt, align: "left", maxw, lineas: 2, min: 11 });
     const yTxt = y, alto = Math.max(Q, yTxt - pad), qy = pad + (alto - Q) / 2;
     if (mods){ const m = Q / mods.n;
@@ -3228,12 +3259,12 @@ function etiquetaOps(p, o = etqOpts()){
     if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { lineas: 1, min: 12 });
     if (o.nombre && p.nombre) texto(p.nombre, 32, 700, false, { lineas: 2, min: 26, luego: { lineas: 3, min: 20 } });
     if (o.codigo && cod){ y -= 2; texto(cod, 96, 800, false, { lineas: 1, min: 24 }); y -= 4; }
-    if (o.precio && p.precio) texto(fmt(p.precio), 40, 800, false, { lineas: 1, min: 22 });
+    if ((o.precio || se?.n > 1) && p.precio){ if (se?.nota) texto(se.nota, 22, 700, false, { lineas: 1, min: 12 }); texto(fmt(se ? se.precio : p.precio), 40, 800, false, { lineas: 1, min: 22 }); }
     if (o.barras && cod && window.JsBarcode) barras(38, W * 0.78);
   } else {
     if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { lineas: 1, min: 12 });
     if (o.nombre && p.nombre) texto(p.nombre, 24, 700, false, { lineas: 2, min: 16 });
-    if (o.precio && p.precio) texto(fmt(p.precio), 32, 800, false, { lineas: 1, min: 24 });
+    if ((o.precio || se?.n > 1) && p.precio){ if (se?.nota) texto(se.nota, 18, 700, false, { lineas: 1, min: 11 }); texto(fmt(se ? se.precio : p.precio), 32, 800, false, { lineas: 1, min: 24 }); }
     if (o.barras && cod && window.JsBarcode) barras(70, W - 2*pad);
     if (o.codigo && cod) texto(cod, 24, 600, true, { lineas: 1, min: 14 });
   }
@@ -3378,7 +3409,7 @@ async function compartirVarios(archivos){   /* [{ blob, nombre }] */
 }
 function etiquetasSeccion(){
   const o = etqOpts(), cache = new Map();
-  const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || ""); if (!cache.has(key)) cache.set(key, etiquetaOps(p, o)); return cache.get(key); };
+  const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || "") + "|" + (p.sello ? "s" + (p.selloN || 0) : ""); if (!cache.has(key)) cache.set(key, etiquetaOps(p, o)); return cache.get(key); };
   const prod = (id) => S.productos.find(q => q.id === id);
   let tab = "productos", chip = etqPendientes().length ? "recientes" : "todos", verMas = 150, verCfg = false, pagVista = 0;
   const CHIPS = [["recientes", "Nuevos"], ["faltan", "Faltan"], ["impresas", "Impresas"], ["todos", "Todos"]];
@@ -3425,10 +3456,11 @@ function etiquetasSeccion(){
       const poner = (id, n) => { const l = hojaLista(), i = l.findIndex(x => x.id === id); n = Math.max(0, Math.min(500, n)); if (i >= 0){ if (n) l[i].n = n; else l.splice(i, 1); } else if (n) l.push({ id, n }); hojaGuardar(l); resumen(); };
       const agregarVarios = (ids, n1) => { const l = hojaLista(); ids.forEach(id => { const i = l.findIndex(x => x.id === id), n = typeof n1 === "function" ? n1(prod(id)) : n1; if (i >= 0) l[i].n = Math.min(500, l[i].n + n); else l.push({ id, n }); }); hojaGuardar(l); resumen(); lista(); };
       const pedirCopias = (titulo, ids) => {
-        const total = ids.reduce((a, id) => a + Math.max(1, Math.round(Number(prod(id)?.cantidad) || 0)), 0);
+        const porUnidad = (p) => p?.sello ? 1 : Math.max(1, Math.round(Number(p?.cantidad) || 0));
+        const total = ids.reduce((a, id) => a + porUnidad(prod(id)), 0), nSello = ids.filter(id => prod(id)?.sello).length;
         preguntar(titulo, `Se agregan ${miles(ids.length)} producto${ids.length > 1 ? "s" : ""} a la hoja. ¿Cuántas etiquetas de cada uno?`, [
           { t: `Una de cada uno (${miles(ids.length)})`, clase: "primary", fn: () => { agregarVarios(ids, 1); toast(`${miles(ids.length)} etiquetas en la hoja`); } },
-          { t: `Una por cada unidad en existencia (${miles(total)})`, fn: () => { agregarVarios(ids, (p) => Math.max(1, Math.round(Number(p?.cantidad) || 0))); toast(`${miles(total)} etiquetas en la hoja`); } }]);
+          { t: `Una por cada unidad en existencia (${miles(total)})${nSello ? ` — los de sello único llevan 1` : ""}`, fn: () => { agregarVarios(ids, porUnidad); toast(`${miles(total)} etiquetas en la hoja`); } }]);
       };
       /* ---------- elegir productos ---------- */
       const recientes = () => S.productos.filter(p => codEtq(p)).sort((a, b) => (b.creado || 0) - (a.creado || 0)).slice(0, 30);
@@ -3449,7 +3481,7 @@ function etiquetasSeccion(){
           const k = enHoja.get(p.id), hecha = etqHecha(p);
           const estado = hecha ? `<span class="etok">✓ Impresa ${corta(p.etqT)}</span>` : `<span class="etfal">Falta</span>`;
           const extra = chip === "recientes" && !q && p.creado ? ` · llegó ${corta(p.creado)}` : "";
-          return `<div class="etrow2${k ? " en" : ""}"><button type="button" class="etname" data-ver="${esc(p.id)}" data-nom="${esc(p.nombre)}" title="${esc(p.nombre)}"><b>${esc(p.nombre)}</b><small><span class="num">${esc(codEtq(p))}</span> · ${estado}${extra}</small></button>`
+          return `<div class="etrow2${k ? " en" : ""}"><button type="button" class="etname" data-ver="${esc(p.id)}" data-nom="${esc(p.nombre)}" title="${esc(p.nombre)}"><b>${esc(p.nombre)}</b><small><span class="num">${esc(codEtq(p))}</span>${p.sello ? `<span class="etsello">Sello</span>` : ""} · ${estado}${extra}</small></button>`
             + (k ? `<div class="etstep"><button type="button" data-m="${esc(p.id)}" aria-label="Una menos">−</button><span class="num">${k}</span><button type="button" data-p="${esc(p.id)}" aria-label="Una más">+</button></div>`
                  : `<button type="button" class="etplus" data-add="${esc(p.id)}" aria-label="Agregar ${esc(p.nombre)} a la hoja">+</button>`) + `</div>`;
         }).join("") + (arr.length > verMas ? `<button type="button" class="linkbtn etmas" id="etMas">Ver más (${miles(arr.length - verMas)})</button>` : "")
