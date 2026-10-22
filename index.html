@@ -361,6 +361,21 @@ details.card[open]>summary{margin-bottom:10px}
 .hjpage{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%}
 .hjpage canvas{width:100%;max-width:330px;height:auto;box-shadow:0 1px 8px rgba(0,0,0,.28);border-radius:2px}
 .hjpag{font-size:13px;color:var(--muted)}
+.sheet>.etlist,.sheet>.hjlist,.sheet>.hjprev,.sheet>.hjpaso,.sheet>.seg3,.sheet>.row,.sheet>#etqOpts,.sheet>.inp{flex-shrink:0}
+.btn.ico.ie{font:800 14px var(--f-mono);letter-spacing:-.02em;min-width:48px;padding-left:8px;padding-right:8px}
+.badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;margin-left:6px;border-radius:11px;background:var(--danger-solid);color:#fff;font-size:12px;font-weight:800;font-family:var(--f-mono)}
+.etlist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);max-height:52vh;overflow-y:auto}
+.etrow{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 4px;border-top:1px solid var(--line)}
+.etrow:first-child{border-top:0}
+.etname{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:none;border:0;padding:6px 8px;text-align:left;color:var(--ink);font:inherit}
+.etname b{font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.etname small{color:var(--muted);font-size:13px}
+.etok{color:var(--ok);font-weight:700}
+.etfal{color:var(--warn);font-weight:700}
+.etadd{flex-shrink:0;min-width:86px;padding:8px 10px;font-size:15px}
+.etadd.en{background:var(--sunk);color:var(--ok);font-weight:800}
+.etlist .linkbtn{align-self:center;color:var(--accent);font-weight:600}
+#etF button{font-size:14px;padding:9px 2px}
 .shot video{width:100%;height:100%;object-fit:cover;background:#000}
 .bigscan{font-size:19px;padding:16px;gap:10px}
 .camrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -634,7 +649,7 @@ details.card[open]>summary{margin-bottom:10px}
   </form>
   <div class="foot gut">
     <button type="button" class="btn cam block" id="iScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear código</button>
-    <div class="row"><button type="button" class="btn" id="iEtiqueta" hidden>Etiqueta</button><button class="btn ingreso grow" id="iGuardar" form="ingForm" type="submit">Guardar</button></div>
+    <div class="row"><button class="btn ingreso grow" id="iGuardar" form="ingForm" type="submit">Guardar</button></div>
   </div>
 </section>
 
@@ -649,12 +664,13 @@ details.card[open]>summary{margin-bottom:10px}
     </div>
     <form id="invSearchForm" class="row" autocomplete="off">
       <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
+      <button class="btn ico ie" type="button" id="invIE" aria-label="Importar o exportar" title="Importar / Exportar">I/E</button>
       <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
     </form>
     <div class="fchips" id="invChips" hidden></div>
     <div id="invList"></div>
   </div>
-  <div class="foot gut"><button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><div class="row"><button class="btn grow" id="invExport">Exportar</button><label class="btn grow" for="aImport">Importar</label><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
+  <div class="foot gut"><button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><div class="row"><button type="button" class="btn grow" id="invEtq">Etiquetas</button><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
 </section>
 
 <!-- PENDIENTES -->
@@ -989,7 +1005,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.).</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Toque un producto y elija <b>Etiqueta</b> para imprimirla (también está dentro de <b>Editar</b>).</li><li>En <b>Qué sale en la etiqueta</b> chulee lo que quiere que salga (nombre de la ferretería, producto, precio, código de barras…).</li><li><b>Varias en hoja carta:</b> elija el tamaño y cuántas (o <b>Hoja llena</b>) y toque <b>Agregar a la hoja</b>. Abra la etiqueta de otros productos y agréguelas también. Abajo ve la lista y cómo queda la hoja; luego <b>Imprimir hoja</b>. Salen con líneas para cortar.</li><li>Si cambia el precio de un producto con código 9, al guardar la app crea el código nuevo y le muestra la etiqueta para reimprimirla.</li><li>En <b>Ajustes › General › Impresión y etiquetas</b> elija qué sale: nombre del negocio, producto, código de barras, código 9, fecha.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.). El botón pequeño <b>I/E</b> de al lado sirve para <b>Importar</b> o <b>Exportar</b> la lista de productos.</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Todo lo de etiquetas está en <b>Inventario › Etiquetas</b> (el número rojo dice cuántas faltan).</li><li>Busque un producto y toque <b>Agregar</b>, o use <b>Agregar lo que falta</b> / <b>Agregar todo</b> (una de cada uno o una por cada unidad). Toque el nombre para imprimir solo esa (rollo o Bluetooth).</li><li>Las que ya se imprimieron dicen <b>Impresa</b> con la fecha y la app pregunta antes de repetirlas. Si cambia el precio de un código 9, el código nuevo vuelve a quedar como <b>Falta</b>.</li><li>En <b>Qué sale en la etiqueta</b> chulee lo que quiere que salga (nombre de la ferretería, producto, precio, código de barras…).</li><li>Abajo elija el tamaño, revise la lista y cómo queda la hoja carta, y toque <b>Imprimir hoja</b>. Salen con líneas para cortar. Al final confirme que salieron bien para marcarlas como impresas.</li><li>El tamaño del papel de rollo se cambia en <b>Ajustes › General › Impresión y etiquetas</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -1230,9 +1246,8 @@ function productSheet(p){
       <div class="price" style="font-size:24px;margin-top:6px">${fmt(p.precio)}</div></div></div>
     <dl class="kv"><dt>Código</dt><dd class="num">${esc(p.codigo||"—")}</dd>${p.codigoPropio?`<dt>Código propio</dt><dd class="num">${esc(p.codigoPropio)}</dd>`:""}<dt>Existencias</dt><dd>${stockChip(p)}</dd>${p.costo?`<dt>Costo</dt><dd class="num">${fmt(p.costo)}</dd>`:""}${p.categoria?`<dt>Categoría</dt><dd>${esc(p.categoria)}</dd>`:""}${(() => { const pv = provById(p.proveedorId); return pv ? `<dt>Proveedor</dt><dd>${esc(pv.nombre)}${pv.telefono?`<br><span class="num" style="font-weight:500">${esc(pv.telefono)}</span> · ${telLinks(pv.telefono)}`:""}</dd>` : ""; })()}${p.creado?`<dt>Ingresado</dt><dd>${fFecha(p.creado)} ${fHora(p.creado)}</dd>`:""}${p.actualizado && p.actualizado !== p.creado?`<dt>Actualizado</dt><dd>${fFecha(p.actualizado)} ${fHora(p.actualizado)}</dd>`:""}</dl>
     <button class="btn venta block" id="psVender">Vender</button>
-    <div class="row"><button class="btn grow" id="psEditar">Editar</button>${(p.codigoPropio || p.codigo) ? `<button class="btn grow" id="psEtq">Etiqueta</button>` : ""}</div>`,
+    <div class="row"><button class="btn grow" id="psEditar">Editar</button></div>`,
     (el, close) => {
-      const et = el.querySelector("#psEtq"); if (et) et.onclick = () => { close(); etiqueta(p); };
       const pf = el.querySelector("#psFoto"); if (pf) pf.onclick = () => verFoto(p.foto, {
         cambiar: () => { close(); cambiarFotoProducto(p); },
         borrar: async () => { close(); try { await S.db.doc("productos/" + p.id).update({ foto: null, actualizado: Date.now() }); toast("Foto borrada"); } catch { toast("No se pudo borrar la foto."); } } });
@@ -2465,7 +2480,6 @@ function pintarOrig(){
   else { box.innerHTML = ""; $("iOrigQuitar").hidden = true; }
   $("iOrig").hidden = !box.innerHTML;
   showBarcode(cod);
-  $("iEtiqueta").hidden = !(cp || cod) || !window.JsBarcode;
 }
 function showBarcode(code){
   if (!code || !window.JsBarcode){ $("iCodeBox").hidden=true; return; }
@@ -2974,8 +2988,8 @@ $("ingForm").onsubmit = async (e) => {
     else await S.db.collection("productos").add({ ...data, creado: Date.now() });
     toast(S.editId ? "Cambios guardados" : "Guardado: "+nombre);
     if (otros9.length) setTimeout(() => toast(`El código ${codigoPropio} también lo tiene ${otros9[0].nombre}${otros9.length > 1 ? " y otros" : ""}. Al escanearlo te preguntará cuál.`, 4500), 1600);
-    if (codCambio){ toast(`El código propio cambió a ${codCambio} por el precio nuevo. Imprima la etiqueta nueva.`, 4500); etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: S.prodRaw.find(x => x.id === S.editId)?.creado || Date.now() }); }
-    else if (!S.editId && auto && !codigo) { etiqueta({ codigoPropio, codigo, nombre, precio, proveedorId: data.proveedorId, creado: Date.now() }); }
+    if (codCambio){ toast(`El código propio cambió a ${codCambio} por el precio nuevo. Su etiqueta quedó pendiente en Inventario › Etiquetas.`, 5000); back(); }
+    else if (!S.editId && auto && !codigo){ toast(`Guardado con el código ${codigoPropio}. La etiqueta queda pendiente en Inventario › Etiquetas.`, 4000); back(); }
     else back();
     if (codViejo) setTimeout(() => toast("Ojo: el código 9 sigue con el precio anterior (el precio nuevo no termina en 00).", 4500), 600);
   } catch(err){ $("iErr").textContent = err?.code==="too_large" ? "La foto es muy pesada. Toma otra." : "No se pudo guardar. Revise la conexión."; }
@@ -2984,8 +2998,6 @@ $("ingForm").onsubmit = async (e) => {
 $("iBorrar").onclick = () => confirmar("¿Eliminar “"+$("iNombre").value+"” del inventario?", "Eliminar", async () => {
   try { await S.db.doc("productos/"+S.editId).delete(); toast("Producto eliminado"); back(); } catch { toast("No se pudo eliminar."); }
 });
-$("iEtiqueta").onclick = () => { const pv = $("iProv").value, ed = S.editId ? S.productos.find(x => x.id === S.editId) : null;
-  etiqueta({ codigoPropio: $("iCodP").value.trim(), codigo: $("iCodigo").value.trim(), nombre: $("iNombre").value.trim(), precio: toNum($("iPrecio").value), proveedorId: pv && pv !== "__nuevo" ? pv : "", creado: ed?.creado || Date.now() }); };
 
 /* ---------- etiqueta: se escoge en Ajustes qué sale ---------- */
 const ETQ_CAMPOS = [["tienda","Nombre de la ferretería"],["nombre","Nombre del producto"],["precio","Precio"],["barras","Código de barras"],["codigo","Código debajo de las barras"],["prov","Código del proveedor"],["fecha","Fecha"]];
@@ -3040,49 +3052,44 @@ function pintarEtqAjustes(){
   prev();
 }
 $("aEtqExtra").addEventListener("change", async () => { await cfgSet({ etqExtra: $("aEtqExtra").value.trim() }, "Listo"); S.config.etqExtra = $("aEtqExtra").value.trim(); pintarEtqAjustes(); });
-function etiqueta(p){
-  if (!(p.codigoPropio || p.codigo) || !window.JsBarcode){ if (!$("ingreso").hidden) back(); return; }
-  const o = etqOpts();
-  sheet(`<h2>Etiqueta</h2><div id="etqOpts"></div><div class="recibo-wrap" id="etqWrap" style="flex-shrink:0"></div>
-    <div class="row"><button class="btn grow" id="etqCerrar">Listo</button><button class="btn ingreso grow" id="etqPrint">Imprimir una</button></div>
-    <div class="row">${navigator.bluetooth?`<button class="btn grow" id="etqBT">Bluetooth</button>`:""}<button class="btn grow" id="etqSave">Compartir</button></div>
-    <div class="hojabox">
-      <div class="sect">Hoja carta · varias etiquetas</div>
-      <div class="hjpaso"><span class="hjnum">1</span>Tamaño de las etiquetas</div>
-      <div class="seg3" id="hjTam" role="group" aria-label="Tamaño de la etiqueta"><button type="button" data-c="4">Pequeña</button><button type="button" data-c="3">Mediana</button><button type="button" data-c="2">Grande</button></div>
-      <div class="hjpaso"><span class="hjnum">2</span>Cuántas de esta etiqueta</div>
-      <div class="hjrow"><div class="hjstep"><button type="button" class="btn" id="hjMenos" aria-label="Una menos">−</button><input id="hjN" class="inp num" inputmode="numeric" value="1" aria-label="Copias"><button type="button" class="btn" id="hjMas" aria-label="Una más">+</button></div>
-        <button type="button" class="btn" id="hjLlena">Hoja llena</button></div>
-      <button type="button" class="btn block" id="hjAdd">Agregar a la hoja</button>
-      <div class="hjpaso"><span class="hjnum">3</span>Lo que va en la hoja<span class="ct" id="hjTot"></span></div>
-      <div class="hjlist" id="hjList"></div>
-      <div class="hjpaso"><span class="hjnum">4</span>Así queda la hoja</div>
-      <div class="hjprev" id="hjPrev"></div>
-      <button type="button" class="btn ingreso block" id="hjPrint">Imprimir hoja</button>
-    </div>`,
-    (el, close) => {
-      let c;
-      const pintar = () => { const w = el.querySelector("#etqWrap"); w.innerHTML = ""; c = etiquetaCanvas(p, o); c.style.maxWidth = "100%"; w.appendChild(c); };
-      const hoja = { repintar(){} };
-      etqChecks(el.querySelector("#etqOpts"), o, (n) => { pintar(); cfgSet({ etq: { ...n } }); hoja.repintar(); });
-      pintar();
-      el.querySelector("#etqCerrar").onclick = () => { close(); if (!$("ingreso").hidden) back(); };
-      el.querySelector("#etqSave").onclick = async () => { const b = await new Promise(r=>c.toBlob(r,"image/png")); shareFile(b, `etiqueta-${p.codigoPropio || p.codigo}.png`); };
-      el.querySelector("#etqPrint").onclick = () => printCanvas(c);
-      const bt = el.querySelector("#etqBT"); if (bt) bt.onclick = () => printBT(c, bt);
-      hojaControles(el, p, o, hoja);
+/* ---------- ETIQUETAS: todo en una sola sección (Inventario › Etiquetas) ----------
+   Cada producto recuerda qué código se le imprimió (etqCod) y cuándo (etqT). Si el código cambia
+   (ej. precio nuevo con código 9), vuelve a quedar como "falta". Se guarda en la nube como lo demás. */
+const codEtq = (p) => p.codigoPropio || p.codigo || "";
+const etqHecha = (p) => !!p.etqCod && p.etqCod === codEtq(p);
+const etqPendientes = () => S.productos.filter(p => codEtq(p) && !etqHecha(p));
+async function marcarImpresas(ids){
+  const todo = S.db.exportAll(), lote = {}, t = Date.now();
+  [...new Set(ids)].forEach(id => { const k = "productos/" + id, d = todo[k]; if (d && codEtq(d)) lote[k] = { ...d, etqCod: codEtq(d), etqT: t }; });
+  if (Object.keys(lote).length) await S.db.putMany(lote);
+  return Object.keys(lote).length;
+}
+/* pregunta encima de la sección (sin cerrarla) */
+function preguntar(titulo, texto, botones){
+  popup(titulo, `<p style="margin:0 0 14px;line-height:1.4">${texto}</p><div style="display:flex;flex-direction:column;gap:8px">`
+    + botones.map((b, i) => `<button type="button" class="btn ${b.clase || ""}" data-bi="${i}">${esc(b.t)}</button>`).join("")
+    + `<button type="button" class="btn" data-popclose>Cancelar</button></div>`, (el, close) => {
+      el.addEventListener("click", (e) => { const b = e.target.closest("[data-bi]"); if (!b) return; close(); botones[Number(b.dataset.bi)].fn(); });
     });
 }
 /* ---------- varias etiquetas en una hoja carta (para cortar con tijera) ----------
-   La lista de la hoja queda guardada en este celular hasta que se imprime. Las hojas se arman
-   aquí mismo (fila por fila, en milímetros): lo que se ve en "Así queda la hoja" es lo que sale. */
+   Las hojas se arman aquí mismo (fila por fila, en milímetros): lo que se ve es lo que sale. */
 const HOJA = { ancho: 199.9, alto: 262, pad: 1.5, papelW: 215.9, papelH: 279.4, margen: 8 };   /* carta con 8 mm de margen */
-const hojaLista = () => { try { const l = JSON.parse(ls.get("hojaEtq") || "[]"); return Array.isArray(l) ? l.filter(x => x && x.p && x.n > 0) : []; } catch { return []; } };
-const hojaGuardar = (l) => ls.set("hojaEtq", JSON.stringify(l));
 const hojaCols = () => [2, 3, 4].includes(Number(ls.get("hojaCols"))) ? Number(ls.get("hojaCols")) : 3;
-const etqClave = (p) => p.codigoPropio || p.codigo || p.nombre || "";
-const etqFoto = (p) => ({ codigoPropio: p.codigoPropio || "", codigo: p.codigo || "", nombre: p.nombre || "", precio: p.precio || 0, proveedorId: p.proveedorId || "", creado: p.creado || Date.now() });
-/* Arma las hojas: cada hoja es una lista de filas; cada fila, sus etiquetas y su alto en mm */
+function hojaLista(){   /* [{ id, n }] — solo productos que siguen existiendo y tienen código */
+  let l; try { l = JSON.parse(ls.get("hojaEtq") || "[]"); } catch { l = []; }
+  if (!Array.isArray(l)) l = [];
+  const out = [];
+  l.forEach(x => {
+    if (!x || !(x.n > 0)) return;
+    let id = x.id;
+    if (!id && x.p){ const c = x.p.codigoPropio || x.p.codigo; const pr = c && S.productos.find(q => codEtq(q) === c); id = pr && pr.id; }   /* listas viejas */
+    const pr = id && S.productos.find(q => q.id === id);
+    if (pr && codEtq(pr) && !out.some(o => o.id === id)) out.push({ id, n: Math.min(500, Math.round(x.n)) });
+  });
+  return out;
+}
+const hojaGuardar = (l) => ls.set("hojaEtq", JSON.stringify(l.map(x => ({ id: x.id, n: x.n }))));
 function hojaPaginas(items, cols){
   const cw = HOJA.ancho / cols, celdas = [];
   items.forEach(it => { for (let i = 0; i < it.n; i++) celdas.push(it); });
@@ -3095,7 +3102,7 @@ function hojaPaginas(items, cols){
   }
   return pags;
 }
-function hojaVista(pags, cols){   /* dibujo pequeño de cada hoja */
+function hojaVista(pags, cols){
   const k = 2.2, W = Math.round(HOJA.papelW * k), H = Math.round(HOJA.papelH * k), cw = HOJA.ancho / cols;
   return pags.map((pag) => {
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
@@ -3103,8 +3110,7 @@ function hojaVista(pags, cols){   /* dibujo pequeño de cada hoja */
     let y = HOJA.margen;
     pag.forEach(({ fila, alto }) => {
       fila.forEach((it, j) => {
-        const cx = HOJA.margen + j * cw;
-        x.strokeRect(cx * k, y * k, cw * k, alto * k);
+        const cx = HOJA.margen + j * cw; x.strokeRect(cx * k, y * k, cw * k, alto * k);
         const iw = cw - 2*HOJA.pad, ih = iw * it.c.height / it.c.width;
         x.drawImage(it.c, (cx + HOJA.pad) * k, (y + (alto - ih) / 2) * k, iw * k, ih * k);
       });
@@ -3113,68 +3119,142 @@ function hojaVista(pags, cols){   /* dibujo pequeño de cada hoja */
     return cv;
   });
 }
-function hojaControles(el, p, o, hoja){
-  const n = el.querySelector("#hjN"), clave = etqClave(p), cache = new Map();
+function etiquetasSeccion(){
+  const o = etqOpts(), cache = new Map();
   const ancho = () => hojaCols() <= 2 ? 768 : 576;
-  const lienzo = (q) => { const key = etqClave(q) + "|" + ancho() + "|" + JSON.stringify(o) + "|" + (q.nombre || "") + (q.precio || ""); if (!cache.has(key)) cache.set(key, etiquetaCanvas(q, o, ancho())); return cache.get(key); };
-  const leerN = () => Math.max(1, Math.min(500, Math.round(toNum(n.value)) || 1));
-  const items = () => { const l = hojaLista(); return (l.length ? l : [{ k: clave, n: leerN(), p: etqFoto(p) }]).map(x => ({ ...x, c: lienzo(x.p) })); };
-  const pintar = () => {
-    const cols = hojaCols(), l = hojaLista(), ya = l.find(x => x.k === clave);
-    el.querySelectorAll("#hjTam [data-c]").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.c) === cols));
-    el.querySelector("#hjAdd").textContent = ya ? (ya.n === leerN() ? "Ya está en la hoja ✓" : `Cambiar a ${leerN()} en la hoja`) : `Agregar ${leerN()} a la hoja`;
-    /* lista */
-    const box = el.querySelector("#hjList");
-    box.innerHTML = l.length ? l.map((x, i) => `<div class="hjitem${x.k === clave ? " esta" : ""}" data-i="${i}"><span class="hjname"><b>${esc(x.p.nombre || "Sin nombre")}</b><small>${esc(x.p.codigoPropio || x.p.codigo || "")}</small></span>
-        <div class="hjstep sm"><button type="button" class="btn" data-a="menos" aria-label="Una menos">−</button><input class="inp num" inputmode="numeric" value="${x.n}" data-a="n" aria-label="Copias de ${esc(x.p.nombre || "")}"><button type="button" class="btn" data-a="mas" aria-label="Una más">+</button></div>
-        <button type="button" class="hjx" data-a="quitar" aria-label="Quitar ${esc(x.p.nombre || "")} de la hoja">×</button></div>`).join("")
-        + `<div class="hjfoot"><button type="button" class="linkbtn" id="hjVaciar">Vaciar la hoja</button></div>`
-      : `<div class="hjvacio">Todavía no hay nada. Toque <b>Agregar a la hoja</b>; luego abra la etiqueta de otro producto y agréguela también.</div>`;
-    const v = box.querySelector("#hjVaciar"); if (v) v.onclick = () => confirmar("¿Quitar todas las etiquetas de la hoja?", "Vaciar", () => { hojaGuardar([]); pintar(); });
-    /* vista de la hoja */
-    const its = items(), pags = hojaPaginas(its, cols), tot = its.reduce((a, x) => a + x.n, 0);
-    el.querySelector("#hjTot").textContent = l.length ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags.length} hoja${pags.length > 1 ? "s" : ""}` : "";
-    const pv = el.querySelector("#hjPrev"); pv.innerHTML = "";
-    if (!l.length) pv.insertAdjacentHTML("beforeend", `<p class="note" style="margin:0;text-align:center">Así saldría solo esta etiqueta (${miles(tot)}).</p>`);
-    else if (!l.find(x => x.k === clave)) pv.insertAdjacentHTML("beforeend", `<p class="note" style="margin:0;text-align:center">Esta etiqueta todavía no está en la hoja.</p>`);
-    hojaVista(pags, cols).forEach((cv, i) => { const w = document.createElement("div"); w.className = "hjpage"; w.appendChild(cv);
-      if (pags.length > 1) w.insertAdjacentHTML("beforeend", `<span class="hjpag">Hoja ${i + 1} de ${pags.length}</span>`); pv.appendChild(w); });
-    el.querySelector("#hjPrint").textContent = `Imprimir ${pags.length > 1 ? pags.length + " hojas" : "hoja"} (${miles(tot)} etiqueta${tot > 1 ? "s" : ""})`;
-  };
-  hoja.repintar = () => { cache.clear(); pintar(); };
-  const ya = hojaLista().find(x => x.k === clave); if (ya) n.value = ya.n;
-  el.querySelector("#hjTam").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; ls.set("hojaCols", b.dataset.c); pintar(); };
-  el.querySelector("#hjMenos").onclick = () => { n.value = Math.max(1, leerN() - 1); pintar(); };
-  el.querySelector("#hjMas").onclick = () => { n.value = leerN() + 1; pintar(); };
-  n.addEventListener("input", pintar); n.addEventListener("change", () => { n.value = leerN(); pintar(); });
-  el.querySelector("#hjLlena").onclick = () => {   /* las que faltan para llenar la última hoja */
-    const cols = hojaCols(), otras = hojaLista().filter(x => x.k !== clave).map(x => ({ ...x, c: lienzo(x.p) })), yo = { n: 1, c: lienzo(p) };
-    const hojas = (m) => hojaPaginas([...otras, { ...yo, n: m }], cols).length, base = hojas(1);
-    let m = 1; while (m < 500 && hojas(m + 1) === base) m++;
-    n.value = m; pintar();
-  };
-  el.querySelector("#hjAdd").onclick = () => {
-    const l = hojaLista(), i = l.findIndex(x => x.k === clave), item = { k: clave, n: leerN(), p: etqFoto(p) };
-    if (i >= 0) l[i] = item; else l.push(item);
-    hojaGuardar(l); pintar(); toast(i >= 0 ? "Hoja actualizada" : "Agregada a la hoja", 2000);
-  };
-  el.querySelector("#hjList").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-a]"), row = e.target.closest("[data-i]"); if (!b || !row || b.dataset.a === "n") return;
-    const l = hojaLista(), it = l[Number(row.dataset.i)]; if (!it) return;
-    if (b.dataset.a === "quitar") l.splice(Number(row.dataset.i), 1);
-    else it.n = Math.max(1, Math.min(500, it.n + (b.dataset.a === "mas" ? 1 : -1)));
-    hojaGuardar(l); if (it.k === clave) n.value = it.n; pintar();
+  const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + ancho() + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || ""); if (!cache.has(key)) cache.set(key, etiquetaCanvas(p, o, ancho())); return cache.get(key); };
+  const prod = (id) => S.productos.find(q => q.id === id);
+  let filtro = etqPendientes().length ? "faltan" : "todas", verMas = 60;
+  sheet(`<h2>Etiquetas</h2><div id="etqOpts"></div>
+    <div class="hjpaso"><span class="hjnum">1</span>Elegir productos</div>
+    <input id="etQ" class="inp" placeholder="Buscar nombre o código" inputmode="search" autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="seg3" id="etF" role="group" aria-label="Mostrar"></div>
+    <div class="row"><button type="button" class="btn grow" id="etFaltan"></button><button type="button" class="btn grow" id="etTodo">Agregar todo</button></div>
+    <div class="etlist" id="etList"></div>
+    <div class="hjpaso"><span class="hjnum">2</span>Tamaño de las etiquetas</div>
+    <div class="seg3" id="hjTam" role="group" aria-label="Tamaño de la etiqueta"><button type="button" data-c="4">Pequeña</button><button type="button" data-c="3">Mediana</button><button type="button" data-c="2">Grande</button></div>
+    <div class="hjpaso"><span class="hjnum">3</span>Lo que va en la hoja<span class="ct" id="hjTot"></span></div>
+    <div class="hjlist" id="hjList"></div>
+    <div class="hjpaso"><span class="hjnum">4</span>Así queda la hoja</div>
+    <div class="hjprev" id="hjPrev"></div>
+    <button type="button" class="btn ingreso block" id="hjPrint">Imprimir hoja</button>
+    <button type="button" class="btn block" data-close>Listo</button>`,
+    (el) => {
+      etqChecks(el.querySelector("#etqOpts"), o, (n) => { cfgSet({ etq: { ...n } }); cache.clear(); pintarHoja(); });
+      const lista = () => {
+        const q = norm(el.querySelector("#etQ").value.trim()), enHoja = new Map(hojaLista().map(x => [x.id, x.n]));
+        const conCod = S.productos.filter(p => codEtq(p)), falt = conCod.filter(p => !etqHecha(p)), imp = conCod.length - falt.length;
+        const sinCod = S.productos.length - conCod.length;
+        el.querySelector("#etF").innerHTML = [["faltan", "Faltan", falt.length], ["impresas", "Impresas", imp], ["todas", "Todas", conCod.length]]
+          .map(([f, t, n]) => `<button type="button" data-f="${f}" aria-pressed="${filtro === f}">${t} <span class="num">${miles(n)}</span></button>`).join("");
+        const faltSin = falt.filter(p => !enHoja.has(p.id)).length;
+        const bf = el.querySelector("#etFaltan"); bf.textContent = faltSin ? `Agregar lo que falta (${miles(faltSin)})` : "No falta ninguna"; bf.disabled = !faltSin;
+        let arr = filtro === "faltan" ? falt : filtro === "impresas" ? conCod.filter(etqHecha) : conCod;
+        if (q) arr = arr.filter(p => norm(p.nombre).includes(q) || norm(codEtq(p)).includes(q) || norm(p.codigo || "").includes(q));
+        arr = [...arr].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre)));
+        const box = el.querySelector("#etList");
+        box.innerHTML = (arr.length ? arr.slice(0, verMas).map(p => {
+          const n = enHoja.get(p.id), hecha = etqHecha(p);
+          return `<div class="etrow"><button type="button" class="etname" data-ver="${esc(p.id)}"><b>${esc(p.nombre)}</b><small><span class="num">${esc(codEtq(p))}</span> · ${hecha ? `<span class="etok">Impresa ${fFecha(p.etqT)}</span>` : `<span class="etfal">Falta</span>`}</small></button>`
+            + (n ? `<button type="button" class="btn etadd en" data-add="${esc(p.id)}" aria-label="Una más en la hoja">✓ ${n}</button>` : `<button type="button" class="btn etadd" data-add="${esc(p.id)}">Agregar</button>`) + `</div>`;
+        }).join("") + (arr.length > verMas ? `<button type="button" class="linkbtn" id="etMas">Ver más (${miles(arr.length - verMas)})</button>` : "")
+          : `<div class="hjvacio">${q ? "Ningún producto coincide." : filtro === "faltan" ? "No falta ninguna etiqueta. 🎉" : filtro === "impresas" ? "Todavía no se ha impreso ninguna." : "No hay productos con código."}</div>`)
+          + (sinCod && filtro !== "impresas" && !q ? `<p class="note" style="margin:6px 4px">${miles(sinCod)} producto${sinCod > 1 ? "s" : ""} sin código no aparece${sinCod > 1 ? "n" : ""} (se les crea al ponerles precio y % de ganancia).</p>` : "");
+        const m = box.querySelector("#etMas"); if (m) m.onclick = () => { verMas += 100; lista(); };
+      };
+      const agregar = (ids, n1) => {   /* n1: copias de cada una (número o función por producto) */
+        const l = hojaLista();
+        ids.forEach(id => { const i = l.findIndex(x => x.id === id), n = typeof n1 === "function" ? n1(prod(id)) : n1; if (i >= 0) l[i].n = Math.min(500, l[i].n + n); else l.push({ id, n }); });
+        hojaGuardar(l); lista(); pintarHoja();
+      };
+      const pedirCopias = (titulo, ids, texto) => {
+        const total = ids.reduce((a, id) => a + Math.max(1, Math.round(Number(prod(id)?.cantidad) || 0)), 0);
+        preguntar(titulo, texto + " ¿Cuántas de cada producto?", [
+          { t: `Una de cada uno (${miles(ids.length)})`, clase: "primary", fn: () => { agregar(ids, 1); toast(`${miles(ids.length)} etiquetas agregadas a la hoja`); } },
+          { t: `Una por cada unidad en existencia (${miles(total)})`, fn: () => { agregar(ids, (p) => Math.max(1, Math.round(Number(p?.cantidad) || 0))); toast(`${miles(total)} etiquetas agregadas a la hoja`); } }]);
+      };
+      el.querySelector("#etQ").addEventListener("input", () => { verMas = 60; lista(); });
+      ponerX(el.querySelector("#etQ"));
+      el.querySelector("#etF").onclick = (e) => { const b = e.target.closest("[data-f]"); if (!b) return; filtro = b.dataset.f; verMas = 60; lista(); };
+      el.querySelector("#etFaltan").onclick = () => {
+        const enHoja = new Set(hojaLista().map(x => x.id)), ids = etqPendientes().filter(p => !enHoja.has(p.id)).map(p => p.id);
+        if (ids.length) pedirCopias("Lo que falta", ids, `Se agregan ${miles(ids.length)} producto${ids.length > 1 ? "s" : ""} que todavía no tienen etiqueta.`);
+      };
+      el.querySelector("#etTodo").onclick = () => {
+        const enHoja = new Set(hojaLista().map(x => x.id)), todos = S.productos.filter(p => codEtq(p) && !enHoja.has(p.id));
+        if (!todos.length) return toast("Ya está todo en la hoja");
+        const falt = todos.filter(p => !etqHecha(p)), ya = todos.length - falt.length;
+        if (!ya) return pedirCopias("Todo el inventario", todos.map(p => p.id), `Se agregan ${miles(todos.length)} productos.`);
+        preguntar("Todo el inventario", `${miles(ya)} producto${ya > 1 ? "s ya tienen" : " ya tiene"} la etiqueta impresa.`, [
+          ...(falt.length ? [{ t: `Solo los que faltan (${miles(falt.length)})`, clase: "primary", fn: () => pedirCopias("Lo que falta", falt.map(p => p.id), `Se agregan ${miles(falt.length)} productos.`) }] : []),
+          { t: `Todos, repitiendo las impresas (${miles(todos.length)})`, fn: () => pedirCopias("Todo el inventario", todos.map(p => p.id), `Se agregan ${miles(todos.length)} productos.`) }]);
+      };
+      el.querySelector("#etList").addEventListener("click", (e) => {
+        const a = e.target.closest("[data-add]"), v = e.target.closest("[data-ver]");
+        if (a){ const p = prod(a.dataset.add); if (!p) return;
+          if (hojaLista().some(x => x.id === p.id)) { agregar([p.id], 1); return; }
+          if (etqHecha(p)) preguntar("Ya está impresa", `La etiqueta de <b>${esc(p.nombre)}</b> se imprimió el ${fFecha(p.etqT)}.`, [{ t: "Repetirla", clase: "primary", fn: () => agregar([p.id], 1) }]);
+          else agregar([p.id], 1);
+        } else if (v){ const p = prod(v.dataset.ver); if (p) etiquetaUna(p, o, () => { lista(); pintarHoja(); }); }
+      });
+      /* hoja */
+      const items = () => hojaLista().map(x => ({ ...x, p: prod(x.id), c: lienzo(prod(x.id)) }));
+      function pintarHoja(){
+        const cols = hojaCols(), its = items();
+        el.querySelectorAll("#hjTam [data-c]").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.c) === cols));
+        el.querySelector("#hjList").innerHTML = its.length ? its.map((x, i) => `<div class="hjitem" data-i="${i}"><span class="hjname"><b>${esc(x.p.nombre || "Sin nombre")}</b><small>${esc(codEtq(x.p))}${etqHecha(x.p) ? " · repetida" : ""}</small></span>
+            <div class="hjstep sm"><button type="button" class="btn" data-a="menos" aria-label="Una menos">−</button><input class="inp num" inputmode="numeric" value="${x.n}" data-a="n" aria-label="Copias"><button type="button" class="btn" data-a="mas" aria-label="Una más">+</button></div>
+            <button type="button" class="hjx" data-a="quitar" aria-label="Quitar de la hoja">×</button></div>`).join("")
+            + `<div class="hjfoot"><button type="button" class="linkbtn" id="hjVaciar">Vaciar la hoja</button></div>`
+          : `<div class="hjvacio">La hoja está vacía. Arriba toque <b>Agregar</b> en los productos, o <b>Agregar lo que falta</b>.</div>`;
+        const v = el.querySelector("#hjVaciar"); if (v) v.onclick = () => preguntar("Vaciar la hoja", "Se quitan todas las etiquetas de la hoja (no se borra nada del inventario).", [{ t: "Vaciar", clase: "primary", fn: () => { hojaGuardar([]); lista(); pintarHoja(); } }]);
+        const pags = hojaPaginas(its, cols), tot = its.reduce((a, x) => a + x.n, 0);
+        el.querySelector("#hjTot").textContent = its.length ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags.length} hoja${pags.length > 1 ? "s" : ""}` : "";
+        const pv = el.querySelector("#hjPrev"); pv.innerHTML = "";
+        const MAXV = 3;
+        hojaVista(pags.slice(0, MAXV), cols).forEach((cv, i) => { const w = document.createElement("div"); w.className = "hjpage"; w.appendChild(cv);
+          if (pags.length > 1) w.insertAdjacentHTML("beforeend", `<span class="hjpag">Hoja ${i + 1} de ${pags.length}</span>`); pv.appendChild(w); });
+        if (pags.length > MAXV) pv.insertAdjacentHTML("beforeend", `<p class="note" style="margin:0">… y ${pags.length - MAXV} hoja${pags.length - MAXV > 1 ? "s" : ""} más.</p>`);
+        if (!its.length){ const w = document.createElement("div"); w.className = "hjpage"; w.appendChild(hojaVista([[]], cols)[0]); pv.appendChild(w); }
+        const bp = el.querySelector("#hjPrint"); bp.disabled = !its.length;
+        bp.textContent = its.length ? `Imprimir ${pags.length > 1 ? pags.length + " hojas" : "hoja"} (${miles(tot)} etiqueta${tot > 1 ? "s" : ""})` : "Imprimir hoja";
+      }
+      el.querySelector("#hjTam").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; ls.set("hojaCols", b.dataset.c); pintarHoja(); };
+      el.querySelector("#hjList").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-a]"), row = e.target.closest("[data-i]"); if (!b || !row || b.dataset.a === "n") return;
+        const l = hojaLista(), it = l[Number(row.dataset.i)]; if (!it) return;
+        if (b.dataset.a === "quitar") l.splice(Number(row.dataset.i), 1); else it.n = Math.max(1, Math.min(500, it.n + (b.dataset.a === "mas" ? 1 : -1)));
+        hojaGuardar(l); lista(); pintarHoja();
+      });
+      el.querySelector("#hjList").addEventListener("change", (e) => {
+        const inp = e.target.closest("[data-a=n]"), row = e.target.closest("[data-i]"); if (!inp || !row) return;
+        const l = hojaLista(), it = l[Number(row.dataset.i)]; if (!it) return;
+        it.n = Math.max(1, Math.min(500, Math.round(toNum(inp.value)) || 1)); hojaGuardar(l); lista(); pintarHoja();
+      });
+      el.querySelector("#hjPrint").onclick = () => {
+        const its = items(); if (!its.length) return;
+        const tot = its.reduce((a, x) => a + x.n, 0);
+        imprimirHoja(hojaPaginas(its, hojaCols()), hojaCols(), () => preguntar("¿Salieron bien?", `Si las ${miles(tot)} etiquetas se imprimieron bien, se marcan como <b>impresas</b> (así no se repiten) y se vacía la hoja.`, [
+          { t: "Sí, marcar como impresas", clase: "primary", fn: async () => { const n = await marcarImpresas(its.map(x => x.id)); hojaGuardar([]); cache.clear(); lista(); pintarHoja(); toast(`${miles(n)} producto${n > 1 ? "s" : ""} marcado${n > 1 ? "s" : ""} como impreso${n > 1 ? "s" : ""}`); } }]));
+      };
+      lista(); pintarHoja();
+    });
+}
+/* Una sola etiqueta (rollo térmico, Bluetooth o compartir), encima de la sección */
+function etiquetaUna(p, o, alCambiar){
+  const c = etiquetaCanvas(p, o);
+  popup(p.nombre || "Etiqueta", `<div class="recibo-wrap" id="e1Wrap" style="flex-shrink:0"></div>
+    <p class="note" style="margin:8px 0">${etqHecha(p) ? `Impresa el ${fFecha(p.etqT)}.` : "Todavía no se ha impreso."}</p>
+    <div class="row"><button type="button" class="btn ingreso grow" id="e1Print">Imprimir una</button>${navigator.bluetooth ? `<button type="button" class="btn grow" id="e1BT">Bluetooth</button>` : ""}</div>
+    <div class="row" style="margin-top:8px"><button type="button" class="btn grow" id="e1Save">Compartir</button>${etqHecha(p) ? `<button type="button" class="btn grow" id="e1Falta">Marcar que falta</button>` : `<button type="button" class="btn grow" id="e1Ya">Ya está impresa</button>`}</div>`, (el, close) => {
+    c.style.maxWidth = "100%"; el.querySelector("#e1Wrap").appendChild(c);
+    const hecho = async () => { await marcarImpresas([p.id]); alCambiar && alCambiar(); };
+    el.querySelector("#e1Print").onclick = () => { printCanvas(c); setTimeout(hecho, 800); };
+    const bt = el.querySelector("#e1BT"); if (bt) bt.onclick = async () => { await printBT(c, bt); hecho(); };
+    el.querySelector("#e1Save").onclick = async () => { const b = await new Promise(r => c.toBlob(r, "image/png")); shareFile(b, `etiqueta-${codEtq(p)}.png`); };
+    const ya = el.querySelector("#e1Ya"); if (ya) ya.onclick = async () => { await hecho(); close(); toast("Marcada como impresa"); };
+    const fa = el.querySelector("#e1Falta"); if (fa) fa.onclick = async () => { const todo = S.db.exportAll(), k = "productos/" + p.id; if (todo[k]) await S.db.putMany({ [k]: { ...todo[k], etqCod: "", etqT: 0 } }); alCambiar && alCambiar(); close(); toast("Quedó como pendiente"); };
   });
-  el.querySelector("#hjList").addEventListener("change", (e) => {
-    const inp = e.target.closest("[data-a=n]"), row = e.target.closest("[data-i]"); if (!inp || !row) return;
-    const l = hojaLista(), it = l[Number(row.dataset.i)]; if (!it) return;
-    it.n = Math.max(1, Math.min(500, Math.round(toNum(inp.value)) || 1)); hojaGuardar(l); if (it.k === clave) n.value = it.n; pintar();
-  });
-  el.querySelector("#hjPrint").onclick = () => {
-    const l = hojaLista();
-    imprimirHoja(hojaPaginas(items(), hojaCols()), hojaCols(), () => { if (l.length) confirmar("¿Ya salió bien la hoja? Puede vaciarla para empezar otra.", "Vaciar la hoja", () => { hojaGuardar([]); pintar(); }, false); });
-  };
-  pintar();
 }
 function imprimirHoja(pags, cols, alTerminar){
   if (!pags.length) return;
@@ -3251,6 +3331,7 @@ $("invCam").onclick = async () => {
 };
 function renderInv(){
   const low = S.config?.bajo ?? 3;
+  { const f = etqPendientes().length; $("invEtq").innerHTML = "Etiquetas" + (f ? ` <span class="badge">${miles(f)}</span>` : ""); }
   $("invCount").textContent = miles(S.productos.length);
   $("invUnits").textContent = miles(S.productos.reduce((a,p)=>a+Math.max(0,Number(p.cantidad)||0),0));
   $("invValor").textContent = fmt(S.productos.reduce((a,p)=>a+Math.max(0,Number(p.cantidad)||0)*(Number(p.precio)||0),0));
@@ -4352,7 +4433,13 @@ function exportSheet(){
     });
 }
 $("aExport").onclick = exportSheet;
-$("invExport").onclick = exportSheet;
+$("invIE").onclick = () => popup("Importar / Exportar", `<div class="poplist" style="padding-bottom:14px">
+  <button type="button" class="popopt" id="ieExp"><span><b>Exportar</b><br><small class="note">Guardar el inventario en un archivo (Excel o copia)</small></span></button>
+  <label class="popopt" for="aImport" id="ieImp"><span><b>Importar</b><br><small class="note">Cargar productos desde un archivo o una copia</small></span></label></div>`, (el, close) => {
+  el.querySelector("#ieExp").onclick = () => { close(); exportSheet(); };
+  el.querySelector("#ieImp").addEventListener("click", () => setTimeout(close, 300));
+});
+$("invEtq").onclick = etiquetasSeccion;
 
 /* ---------- cargar archivo ---------- */
 function parseDelimited(text){
