@@ -319,11 +319,8 @@ details.card[open]>summary{margin-bottom:10px}
   #app,#sheetHost,#toastHost{display:none!important}
   #printArea{display:block!important}
   #printArea img{width:100%;max-width:none}
-  #printHoja .hpage{width:199.9mm;break-after:page;page-break-after:always;overflow:hidden}
-  #printHoja .hpage:last-child{break-after:auto;page-break-after:auto}
-  #printHoja .hrow{display:flex;break-inside:avoid;page-break-inside:avoid}
-  #printHoja .hc{box-sizing:border-box;height:100%;border:.2mm dashed #aaa;padding:1.5mm;display:flex;align-items:center;justify-content:center}
-  #printHoja .hc img{width:100%;height:auto;display:block}
+  #printHoja .hpimg{display:block;break-after:page;page-break-after:always;max-width:none!important}
+  #printHoja .hpimg:last-child{break-after:auto;page-break-after:auto}
 }
 .hojabox{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
 .hjrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -365,13 +362,36 @@ details.card[open]>summary{margin-bottom:10px}
 .btn.ico.ie{font:800 14px var(--f-mono);letter-spacing:-.02em;min-width:48px;padding-left:8px;padding-right:8px}
 .badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;margin-left:6px;border-radius:11px;background:var(--danger-solid);color:#fff;font-size:12px;font-weight:800;font-family:var(--f-mono)}
 .etscrim{align-items:stretch!important}
+.icobadge{position:relative}
+.icobadge .badge{position:absolute;top:-6px;right:-6px;margin:0;min-width:20px;height:20px;font-size:11px;padding:0 5px;border:2px solid var(--bg)}
+.segn{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;background:var(--sunk);border-radius:12px;padding:3px}
+.segn button{border:0;background:none;border-radius:9px;padding:8px 2px;font-weight:700;font-size:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;line-height:1.15}
+.segn button small{font-size:11px;font-weight:600;opacity:.8}
+.segn button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.hjtop{display:flex;gap:8px;align-items:stretch}
+.hjtop .segn{flex:1}
+.hjtop .btn.ico{flex-shrink:0;width:52px;padding:0}
+.hjtop .btn.ico svg{width:24px;height:24px}
+.hjcfg{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
+.hjcfg[hidden]{display:none}
+.cfgrow{display:flex;flex-direction:column;gap:5px}
+.cfgrow>span{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.cfgrow .segn button{font-size:13.5px;padding:9px 2px}
+.etpaneh .hjpage.h canvas{max-height:34vh}
+.etexp{width:52px;padding:0;flex-shrink:0}
+.etexp svg{width:24px;height:24px}
+.etexp:disabled{opacity:.45}
+.ettip{margin:0;font-size:12.5px;text-align:center}
+.etbubble{position:fixed;z-index:60;background:var(--ink);color:var(--bg);padding:10px 12px;border-radius:10px;font-weight:700;font-size:15px;line-height:1.3;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;overflow-wrap:anywhere}
+.etname,.hjname{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .etsheet{height:100%;max-height:100%;border-radius:0;overflow:hidden!important;gap:10px;padding-top:calc(10px + env(safe-area-inset-top,0px))!important;padding-bottom:0!important}
 .etsheet>*{flex-shrink:0}
 .ethead{display:flex;align-items:center;gap:12px}
 .ethead .back{flex-shrink:0}
 .etsheet>.etpane{flex:1 1 auto;min-height:0;flex-shrink:1}
-#etPaneP .etlist2{flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
-#etPaneP>*:not(.etlist2){flex-shrink:0}
+#etPaneP .etlist2{flex:0 1 auto;min-height:0;max-height:254px;overflow-y:auto;overscroll-behavior:contain}
+#etPaneP>*:not(.etlist2){flex:0 0 auto}
+#invSearchForm .btn.ico{width:46px;min-width:46px;padding:0;flex-shrink:0;align-self:stretch;min-height:48px}
 .etpaneh{overflow-y:auto;overscroll-behavior:contain;padding-bottom:6px}
 .etpaneh>*{flex-shrink:0}
 .etpaneh .hjpage canvas{max-height:46vh;width:auto;max-width:100%}
@@ -392,7 +412,7 @@ details.card[open]>summary{margin-bottom:10px}
 .etrow2{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 2px;border-top:1px solid var(--line);min-height:62px}
 .etrow2:first-child{border-top:0}
 .etrow2.en{background:color-mix(in srgb,var(--primary-bg) 9%,var(--surface))}
-.etrow2 .etname b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.etrow2 .etname b{display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .etplus{width:46px;height:46px;border-radius:50%;border:0;background:var(--primary-bg);color:#fff;font-size:28px;font-weight:600;line-height:1;flex-shrink:0;display:grid;place-items:center;padding:0}
 .etstep{display:flex;align-items:center;gap:2px;background:var(--primary-bg);border-radius:999px;padding:3px;flex-shrink:0}
 .etstep button{width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.18);color:#fff;font-size:22px;font-weight:700;line-height:1;padding:0}
@@ -400,9 +420,9 @@ details.card[open]>summary{margin-bottom:10px}
 .etmas{align-self:center;color:var(--accent);font-weight:600;padding:12px}
 .etbar{margin-top:0;display:flex;align-items:center;gap:10px;background:var(--bg);border-top:1px solid var(--line);padding:10px 0 calc(12px + env(safe-area-inset-bottom,0px));z-index:2}
 .etsum{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:none;border:0;padding:4px 2px;color:var(--ink);text-align:left;font:inherit}
-.etsum b{font-size:17px;font-weight:800}
-.etsum small{color:var(--muted);font-size:13px}
-.etbar .btn{min-width:130px;padding:14px 18px;font-size:17px}
+.etsum b{font-size:16px;font-weight:800;white-space:nowrap}
+.etsum small{color:var(--muted);font-size:12px;line-height:1.25}
+.etbar .btn.ingreso{min-width:112px;padding:14px 16px;font-size:17px}
 .etbar .btn:disabled{opacity:.45}
 .etres{display:flex;flex-direction:column;gap:6px;flex-shrink:0;margin-top:-4px}
 .etres[hidden]{display:none}
@@ -717,13 +737,14 @@ details.card[open]>summary{margin-bottom:10px}
     </div>
     <form id="invSearchForm" class="row" autocomplete="off">
       <input id="invQ" class="inp grow" placeholder="Nombre o código" enterkeyhint="search" inputmode="search" autocorrect="off" spellcheck="false">
-      <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+      <button class="btn ico" type="button" id="invFiltros" aria-label="Filtros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h18l-7 8.5V19l-4 2v-8.5z"/></svg></button>
+      <button class="btn ico icobadge" type="button" id="invEtq" aria-label="Etiquetas" title="Etiquetas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L3 13V3h10l7.6 7.6a2 2 0 010 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="badge" id="invEtqN" hidden></span></button>
       <button class="btn ico" type="button" id="invIE" aria-label="Importar o exportar" title="Importar / Exportar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 20V5M3 9l4-4 4 4"/><path d="M17 4v15M13 15l4 4 4-4"/></svg></button>
     </form>
     <div class="fchips" id="invChips" hidden></div>
     <div id="invList"></div>
   </div>
-  <div class="foot gut"><button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><div class="row"><button type="button" class="btn grow" id="invEtq">Etiquetas</button><button class="btn ingreso grow" id="invNuevo">+ Ingresar</button></div></div>
+  <div class="foot gut"><button type="button" class="btn cam block" id="invCam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3"/><path d="M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Escanear</button><button class="btn ingreso block" id="invNuevo">+ Ingresar</button></div>
 </section>
 
 <!-- PENDIENTES -->
@@ -1058,7 +1079,7 @@ function irArriba(d){
   }));
 }
 function abrirGuia(){
-  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.). El botón pequeño <b>I/E</b> de al lado sirve para <b>Importar</b> o <b>Exportar</b> la lista de productos.</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Todo lo de etiquetas está en <b>Inventario › Etiquetas</b> (el número rojo dice cuántas faltan).</li><li>En <b>Elegir productos</b> están los <b>Nuevos</b> (lo último que ingresó), <b>Faltan</b>, <b>Impresas</b> y <b>Todos</b>, y un buscador. Toque <b>+</b> en un producto para ponerlo en la hoja; con − y + cambia cuántas.</li><li>Toque el nombre de un producto para imprimir solo esa etiqueta (rollo o Bluetooth).</li><li>En la pestaña <b>Hoja</b> elija el tamaño, lo que sale en la etiqueta y vea cómo queda la hoja carta. Abajo siempre está <b>Imprimir</b>.</li><li>Después de imprimir, confirme que salieron bien: quedan como <b>Impresas</b> y la app pregunta antes de repetirlas. Si cambia el precio de un código 9, vuelve a quedar como <b>Falta</b>.</li><li>El tamaño del papel de rollo se cambia en <b>Ajustes › General › Impresión y etiquetas</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
+  sheet(`<h2 style="margin:0">Cómo usar la app</h2><p class="note" style="margin:0">Toque un tema para ver los pasos.</p><div class="guia"><details class="acc"><summary><span class="acct">Empezar y entrar</span></summary><div class="accb"><ol class="guiaol"><li><b>Primera vez del dueño:</b> toque <b>Crear caja</b>, escriba el nombre del negocio y una clave de 4 a 6 números, y toque <b>Crear</b>.</li><li>Luego vaya a <b>Ajustes › Cuenta</b>, cree un <b>usuario y contraseña</b> de la nube. Así todo queda guardado en internet.</li><li><b>Otro celular o persona nueva:</b> en la pantalla de inicio escriba ese mismo usuario y contraseña y toque <b>Entrar</b>. Se trae todo el inventario.</li><li>Si tiene un archivo de copia, en <b>Crear caja</b> use <b>Recuperar desde una copia</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Vender</span></summary><div class="accb"><ol class="guiaol"><li>En el inicio toque <b>Venta</b>. Arriba puede elegir el cliente (o dejarlo en mostrador).</li><li>Busque el producto por nombre o toque <b>Escanear</b> para leer el código de barras o el código 9 escrito a mano.</li><li>Ajuste cantidades con + y −. En <b>Recibido</b> ponga con cuánto paga, se calcula el cambio, y toque <b>Cobrar</b>.</li><li>Puede imprimir o compartir la factura.</li></ol></div></details><details class="acc"><summary><span class="acct">Ingresar productos</span></summary><div class="accb"><ol class="guiaol"><li>Vaya a <b>Inventario</b> y toque <b>+ Ingresar</b>.</li><li>Tome primero la <b>foto</b>: la app reconoce el producto y llena el <b>nombre</b> y la <b>categoría</b>. Pone qué es (por ejemplo <i>Candado</i>) y, si el empaque tiene letras claras, la palabra y la marca que lea. Todo se hace en el celular, sin enviar la foto. Revise el nombre antes de guardar; lo que usted ya escribió no se cambia.</li><li>Si escribe el nombre, la categoría se llena sola. Luego ponga el costo y la cantidad.</li><li>De <b>Costo</b>, <b>Precio de venta</b> y <b>% Ganancia</b> llene solo dos: el tercero se calcula.</li><li>Toque la foto del producto (en el formulario o en la ficha) para verla en grande: pellizque o toque dos veces para ampliar, y ahí mismo puede <b>Cambiar</b> o <b>Borrar</b> la foto.</li><li>El <b>código propio</b> (el que empieza por 9) se crea solo. Si el producto trae código de barras, póngalo en la sección de código original.</li></ol></div></details><details class="acc"><summary><span class="acct">El código 9</span></summary><div class="accb"><ol class="guiaol"><li>Ejemplo <b>92118x93</b>: el primer 9 solo marca que es código propio.</li><li>El <b>2</b> y el <b>93</b> del final forman el margen 2,93 (sirve para saber el costo).</li><li>El <b>118</b> con la <b>x</b> es el precio de venta: la x vale dos ceros → 11.800.</li><li>La app crea este código sola con el precio y el % de ganancia.</li><li>Se puede escribir a mano en la etiqueta y la cámara lo lee.</li></ol></div></details><details class="acc"><summary><span class="acct">Inventario y Por comprar</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Inventario</b> use el buscador y el botón de <b>filtros</b> (categoría, pocas unidades, etc.). El botón pequeño <b>I/E</b> de al lado sirve para <b>Importar</b> o <b>Exportar</b> la lista de productos.</li><li>El filtro <b>Pocas unidades</b> muestra lo que se está acabando (el número se cambia en <b>Ajustes › General › Inventario</b>).</li><li>Lo que hay que pedir se anota en <b>Por comprar</b>: desde el inicio, o con el botón <b>Por comprar</b> cuando un código no está en el inventario.</li><li>En Por comprar puede filtrar y <b>Exportar</b> la lista como texto para mandarla al proveedor.</li></ol></div></details><details class="acc"><summary><span class="acct">Etiquetas</span></summary><div class="accb"><ol class="guiaol"><li>Todo lo de etiquetas está en <b>Inventario</b>, en el ícono de etiqueta al lado del filtro (el número rojo dice cuántas faltan).</li><li>En <b>Elegir productos</b> están los <b>Nuevos</b> (lo último que ingresó), <b>Faltan</b>, <b>Impresas</b> y <b>Todos</b>, y un buscador. Toque <b>+</b> en un producto para ponerlo en la hoja; con − y + cambia cuántas.</li><li>Toque el nombre de un producto para imprimir solo esa etiqueta (rollo o Bluetooth). Mantenga el dedo sobre el nombre para leerlo completo.</li><li>En la pestaña <b>Hoja</b> elija el tamaño (Micro 30 mm, Mini 38 mm, Pequeña 48 mm o Grande 64 mm) y vea cómo queda. Con la tuerca ⚙ cambia el papel (carta, oficio, A4), la orientación (vertical u horizontal), las guías de corte (punteadas, marcas de corte para guillotina o sin guías), el espacio entre etiquetas y el margen.</li><li>Abajo dice cuántas caben por hoja. Con la flecha ⤓ guarda la hoja en PDF, PNG o JPG; con <b>Imprimir</b> la imprime. Imprima siempre al 100 %.</li><li>Después de imprimir, confirme que salieron bien: quedan como <b>Impresas</b> y la app pregunta antes de repetirlas. Si cambia el precio de un código 9, vuelve a quedar como <b>Falta</b>.</li><li>El tamaño del papel de rollo se cambia en <b>Ajustes › General › Impresión y etiquetas</b>.</li></ol></div></details><details class="acc"><summary><span class="acct">Clientes y proveedores</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Clientes</b> y <b>Ajustes › Proveedores</b> los agrega, edita y busca.</li><li>El cliente se elige al vender; el proveedor al ingresar productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Nube y varios celulares</span></summary><div class="accb"><ol class="guiaol"><li>Con la sesión iniciada todo se guarda solo en la nube y llega a los otros celulares con el mismo usuario.</li><li>Sin internet sigue funcionando; al volver la señal se sube lo pendiente.</li><li>Para cambiar de cuenta: <b>Ajustes › Cuenta › Cerrar sesión</b>. Ahí mismo puede <b>Cambiar contraseña</b>.</li><li>Si aparece el aviso naranja en el inicio, hay ventas sin subir: no cierre el navegador hasta que se conecte.</li><li>Si dos celulares venden a la vez, las existencias se descuentan bien en ambos.</li></ol></div></details><details class="acc"><summary><span class="acct">Copias</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › Cuenta</b> puede <b>Exportar</b> una copia, <b>Importar</b> una, o <b>Compartir todo con otra persona</b>.</li><li>Al importar una copia se combina con lo que ya hay, sin repetir productos.</li></ol></div></details><details class="acc"><summary><span class="acct">Pantalla y clave</span></summary><div class="accb"><ol class="guiaol"><li>En <b>Ajustes › General › Pantalla y clave</b> puede prender o apagar la <b>pantalla completa</b>, instalar la app y cambiar la clave (pide la clave actual).</li><li>Ahí mismo active <b>Entrar con huella</b> para abrir la app con el lector de huella del celular. La clave sigue sirviendo.</li></ol></div></details></div><button class="btn primary block" data-close>Listo</button>`, (el) => {
     const ds = el.querySelectorAll("details"); ds.forEach(d => d.addEventListener("toggle", () => { if (d.open){ ds.forEach(o => { if (o !== d) o.open = false; }); irArriba(d); } }));
   });
 }
@@ -3140,8 +3161,11 @@ function preguntar(titulo, texto, botones){
 }
 /* ---------- varias etiquetas en una hoja carta (para cortar con tijera) ----------
    Las hojas se arman aquí mismo (fila por fila, en milímetros): lo que se ve es lo que sale. */
-const HOJA = { ancho: 199.9, alto: 262, pad: 1.5, papelW: 215.9, papelH: 279.4, margen: 8 };   /* carta con 8 mm de margen */
-const hojaCols = () => [2, 3, 4].includes(Number(ls.get("hojaCols"))) ? Number(ls.get("hojaCols")) : 3;
+const HOJA_TAM = [["micro", "Micro", 30], ["mini", "Mini", 38], ["pequena", "Pequeña", 48], ["grande", "Grande", 64]];   /* ancho de cada etiqueta en mm */
+const PAPELES = { carta: ["Carta", 215.9, 279.4], oficio: ["Oficio", 215.9, 330], a4: ["A4", 210, 297] };
+const HOJA_DEF = { papel: "carta", orient: "v", tam: "pequena", guia: "punteada", sep: 0, margen: 8 };
+function hojaCfg(){ let c = {}; try { c = JSON.parse(ls.get("hojaCfg") || "{}") || {}; } catch {} return { ...HOJA_DEF, ...c }; }
+const hojaCfgSet = (d) => ls.set("hojaCfg", JSON.stringify({ ...hojaCfg(), ...d }));
 function hojaLista(){   /* [{ id, n }] — solo productos que siguen existiendo y tienen código */
   let l; try { l = JSON.parse(ls.get("hojaEtq") || "[]"); } catch { l = []; }
   if (!Array.isArray(l)) l = [];
@@ -3149,50 +3173,88 @@ function hojaLista(){   /* [{ id, n }] — solo productos que siguen existiendo 
   l.forEach(x => {
     if (!x || !(x.n > 0)) return;
     let id = x.id;
-    if (!id && x.p){ const c = x.p.codigoPropio || x.p.codigo; const pr = c && S.productos.find(q => codEtq(q) === c); id = pr && pr.id; }   /* listas viejas */
+    if (!id && x.p){ const c = x.p.codigoPropio || x.p.codigo; const pr = c && S.productos.find(q => codEtq(q) === c); id = pr && pr.id; }
     const pr = id && S.productos.find(q => q.id === id);
     if (pr && codEtq(pr) && !out.some(o => o.id === id)) out.push({ id, n: Math.min(500, Math.round(x.n)) });
   });
   return out;
 }
 const hojaGuardar = (l) => ls.set("hojaEtq", JSON.stringify(l.map(x => ({ id: x.id, n: x.n }))));
-function hojaPaginas(items, cols){
-  const cw = HOJA.ancho / cols, celdas = [];
-  items.forEach(it => { for (let i = 0; i < it.n; i++) celdas.push(it); });
-  const pags = []; let pag = null, y = 0;
-  for (let i = 0; i < celdas.length; i += cols){
-    const fila = celdas.slice(i, i + cols);
-    const alto = Math.max(...fila.map(it => (cw - 2*HOJA.pad) * it.c.height / it.c.width + 2*HOJA.pad));
-    if (!pag || y + alto > HOJA.alto){ pag = []; pags.push(pag); y = 0; }
-    pag.push({ fila, alto }); y += alto;
-  }
-  return pags;
+/* Medidas de la hoja en mm: todas las celdas iguales (para cortar parejo con guillotina) */
+function hojaGeo(cfg, lienzos){
+  const [, pw0, ph0] = PAPELES[cfg.papel] || PAPELES.carta;
+  const pw = cfg.orient === "h" ? ph0 : pw0, ph = cfg.orient === "h" ? pw0 : ph0;
+  const m = Number(cfg.margen) || 8, sep = Number(cfg.sep) || 0, pad = sep ? 1 : 1.5;
+  const w = (HOJA_TAM.find(t => t[0] === cfg.tam) || HOJA_TAM[2])[2];
+  const ratio = Math.max(0.15, ...lienzos.map(c => c.height / c.width));
+  const h = (w - 2*pad) * ratio + 2*pad;
+  const cols = Math.max(1, Math.floor((pw - 2*m + sep) / (w + sep))), rows = Math.max(1, Math.floor((ph - 2*m + sep) / (h + sep)));
+  const gw = cols * w + (cols - 1) * sep;
+  return { pw, ph, m, sep, pad, w, h, cols, rows, porHoja: cols * rows, x0: (pw - gw) / 2, y0: m };
 }
-function hojaVista(pags, cols){
-  const k = 2.2, W = Math.round(HOJA.papelW * k), H = Math.round(HOJA.papelH * k), cw = HOJA.ancho / cols;
-  return pags.map((pag) => {
-    const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const x = cv.getContext("2d");
-    x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.setLineDash([3, 3]); x.strokeStyle = "#b5b5b5"; x.lineWidth = 1;
-    let y = HOJA.margen;
-    pag.forEach(({ fila, alto }) => {
-      fila.forEach((it, j) => {
-        const cx = HOJA.margen + j * cw; x.strokeRect(cx * k, y * k, cw * k, alto * k);
-        const iw = cw - 2*HOJA.pad, ih = iw * it.c.height / it.c.width;
-        x.drawImage(it.c, (cx + HOJA.pad) * k, (y + (alto - ih) / 2) * k, iw * k, ih * k);
-      });
-      y += alto;
-    });
-    return cv;
+/* celdas = lista de lienzos (uno por etiqueta); devuelve hojas = listas de lienzos */
+const hojaPartir = (celdas, g) => { const out = []; for (let i = 0; i < celdas.length; i += g.porHoja) out.push(celdas.slice(i, i + g.porHoja)); return out; };
+function hojaDibujar(g, celdas, cfg, k){   /* k = puntos por mm */
+  const cv = document.createElement("canvas"); cv.width = Math.round(g.pw * k); cv.height = Math.round(g.ph * k);
+  const x = cv.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, cv.width, cv.height);
+  x.imageSmoothingQuality = "high";
+  celdas.forEach((c, i) => {
+    const cx = g.x0 + (i % g.cols) * (g.w + g.sep), cy = g.y0 + Math.floor(i / g.cols) * (g.h + g.sep);
+    const iw = g.w - 2*g.pad, ih = iw * c.height / c.width;
+    x.drawImage(c, (cx + g.pad) * k, (cy + (g.h - ih) / 2) * k, iw * k, ih * k);
+    if (cfg.guia === "punteada"){ x.save(); x.setLineDash([1.2 * k, 1.2 * k]); x.strokeStyle = "#9a9a9a"; x.lineWidth = Math.max(1, 0.15 * k); x.strokeRect(cx * k, cy * k, g.w * k, g.h * k); x.restore(); }
   });
+  if (cfg.guia === "marcas" && celdas.length){   /* marcas de corte en el margen, como en imprenta */
+    const cols = Math.min(g.cols, celdas.length), rows = Math.ceil(celdas.length / g.cols);
+    const xs = new Set(), ys = new Set();
+    for (let c = 0; c < cols; c++){ const cx = g.x0 + c * (g.w + g.sep); xs.add(+cx.toFixed(2)); xs.add(+(cx + g.w).toFixed(2)); }
+    for (let r = 0; r < rows; r++){ const cy = g.y0 + r * (g.h + g.sep); ys.add(+cy.toFixed(2)); ys.add(+(cy + g.h).toFixed(2)); }
+    const top = g.y0, bot = g.y0 + rows * g.h + (rows - 1) * g.sep, izq = g.x0, der = g.x0 + cols * g.w + (cols - 1) * g.sep;
+    const L = Math.max(2, Math.min(5, g.m - 1.5)), gap = 1;
+    x.strokeStyle = "#000"; x.lineWidth = Math.max(1, 0.18 * k); x.beginPath();
+    xs.forEach(v => { x.moveTo(v * k, (top - gap - L) * k); x.lineTo(v * k, (top - gap) * k); x.moveTo(v * k, (bot + gap) * k); x.lineTo(v * k, (bot + gap + L) * k); });
+    ys.forEach(v => { x.moveTo((izq - gap - L) * k, v * k); x.lineTo((izq - gap) * k, v * k); x.moveTo((der + gap) * k, v * k); x.lineTo((der + gap + L) * k, v * k); });
+    x.stroke();
+  }
+  return cv;
+}
+/* PDF sencillo: una imagen JPG por hoja, al tamaño exacto del papel */
+async function pdfDeHojas(lienzos, pw, ph){
+  const enc = new TextEncoder(), partes = [], offs = []; let len = 0;
+  const put = (v) => { const b = typeof v === "string" ? enc.encode(v) : v; partes.push(b); len += b.length; };
+  const W = (pw * 72 / 25.4).toFixed(2), H = (ph * 72 / 25.4).toFixed(2), n = lienzos.length;
+  put("%PDF-1.4\n%âãÏÓ\n");
+  offs[1] = len; put("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+  offs[2] = len; put(`2 0 obj\n<< /Type /Pages /Count ${n} /Kids [${lienzos.map((_, i) => `${3 + 3*i} 0 R`).join(" ")}] >>\nendobj\n`);
+  for (let i = 0; i < n; i++){
+    const cv = lienzos[i], jpg = new Uint8Array(await (await new Promise(r => cv.toBlob(r, "image/jpeg", 0.93))).arrayBuffer());
+    const pg = 3 + 3*i, ct = pg + 1, im = pg + 2, cont = `q ${W} 0 0 ${H} 0 0 cm /Im0 Do Q`;
+    offs[pg] = len; put(`${pg} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /XObject << /Im0 ${im} 0 R >> >> /Contents ${ct} 0 R >>\nendobj\n`);
+    offs[ct] = len; put(`${ct} 0 obj\n<< /Length ${cont.length} >>\nstream\n${cont}\nendstream\nendobj\n`);
+    offs[im] = len; put(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${cv.width} /Height ${cv.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`); put(jpg); put("\nendstream\nendobj\n");
+  }
+  const total = 3 + 3*n, xref = len;
+  put(`xref\n0 ${total}\n0000000000 65535 f \n` + Array.from({ length: total - 1 }, (_, i) => String(offs[i + 1]).padStart(10, "0") + " 00000 n \n").join(""));
+  put(`trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(partes, { type: "application/pdf" });
+}
+async function compartirVarios(archivos){   /* [{ blob, nombre }] */
+  const files = archivos.map(a => new File([a.blob], a.nombre, { type: a.blob.type }));
+  try { if (navigator.canShare && navigator.canShare({ files })){ await navigator.share({ files, title: archivos[0].nombre }); return; } }
+  catch (e){ if (e?.name === "AbortError") return; }
+  for (const a of archivos){ const l = document.createElement("a"); l.href = URL.createObjectURL(a.blob); l.download = a.nombre; document.body.appendChild(l); l.click(); await new Promise(r => setTimeout(r, 400)); setTimeout(() => { URL.revokeObjectURL(l.href); l.remove(); }, 2000); }
+  toast(archivos.length > 1 ? `${archivos.length} archivos guardados en Descargas` : "Archivo guardado en Descargas");
 }
 function etiquetasSeccion(){
   const o = etqOpts(), cache = new Map();
-  const ancho = () => hojaCols() <= 2 ? 768 : 576;
-  const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + ancho() + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || ""); if (!cache.has(key)) cache.set(key, etiquetaCanvas(p, o, ancho())); return cache.get(key); };
+  const lienzo = (p) => { const key = p.id + "|" + codEtq(p) + "|" + JSON.stringify(o) + "|" + p.nombre + "|" + p.precio + "|" + (p.proveedorId || ""); if (!cache.has(key)) cache.set(key, etiquetaCanvas(p, o, 576)); return cache.get(key); };
   const prod = (id) => S.productos.find(q => q.id === id);
-  let tab = "productos", chip = etqPendientes().length ? "recientes" : "todos", verMas = 120;
+  let tab = "productos", chip = etqPendientes().length ? "recientes" : "todos", verMas = 150, verCfg = false;
   const CHIPS = [["recientes", "Nuevos"], ["faltan", "Faltan"], ["impresas", "Impresas"], ["todos", "Todos"]];
   const ICON_TAG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 01-2.8 0L3 13V3h10l7.6 7.6a2 2 0 010 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>`;
+  const ICON_CFG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>`;
+  const ICON_EXP = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg>`;
+  const seg = (k, ops) => `<div class="segn" data-k="${k}" role="group">${ops.map(([v, t]) => `<button type="button" data-v="${v}">${t}</button>`).join("")}</div>`;
   sheet(`<h2>Etiquetas</h2>
     <div class="ettabs" role="tablist"><button type="button" role="tab" data-t="productos">Elegir productos</button><button type="button" role="tab" data-t="hoja">Hoja<span class="ettabn" id="etTabN"></span></button></div>
     <div class="etpane" id="etPaneP">
@@ -3200,23 +3262,31 @@ function etiquetasSeccion(){
       <div class="etchips" id="etChips" role="group" aria-label="Mostrar"></div>
       <div id="etAccion"></div>
       <div class="etlist2" id="etList"></div>
+      <p class="note ettip">Mantenga el dedo sobre un nombre para leerlo completo. Toque el nombre para imprimir solo esa.</p>
     </div>
     <div class="etpane etpaneh" id="etPaneH" hidden>
-      <div class="seg3" id="hjTam" role="group" aria-label="Tamaño de la etiqueta"><button type="button" data-c="4">Pequeña</button><button type="button" data-c="3">Mediana</button><button type="button" data-c="2">Grande</button></div>
+      <div class="hjtop">${seg("tam", HOJA_TAM.map(([v, t, mm]) => [v, `${t}<small>${mm} mm</small>`]))}<button type="button" class="btn ico" id="hjCfgBtn" aria-label="Ajustes de impresión" aria-expanded="false">${ICON_CFG}</button></div>
+      <div class="hjcfg" id="hjCfg" hidden>
+        <div class="cfgrow"><span>Papel</span>${seg("papel", Object.entries(PAPELES).map(([v, [t]]) => [v, t]))}</div>
+        <div class="cfgrow"><span>Orientación</span>${seg("orient", [["v", "Vertical"], ["h", "Horizontal"]])}</div>
+        <div class="cfgrow"><span>Guías de corte</span>${seg("guia", [["punteada", "Punteadas"], ["marcas", "Marcas de corte"], ["ninguna", "Sin guías"]])}</div>
+        <div class="cfgrow"><span>Espacio entre etiquetas</span>${seg("sep", [["0", "Juntas"], ["2", "2 mm"], ["4", "4 mm"]])}</div>
+        <div class="cfgrow"><span>Margen de la hoja</span>${seg("margen", [["5", "5 mm"], ["8", "8 mm"], ["12", "12 mm"]])}</div>
+        <p class="note" style="margin:0">Para cortar con <b>guillotina</b>: <b>Marcas de corte</b> y <b>2 mm</b> de espacio (se corta por las marcas sin tocar la etiqueta). Con tijera: <b>Punteadas</b> y <b>Juntas</b>. Imprima siempre al <b>100 %</b>, sin "Ajustar a la página".</p>
+      </div>
       <div class="hjprev" id="hjPrev"></div>
       <button type="button" class="btn block etqbtn" id="etqOpts">${ICON_TAG}<span>Qué sale en la etiqueta</span><span class="ct" id="etqCt"></span></button>
       <div class="hjlist" id="hjList"></div>
     </div>
-    <div class="etbar"><button type="button" class="etsum" id="etSum"></button><button type="button" class="btn ingreso" id="hjPrint">Imprimir</button></div>`,
+    <div class="etbar"><button type="button" class="etsum" id="etSum"></button><button type="button" class="btn ico etexp" id="hjExp" aria-label="Guardar como PDF o imagen">${ICON_EXP}</button><button type="button" class="btn ingreso" id="hjPrint">Imprimir</button></div>`,
     (el) => {
       el.classList.add("etsheet"); el.parentElement.classList.add("etscrim");
-      /* flecha de volver al lado del título */
       const head = document.createElement("div"); head.className = "ethead";
       const atras = el.querySelector(":scope > .back"), tit = el.querySelector(":scope > h2");
       el.insertBefore(head, el.firstChild); if (atras) head.appendChild(atras); if (tit) head.appendChild(tit);
       const $e = (s) => el.querySelector(s);
       /* ---------- pestañas ---------- */
-      const verTab = (t) => { tab = t; el.querySelectorAll(".ettabs [data-t]").forEach(b => b.setAttribute("aria-selected", b.dataset.t === t)); $e("#etPaneP").hidden = t !== "productos"; $e("#etPaneH").hidden = t !== "hoja"; $e("#etPaneP").scrollTop = 0; $e("#etPaneH").scrollTop = 0; if (t === "hoja") pintarHoja(); else lista(); };
+      const verTab = (t) => { tab = t; el.querySelectorAll(".ettabs [data-t]").forEach(b => b.setAttribute("aria-selected", b.dataset.t === t)); $e("#etPaneP").hidden = t !== "productos"; $e("#etPaneH").hidden = t !== "hoja"; $e("#etPaneH").scrollTop = 0; if (t === "hoja") pintarHoja(); else lista(); };
       $e(".ettabs").onclick = (e) => { const b = e.target.closest("[data-t]"); if (b) verTab(b.dataset.t); };
       $e("#etSum").onclick = () => verTab("hoja");
       /* ---------- hoja: cuántas lleva cada producto ---------- */
@@ -3231,6 +3301,7 @@ function etiquetasSeccion(){
       };
       /* ---------- elegir productos ---------- */
       const recientes = () => S.productos.filter(p => codEtq(p)).sort((a, b) => (b.creado || 0) - (a.creado || 0)).slice(0, 30);
+      const corta = (t) => new Date(t).toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
       function lista(){
         const q = norm($e("#etQ").value.trim()), enHoja = cuantas();
         const conCod = S.productos.filter(p => codEtq(p)), falt = conCod.filter(p => !etqHecha(p));
@@ -3239,26 +3310,41 @@ function etiquetasSeccion(){
         let arr = chip === "recientes" ? (q ? conCod : recientes()) : chip === "faltan" ? falt : chip === "impresas" ? conCod.filter(etqHecha) : conCod;
         if (q) arr = arr.filter(p => norm(p.nombre).includes(q) || norm(codEtq(p)).includes(q) || norm(p.codigo || "").includes(q));
         if (chip !== "recientes" || q) arr = [...arr].sort((a, b) => norm(a.nombre).localeCompare(norm(b.nombre)));
-        /* botón para agregar varias de una vez */
         const sinAgregar = arr.filter(p => !etqHecha(p) && !enHoja.has(p.id));
         $e("#etAccion").innerHTML = (chip === "faltan" || chip === "recientes") && sinAgregar.length > 1 && !q
           ? `<button type="button" class="btn block etall" id="etAll">+ Agregar ${chip === "faltan" ? "todas las que faltan" : "los nuevos que faltan"} (${miles(sinAgregar.length)})</button>` : "";
         const all = $e("#etAll"); if (all) all.onclick = () => pedirCopias(chip === "faltan" ? "Las que faltan" : "Nuevos", sinAgregar.map(p => p.id));
         $e("#etList").innerHTML = arr.length ? arr.slice(0, verMas).map(p => {
           const k = enHoja.get(p.id), hecha = etqHecha(p);
-          const corta = (t) => new Date(t).toLocaleDateString("es-CO", { day: "numeric", month: "short" }).replace(".", "");
           const estado = hecha ? `<span class="etok">✓ Impresa ${corta(p.etqT)}</span>` : `<span class="etfal">Falta</span>`;
           const extra = chip === "recientes" && !q && p.creado ? ` · llegó ${corta(p.creado)}` : "";
-          return `<div class="etrow2${k ? " en" : ""}"><button type="button" class="etname" data-ver="${esc(p.id)}"><b>${esc(p.nombre)}</b><small><span class="num">${esc(codEtq(p))}</span> · ${estado}${extra}</small></button>`
+          return `<div class="etrow2${k ? " en" : ""}"><button type="button" class="etname" data-ver="${esc(p.id)}" data-nom="${esc(p.nombre)}" title="${esc(p.nombre)}"><b>${esc(p.nombre)}</b><small><span class="num">${esc(codEtq(p))}</span> · ${estado}${extra}</small></button>`
             + (k ? `<div class="etstep"><button type="button" data-m="${esc(p.id)}" aria-label="Una menos">−</button><span class="num">${k}</span><button type="button" data-p="${esc(p.id)}" aria-label="Una más">+</button></div>`
                  : `<button type="button" class="etplus" data-add="${esc(p.id)}" aria-label="Agregar ${esc(p.nombre)} a la hoja">+</button>`) + `</div>`;
         }).join("") + (arr.length > verMas ? `<button type="button" class="linkbtn etmas" id="etMas">Ver más (${miles(arr.length - verMas)})</button>` : "")
           : `<div class="hjvacio">${q ? "Ningún producto coincide." : chip === "faltan" ? "No falta ninguna etiqueta. 🎉" : chip === "impresas" ? "Todavía no se ha impreso ninguna." : "No hay productos con código todavía."}</div>`;
         const m = $e("#etMas"); if (m) m.onclick = () => { verMas += 200; lista(); };
       }
-      $e("#etQ").addEventListener("input", () => { verMas = 120; lista(); });
+      $e("#etQ").addEventListener("input", () => { verMas = 150; lista(); $e("#etList").scrollTop = 0; });
       ponerX($e("#etQ"));
-      $e("#etChips").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; chip = b.dataset.c; verMas = 120; lista(); };
+      $e("#etChips").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; chip = b.dataset.c; verMas = 150; lista(); $e("#etList").scrollTop = 0; };
+      /* mantener el dedo sobre un nombre: se ve completo */
+      let tLargo = 0, largo = false, burbuja = null, x0 = 0, y0 = 0;
+      const quitarBurbuja = () => { clearTimeout(tLargo); if (burbuja){ burbuja.remove(); burbuja = null; } };
+      const nombreLargo = (box) => {
+        box.addEventListener("pointerdown", (e) => {
+          const n = e.target.closest("[data-nom]"); if (!n) return; largo = false; x0 = e.clientX; y0 = e.clientY; quitarBurbuja();
+          tLargo = setTimeout(() => { largo = true; burbuja = document.createElement("div"); burbuja.className = "etbubble"; burbuja.textContent = n.dataset.nom; document.body.appendChild(burbuja);
+            const r = n.getBoundingClientRect(), bw = Math.min(innerWidth - 24, 320); burbuja.style.width = "max-content"; burbuja.style.maxWidth = bw + "px";
+            const top = r.top - burbuja.offsetHeight - 8; burbuja.style.left = Math.max(12, Math.min(innerWidth - burbuja.offsetWidth - 12, r.left)) + "px"; burbuja.style.top = (top > 8 ? top : r.bottom + 8) + "px";
+            try { navigator.vibrate && navigator.vibrate(15); } catch {} }, 420);
+        });
+        box.addEventListener("pointermove", (e) => { if (Math.abs(e.clientX - x0) > 10 || Math.abs(e.clientY - y0) > 10) quitarBurbuja(); });
+        ["pointerup", "pointercancel", "pointerleave", "scroll"].forEach(ev => box.addEventListener(ev, () => { clearTimeout(tLargo); setTimeout(quitarBurbuja, ev === "pointerup" ? 900 : 0); }, true));
+        box.addEventListener("contextmenu", (e) => { if (e.target.closest("[data-nom]")) e.preventDefault(); });
+        box.addEventListener("click", (e) => { if (largo && e.target.closest("[data-nom]")){ e.stopPropagation(); e.preventDefault(); largo = false; } }, true);
+      };
+      nombreLargo($e("#etList"));
       $e("#etList").addEventListener("click", (e) => {
         const a = e.target.closest("[data-add]"), mas = e.target.closest("[data-p]"), menos = e.target.closest("[data-m]"), v = e.target.closest("[data-ver]");
         if (a){ const p = prod(a.dataset.add); if (!p) return;
@@ -3271,31 +3357,45 @@ function etiquetasSeccion(){
       });
       /* ---------- la hoja ---------- */
       const items = () => hojaLista().map(x => ({ ...x, p: prod(x.id), c: lienzo(prod(x.id)) }));
+      const celdasDe = (its) => { const out = []; its.forEach(it => { for (let i = 0; i < it.n; i++) out.push(it.c); }); return out; };
+      const muestraC = () => lienzo(prod(hojaLista()[0]?.id) || S.productos.find(q => codEtq(q)) || { id: "muestra", ...ETQ_MUESTRA() });
+      const geo = (its) => hojaGeo(hojaCfg(), its.length ? its.map(x => x.c) : [muestraC()]);
       const ctOpts = () => { $e("#etqCt").textContent = `${ETQ_CAMPOS.filter(([k]) => o[k]).length} de ${ETQ_CAMPOS.length}`; };
       function resumen(){
-        const its = items(), tot = its.reduce((a, x) => a + x.n, 0), pags = tot ? hojaPaginas(its, hojaCols()).length : 0;
+        const its = items(), tot = its.reduce((a, x) => a + x.n, 0), g = geo(its), pags = tot ? Math.ceil(tot / g.porHoja) : 0;
+        const tam = HOJA_TAM.find(t => t[0] === hojaCfg().tam) || HOJA_TAM[2], cfg = hojaCfg();
         $e("#etTabN").textContent = tot ? miles(tot) : "";
-        $e("#etSum").innerHTML = tot ? `<b>${miles(tot)} etiqueta${tot > 1 ? "s" : ""}</b><small>${pags} hoja${pags > 1 ? "s" : ""} carta · ver la hoja</small>` : `<b>Hoja vacía</b><small>Toque + en los productos</small>`;
-        const bp = $e("#hjPrint"); bp.disabled = !tot;
-        return { its, tot };
+        $e("#etSum").innerHTML = `<b>${tot ? `${miles(tot)} etiqueta${tot > 1 ? "s" : ""} · ${pags} hoja${pags > 1 ? "s" : ""}` : "Hoja vacía"}</b><small>Caben ${g.porHoja} por hoja · ${tam[1]} ${tam[2]} mm${cfg.orient === "h" ? " · horizontal" : ""}</small>`;
+        $e("#hjPrint").disabled = !tot; $e("#hjExp").disabled = !tot;
+        return { its, tot, g };
+      }
+      function pintarSegs(){
+        const cfg = hojaCfg();
+        el.querySelectorAll(".segn[data-k]").forEach(sg => sg.querySelectorAll("[data-v]").forEach(b => b.setAttribute("aria-pressed", String(cfg[sg.dataset.k]) === b.dataset.v)));
+        $e("#hjCfg").hidden = !verCfg; $e("#hjCfgBtn").setAttribute("aria-expanded", verCfg); $e("#hjCfgBtn").classList.toggle("primary", verCfg);
       }
       function pintarHoja(){
-        const cols = hojaCols(), { its, tot } = resumen();
-        el.querySelectorAll("#hjTam [data-c]").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.c) === cols));
-        ctOpts();
-        $e("#hjList").innerHTML = its.length ? its.map((x, i) => `<div class="hjitem" data-i="${i}"><span class="hjname"><b>${esc(x.p.nombre || "Sin nombre")}</b><small>${esc(codEtq(x.p))}${etqHecha(x.p) ? " · repetida" : ""}</small></span>
+        const { its, g } = resumen(), cfg = hojaCfg();
+        pintarSegs(); ctOpts();
+        $e("#hjList").innerHTML = its.length ? its.map((x, i) => `<div class="hjitem" data-i="${i}"><span class="hjname" data-nom="${esc(x.p.nombre || "")}" title="${esc(x.p.nombre || "")}"><b>${esc(x.p.nombre || "Sin nombre")}</b><small>${esc(codEtq(x.p))}${etqHecha(x.p) ? " · repetida" : ""}</small></span>
             <div class="hjstep sm"><button type="button" class="btn" data-a="menos" aria-label="Una menos">−</button><input class="inp num" inputmode="numeric" value="${x.n}" data-a="n" aria-label="Copias"><button type="button" class="btn" data-a="mas" aria-label="Una más">+</button></div>
             <button type="button" class="hjx" data-a="quitar" aria-label="Quitar de la hoja">×</button></div>`).join("")
             + `<div class="hjfoot"><span></span><button type="button" class="linkbtn" id="hjVaciar">Vaciar la hoja</button></div>`
           : `<div class="hjvacio">La hoja está vacía.<br><button type="button" class="btn" id="hjIr" style="margin-top:10px">Elegir productos</button></div>`;
         const ir = $e("#hjIr"); if (ir) ir.onclick = () => verTab("productos");
         const v = $e("#hjVaciar"); if (v) v.onclick = () => preguntar("Vaciar la hoja", "Se quitan todas las etiquetas de la hoja (no se borra nada del inventario).", [{ t: "Vaciar", clase: "primary", fn: () => { hojaGuardar([]); pintarHoja(); } }]);
-        const pags = hojaPaginas(its, cols), pv = $e("#hjPrev"); pv.innerHTML = "";
-        /* una sola hoja de muestra (la primera) */
-        const w = document.createElement("div"); w.className = "hjpage"; w.appendChild(hojaVista([its.length ? pags[0] : []], cols)[0]);
-        w.insertAdjacentHTML("beforeend", `<span class="hjpag">${!its.length ? "Así se verá la hoja carta" : pags.length > 1 ? `Hoja 1 de ${pags.length} (muestra)` : "Así queda la hoja"}</span>`); pv.appendChild(w);
+        /* una sola hoja de muestra (la primera); vacía: se muestra llena de ejemplo */
+        const celdas = its.length ? celdasDe(its) : Array(g.porHoja).fill(muestraC()), hojas = hojaPartir(celdas, g);
+        const pv = $e("#hjPrev"); pv.innerHTML = "";
+        const w = document.createElement("div"); w.className = "hjpage" + (cfg.orient === "h" ? " h" : ""); w.appendChild(hojaDibujar(g, hojas[0] || [], cfg, 2.4));
+        w.insertAdjacentHTML("beforeend", `<span class="hjpag">${!its.length ? "Ejemplo de hoja llena" : hojas.length > 1 ? `Hoja 1 de ${hojas.length} (muestra)` : "Así queda la hoja"}</span>`); pv.appendChild(w);
       }
-      $e("#hjTam").onclick = (e) => { const b = e.target.closest("[data-c]"); if (!b) return; ls.set("hojaCols", b.dataset.c); pintarHoja(); };
+      nombreLargo($e("#hjList"));
+      el.querySelectorAll(".segn[data-k]").forEach(sg => sg.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-v]"); if (!b) return; const k = sg.dataset.k;
+        hojaCfgSet({ [k]: ["sep", "margen"].includes(k) ? Number(b.dataset.v) : b.dataset.v }); pintarHoja();
+      }));
+      $e("#hjCfgBtn").onclick = () => { verCfg = !verCfg; pintarSegs(); };
       $e("#hjList").addEventListener("click", (e) => {
         const b = e.target.closest("[data-a]"), row = e.target.closest("[data-i]"); if (!b || !row || b.dataset.a === "n") return;
         const l = hojaLista(), it = l[Number(row.dataset.i)]; if (!it) return;
@@ -3317,11 +3417,32 @@ function etiquetasSeccion(){
           ver();
         });
       };
+      /* hojas listas para imprimir o guardar (a buena resolución: ~200 puntos por pulgada) */
+      const hojasFinales = () => { const its = items(), g = geo(its), cfg = hojaCfg(); return { its, g, cfg, lienzos: hojaPartir(celdasDe(its), g).map(cs => hojaDibujar(g, cs, cfg, 8)) }; };
+      const despues = (its, tot, que) => setTimeout(() => preguntar(`¿Salieron bien?`, `Si las ${miles(tot)} etiquetas ${que} bien, se marcan como <b>impresas</b> (así no se repiten) y se vacía la hoja.`, [
+        { t: "Sí, marcar como impresas", clase: "primary", fn: async () => { const n = await marcarImpresas(its.map(x => x.id)); hojaGuardar([]); cache.clear(); resumen(); if (tab === "hoja") pintarHoja(); else lista(); toast(`${miles(n)} producto${n > 1 ? "s" : ""} marcado${n > 1 ? "s" : ""} como impreso${n > 1 ? "s" : ""}`); } }]), 700);
       $e("#hjPrint").onclick = () => {
-        const its = items(); if (!its.length) return;
-        const tot = its.reduce((a, x) => a + x.n, 0);
-        imprimirHoja(hojaPaginas(its, hojaCols()), hojaCols(), () => preguntar("¿Salieron bien?", `Si las ${miles(tot)} etiquetas se imprimieron bien, se marcan como <b>impresas</b> (así no se repiten) y se vacía la hoja.`, [
-          { t: "Sí, marcar como impresas", clase: "primary", fn: async () => { const n = await marcarImpresas(its.map(x => x.id)); hojaGuardar([]); cache.clear(); resumen(); if (tab === "hoja") pintarHoja(); else lista(); toast(`${miles(n)} producto${n > 1 ? "s" : ""} marcado${n > 1 ? "s" : ""} como impreso${n > 1 ? "s" : ""}`); } }]));
+        const { its, g, cfg, lienzos } = hojasFinales(); if (!lienzos.length) return;
+        imprimirHoja(lienzos, g, cfg); despues(its, its.reduce((a, x) => a + x.n, 0), "se imprimieron");
+      };
+      $e("#hjExp").onclick = () => {
+        const nombre = `etiquetas-${stamp()}`;
+        const guardar = async (tipo) => {
+          toast("Preparando el archivo…", 1500);
+          await new Promise(r => setTimeout(r, 60));
+          const { its, g, lienzos } = hojasFinales(); if (!lienzos.length) return;
+          try {
+            if (tipo === "pdf") await compartirVarios([{ blob: await pdfDeHojas(lienzos, g.pw, g.ph), nombre: nombre + ".pdf" }]);
+            else { const mime = tipo === "png" ? "image/png" : "image/jpeg", arch = [];
+              for (let i = 0; i < lienzos.length; i++) arch.push({ blob: await new Promise(r => lienzos[i].toBlob(r, mime, 0.93)), nombre: `${nombre}${lienzos.length > 1 ? "-hoja" + (i + 1) : ""}.${tipo}` });
+              await compartirVarios(arch); }
+            despues(its, its.reduce((a, x) => a + x.n, 0), "salieron");
+          } catch { toast("No se pudo crear el archivo."); }
+        };
+        preguntar("Guardar la hoja", "Para imprimir en otro computador, mandar a una imprenta o guardar. Sale al tamaño exacto del papel.", [
+          { t: "PDF (para imprimir)", clase: "primary", fn: () => guardar("pdf") },
+          { t: "Imagen PNG (más nítida)", fn: () => guardar("png") },
+          { t: "Imagen JPG (más liviana)", fn: () => guardar("jpg") }]);
       };
       verTab("productos"); resumen();
     });
@@ -3342,21 +3463,16 @@ function etiquetaUna(p, o, alCambiar){
     const fa = el.querySelector("#e1Falta"); if (fa) fa.onclick = async () => { const todo = S.db.exportAll(), k = "productos/" + p.id; if (todo[k]) await S.db.putMany({ [k]: { ...todo[k], etqCod: "", etqT: 0 } }); alCambiar && alCambiar(); close(); toast("Quedó como pendiente"); };
   });
 }
-function imprimirHoja(pags, cols, alTerminar){
-  if (!pags.length) return;
-  const cw = HOJA.ancho / cols, urls = new Map(), url = (c) => { if (!urls.has(c)) urls.set(c, c.toDataURL("image/png")); return urls.get(c); };
-  let tot = 0;
+function imprimirHoja(lienzos, g, cfg){
+  if (!lienzos.length) return;
   let h = $("printHoja"); if (!h){ h = document.createElement("div"); h.id = "printHoja"; $("printArea").appendChild(h); }
-  h.innerHTML = pags.map(pag => `<div class="hpage">` + pag.map(({ fila, alto }) => `<div class="hrow" style="height:${alto.toFixed(2)}mm">`
-    + fila.map(it => { tot++; return `<div class="hc" style="width:${cw.toFixed(2)}mm"><img src="${url(it.c)}" alt=""></div>`; }).join("") + `</div>`).join("") + `</div>`).join("");
+  h.innerHTML = lienzos.map(cv => `<img class="hpimg" src="${cv.toDataURL("image/png")}" alt="" style="width:${g.pw}mm;height:${g.ph}mm">`).join("");
   let st = $("pageHoja"); if (!st){ st = document.createElement("style"); st.id = "pageHoja"; document.head.appendChild(st); }
-  st.textContent = `@media print{@page{size:letter;margin:${HOJA.margen}mm}#printImg{display:none!important}}`;
+  st.textContent = `@media print{@page{size:${g.pw}mm ${g.ph}mm;margin:0}#printImg{display:none!important}}`;
   $("printImg").removeAttribute("src");
   const limpiar = () => { window.removeEventListener("afterprint", limpiar); setTimeout(() => { const s2 = $("pageHoja"); if (s2) s2.remove(); const h2 = $("printHoja"); if (h2) h2.remove(); }, 500); };
   window.addEventListener("afterprint", limpiar);
-  Promise.all([...h.querySelectorAll("img")].map(i => i.decode ? i.decode().catch(() => {}) : null)).then(() => {
-    setTimeout(() => { window.print(); toast(`${miles(tot)} etiqueta${tot > 1 ? "s" : ""} en ${pags.length} hoja${pags.length > 1 ? "s" : ""} carta`, 2500); if (alTerminar) setTimeout(alTerminar, 600); }, 120);
-  });
+  Promise.all([...h.querySelectorAll("img")].map(i => i.decode ? i.decode().catch(() => {}) : null)).then(() => setTimeout(() => window.print(), 120));
 }
 
 /* ---------- inventario ---------- */
@@ -3417,7 +3533,7 @@ $("invCam").onclick = async () => {
 };
 function renderInv(){
   const low = S.config?.bajo ?? 3;
-  { const f = etqPendientes().length; $("invEtq").innerHTML = "Etiquetas" + (f ? ` <span class="badge">${miles(f)}</span>` : ""); }
+  { const f = etqPendientes().length, b = $("invEtqN"); b.textContent = f > 99 ? "99+" : miles(f); b.hidden = !f; $("invEtq").setAttribute("aria-label", f ? `Etiquetas (${f} pendientes)` : "Etiquetas"); }
   $("invCount").textContent = miles(S.productos.length);
   $("invUnits").textContent = miles(S.productos.reduce((a,p)=>a+Math.max(0,Number(p.cantidad)||0),0));
   $("invValor").textContent = fmt(S.productos.reduce((a,p)=>a+Math.max(0,Number(p.cantidad)||0)*(Number(p.precio)||0),0));
