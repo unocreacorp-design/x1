@@ -3088,47 +3088,29 @@ $("iBorrar").onclick = () => confirmar("¿Eliminar “"+$("iNombre").value+"” 
 });
 
 /* ---------- etiqueta: se escoge en Ajustes qué sale ---------- */
-const ETQ_CAMPOS = [["tienda","Nombre de la ferretería"],["nombre","Nombre del producto"],["precio","Precio"],["barras","Código de barras"],["codigo","Código debajo de las barras"],["prov","Código del proveedor"],["fecha","Fecha"]];
-const ETQ_DEF = { tienda:true, nombre:true, precio:false, barras:true, codigo:true, prov:true, fecha:true };
+const ETQ_CAMPOS = [["tienda","Nombre de la ferretería"],["nombre","Nombre del producto"],["precio","Precio"],["barras","Código de barras o QR"],["codigo","Número del código"],["prov","Código del proveedor"],["fecha","Fecha"]];
+const ETQ_DEF = { tienda:true, nombre:true, precio:false, barras:true, codigo:true, prov:true, fecha:true, diseno:"grande" };
 function etqOpts(){ return { ...ETQ_DEF, ...(S.config?.etq || {}) }; }
 function etqTexto(x, t, maxW){ if (x.measureText(t).width <= maxW) return [t];
   const ws = String(t).split(/\s+/), ls = []; let cur = "";
   for (const w of ws){ const n = cur ? cur + " " + w : w; if (x.measureText(n).width <= maxW) cur = n; else { if (cur) ls.push(cur); cur = w; } }
   if (cur) ls.push(cur); return ls.slice(0, 2); }
 function etiquetaCanvas(p, o = etqOpts(), ancho){
-  const W = ancho || Number(S.config?.papel)||384, big = W >= 576 ? 1.4 : 1, pad = 10;
-  const c = document.createElement("canvas"); c.width = W; c.height = 900; const x = c.getContext("2d");
-  x.fillStyle = "#fff"; x.fillRect(0, 0, W, c.height); x.fillStyle = "#000"; x.textAlign = "center"; x.textBaseline = "top";
-  let y = pad; const linea = (txt, size, peso = 700, fam = '"Barlow Condensed", "IBM Plex Mono", sans-serif') => {
-    x.font = `${peso} ${Math.round(size*big)}px ${fam}`;
-    for (const l of etqTexto(x, txt, W - pad*2)){ x.fillText(l, W/2, y); y += Math.round(size*big*1.12); } y += 2; };
-  const cod = p.codigoPropio || p.codigo || "";
-  if (o.tienda && S.config?.nombre) linea(String(S.config.nombre).toUpperCase(), 20, 800);
-  if (o.nombre && p.nombre) linea(p.nombre, 24, 700);
-  if (o.precio && p.precio) linea(fmt(p.precio), 32, 800);
-  if (o.barras && cod && window.JsBarcode){
-    const bc = document.createElement("canvas");
-    try { JsBarcode(bc, cod, { format:"CODE128", width: W >= 576 ? 3 : 2, height: Math.round(70*big), margin: 0, displayValue: false });
-      const bw = Math.min(bc.width, W - pad*2); y += 4; x.drawImage(bc, (W - bw)/2, y, bw, bc.height); y += bc.height + 4; } catch {}
-  }
-  if (o.codigo && cod) linea(cod, 24, 600, '"IBM Plex Mono", monospace');
-  const pie = [];
-  if (o.prov){ const pv = provById(p.proveedorId); const t = pv ? (pv.codigo || pv.nombre) : ""; if (t) pie.push("Prov: " + t); }
-  if (o.fecha) pie.push(fFecha(p.creado || Date.now()));
-  if (pie.length) linea(pie.join("   "), 18, 600, '"IBM Plex Mono", monospace');
-  if (S.config?.etqExtra) linea(S.config.etqExtra, 18, 600);
-  const out = document.createElement("canvas"); out.width = W; out.height = y + pad;
-  out.getContext("2d").drawImage(c, 0, 0); return out;
+  const v = etiquetaOps(p, o), W = ancho || Number(S.config?.papel) || 384, k = W / v.W;
+  const c = document.createElement("canvas"); c.width = W; c.height = Math.ceil(v.H * k);
+  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+  opsEnCanvas(x, v, 0, 0, W); return c;
 }
 /* Qué sale en la etiqueta: lista desplegable para chulear cada cosa */
 function etqChecks(box, o, alCambiar){
   const cuenta = () => `${ETQ_CAMPOS.filter(([k]) => o[k]).length} de ${ETQ_CAMPOS.length}`;
-  box.innerHTML = `<details class="etqdd"><summary><span>Qué sale en la etiqueta</span><span class="ct">${cuenta()}</span></summary><div class="ckl">`
+  box.innerHTML = `<div class="segn" data-dis role="group" aria-label="Diseño" style="margin-bottom:8px">${ETQ_DISENOS.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${(o.diseno || "grande") === v}">${t}</button>`).join("")}</div><details class="etqdd"><summary><span>Qué sale en la etiqueta</span><span class="ct">${cuenta()}</span></summary><div class="ckl">`
     + ETQ_CAMPOS.map(([k, t]) => `<label class="ck"><input type="checkbox" data-etqk="${k}"${o[k] ? " checked" : ""}><span>${t}</span></label>`).join("") + `</div></details>`;
   box.querySelector(".ckl").addEventListener("change", (e) => {
     const i = e.target.closest("[data-etqk]"); if (!i) return;
     o[i.dataset.etqk] = i.checked; box.querySelector(".ct").textContent = cuenta(); alCambiar(o);
   });
+  box.querySelector("[data-dis]").addEventListener("click", (e) => { const b = e.target.closest("[data-v]"); if (!b) return; o.diseno = b.dataset.v; box.querySelectorAll("[data-dis] [data-v]").forEach(x => x.setAttribute("aria-pressed", x === b)); alCambiar(o); });
 }
 const ETQ_MUESTRA = () => ({ codigoPropio: "9195x20", nombre: "Martillo de uña 16 oz", precio: 9500, proveedorId: (S.provs||[])[0]?.id || "", creado: Date.now() });
 function pintarEtqAjustes(){
@@ -3166,41 +3148,80 @@ function preguntar(titulo, texto, botones){
    Se arma una lista de dibujos en unidades de 384 de ancho; con eso se hace la vista, la impresión (SVG),
    el PDF (vectores, negro puro CMYK 0/0/0/100) y las imágenes PNG/JPG en alta resolución. */
 const HB_W = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+/* Diseños: "grande" (letra grande, barras bajitas y angostas), "qr" (QR al lado y letra grande), "clasica" (como antes) */
+const ETQ_DISENOS = [["grande", "Letra grande"], ["qr", "QR al lado"], ["clasica", "Clásica"]];
+const etqFam = (mono) => mono ? '"IBM Plex Mono", monospace' : '"Barlow Condensed", "IBM Plex Mono", sans-serif';
+function etqEnvolver(cx, t, maxw){   /* parte el texto en renglones; una palabra muy larga se parte por letras */
+  const ls = []; let cur = "";
+  for (const w0 of String(t).split(/\s+/).filter(Boolean)){
+    let w = w0;
+    while (cx.measureText(w).width > maxw && w.length > 1){ let i = w.length - 1; while (i > 1 && cx.measureText(w.slice(0, i)).width > maxw) i--; if (cur){ ls.push(cur); cur = ""; } ls.push(w.slice(0, i)); w = w.slice(i); }
+    const n = cur ? cur + " " + w : w;
+    if (cx.measureText(n).width <= maxw) cur = n; else { if (cur) ls.push(cur); cur = w; }
+  }
+  if (cur) ls.push(cur); return ls;
+}
 function etiquetaOps(p, o = etqOpts()){
-  const W = 384, pad = 10, ops = [], cx = document.createElement("canvas").getContext("2d"); let y = pad;
-  const linea = (txt, size, peso = 700, mono = false) => {
-    cx.font = `${peso} ${size}px ${mono ? '"IBM Plex Mono", monospace' : '"Barlow Condensed", "IBM Plex Mono", sans-serif'}`;
-    for (const l of etqTexto(cx, txt, W - pad*2)){ ops.push({ t: "txt", s: l, size, peso, mono, y }); y += Math.round(size * 1.12); }
-    y += 2;
-  };
+  const W = 384, pad = 10, ops = [], cx = document.createElement("canvas").getContext("2d"), d = o.diseno || "grande";
   const cod = p.codigoPropio || p.codigo || "";
-  if (o.tienda && S.config?.nombre) linea(String(S.config.nombre).toUpperCase(), 20, 800);
-  if (o.nombre && p.nombre) linea(p.nombre, 24, 700);
-  if (o.precio && p.precio) linea(fmt(p.precio), 32, 800);
-  if (o.barras && cod && window.JsBarcode){
+  let y = pad;
+  /* texto que se achica hasta caber en "lineas" renglones; si no cabe, se corta con … */
+  const texto = (txt, size, peso, mono, { x = W / 2, align = "center", maxw = W - 2*pad, lineas = 2, min = Math.round(size * 0.6), luego } = {}) => {
+    let s = size, ls;
+    if (luego){   /* primero intenta en pocos renglones sin achicar mucho; si no cabe, usa más renglones */
+      cx.font = `${peso} ${min}px ${etqFam(mono)}`;
+      if (etqEnvolver(cx, txt, maxw).length > lineas) return texto(txt, min, peso, mono, { x, align, maxw, ...luego });
+    }
+    for (; s >= min; s -= 2){ cx.font = `${peso} ${s}px ${etqFam(mono)}`; ls = etqEnvolver(cx, txt, maxw); if (ls.length <= lineas) break; }
+    if (s < min){ s = min; cx.font = `${peso} ${s}px ${etqFam(mono)}`; ls = etqEnvolver(cx, txt, maxw).slice(0, lineas); let u = ls[lineas - 1] + "…"; while (u.length > 2 && cx.measureText(u).width > maxw) u = u.slice(0, -2) + "…"; ls[lineas - 1] = u; }
+    ls.forEach(l => { ops.push({ t: "txt", s: l, size: s, peso, mono, y, x, align, maxw }); y += Math.round(s * 1.08); });
+    y += 3;
+  };
+  const barras = (alto, maxAncho) => {
     try {
       const sv = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      JsBarcode(sv, cod, { format: "CODE128", width: 2, height: 70, margin: 0, displayValue: false, background: "#ffffff" });
-      const bars = [...sv.querySelectorAll("g rect")].map(r => ({ x: +r.getAttribute("x") || 0, y: +r.getAttribute("y") || 0, w: +r.getAttribute("width") || 0, h: +r.getAttribute("height") || 0 })).filter(r => r.w > 0);
-      const tw = Math.max(...bars.map(b => b.x + b.w)), bw = Math.min(tw, W - pad*2), k = bw / tw, x0 = (W - bw) / 2;
-      y += 4; bars.forEach(b => ops.push({ t: "rect", x: x0 + b.x * k, y: y + b.y, w: b.w * k, h: b.h })); y += 70 + 4;
+      JsBarcode(sv, cod, { format: "CODE128", width: 2, height: alto, margin: 0, displayValue: false, background: "#ffffff" });
+      const bars = [...sv.querySelectorAll("g rect")].map(r => ({ x: +r.getAttribute("x") || 0, w: +r.getAttribute("width") || 0 })).filter(r => r.w > 0);
+      const tw = Math.max(...bars.map(b => b.x + b.w)), bw = Math.min(tw, maxAncho), k = bw / tw, x0 = (W - bw) / 2;
+      y += 2; bars.forEach(b => ops.push({ t: "rect", x: x0 + b.x * k, y, w: b.w * k, h: alto })); y += alto + 4;
     } catch {}
+  };
+  const pieTxt = () => { const pie = []; if (o.prov){ const pv = provById(p.proveedorId); const t = pv ? (pv.codigo || pv.nombre) : ""; if (t) pie.push("Prov: " + t); } if (o.fecha) pie.push(fFecha(p.creado || Date.now())); return pie.join("  "); };
+  if (d === "qr" && o.barras && cod && window.ZXing){
+    /* QR a la izquierda, textos grandes a la derecha */
+    let mods = null;
+    try { const q = ZXing.QRCodeEncoder.encode(cod, ZXing.QRCodeDecoderErrorCorrectionLevel.M, new Map()).getMatrix(); mods = { n: q.getWidth(), get: (a, b) => q.get(a, b) === 1 }; } catch {}
+    const Q = 150, qx = pad, xt = pad + Q + 14, maxw = W - xt - pad;
+    if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), 20, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 12 });
+    if (o.nombre && p.nombre) texto(p.nombre, 34, 700, false, { x: xt, align: "left", maxw, lineas: 2, min: 28, luego: { lineas: 4, min: 20 } });
+    if (o.precio && p.precio) texto(fmt(p.precio), 42, 800, false, { x: xt, align: "left", maxw, lineas: 1, min: 24 });
+    if (o.codigo && cod) texto(cod, 30, 700, true, { x: xt, align: "left", maxw, lineas: 1, min: 14 });
+    const pt = pieTxt(); if (pt) texto(pt, 17, 600, true, { x: xt, align: "left", maxw, lineas: 2, min: 11 });
+    const yTxt = y, alto = Math.max(Q, yTxt - pad), qy = pad + (alto - Q) / 2;
+    if (mods){ const m = Q / mods.n;
+      for (let r = 0; r < mods.n; r++){ let c = 0; while (c < mods.n){ if (!mods.get(c, r)){ c++; continue; } let e = c; while (e < mods.n && mods.get(e, r)) e++; ops.push({ t: "rect", x: qx + c * m, y: qy + r * m, w: (e - c) * m, h: m + 0.05 }); c = e; } } }
+    if (yTxt - pad < Q){ const dy = (Q - (yTxt - pad)) / 2; ops.forEach(op => { if (op.t === "txt") op.y += dy; }); }
+    y = pad + alto;
+    if (S.config?.etqExtra){ y += 4; texto(S.config.etqExtra, 18, 600, false, { lineas: 1, min: 11 }); y -= 3; }
+    return { W, H: y + pad, ops };
   }
-  if (o.codigo && cod) linea(cod, 24, 600, true);
-  const pie = [];
-  if (o.prov){ const pv = provById(p.proveedorId); const t = pv ? (pv.codigo || pv.nombre) : ""; if (t) pie.push("Prov: " + t); }
-  if (o.fecha) pie.push(fFecha(p.creado || Date.now()));
-  if (pie.length) linea(pie.join("   "), 18, 600, true);
-  if (S.config?.etqExtra) linea(S.config.etqExtra, 18, 600);
-  return { W, H: y + pad, ops };
+  const G = d !== "clasica";
+  if (o.tienda && S.config?.nombre) texto(String(S.config.nombre).toUpperCase(), G ? 22 : 20, 800, false, { lineas: 1, min: 12 });
+  if (o.nombre && p.nombre) texto(p.nombre, G ? 40 : 24, 700, false, G ? { lineas: 2, min: 32, luego: { lineas: 3, min: 24 } } : { lineas: 2, min: 16 });
+  if (o.precio && p.precio) texto(fmt(p.precio), G ? 48 : 32, 800, false, { lineas: 1, min: 24 });
+  if (o.barras && cod && window.JsBarcode) barras(G ? 44 : 70, G ? W * 0.8 : W - 2*pad);
+  if (o.codigo && cod) texto(cod, G ? 38 : 24, G ? 700 : 600, true, { lineas: 1, min: 14 });
+  const pt = pieTxt(); if (pt) texto(pt, G ? 20 : 18, 600, true, { lineas: 1, min: 11 });
+  if (S.config?.etqExtra) texto(S.config.etqExtra, G ? 20 : 18, 600, false, { lineas: 1, min: 11 });
+  return { W, H: y - 3 + pad, ops };
 }
 /* dibuja la etiqueta (ops) en un canvas: x0,y0 y ancho en pixeles */
 function opsEnCanvas(x, v, x0, y0, ancho){
   const k = ancho / v.W;
-  x.save(); x.fillStyle = "#000"; x.textAlign = "center"; x.textBaseline = "top";
+  x.save(); x.fillStyle = "#000"; x.textBaseline = "top";
   v.ops.forEach(op => {
     if (op.t === "rect") x.fillRect(x0 + op.x * k, y0 + op.y * k, Math.max(op.w * k, 0.5), op.h * k);
-    else { x.font = `${op.peso} ${op.size * k}px ${op.mono ? '"IBM Plex Mono", monospace' : '"Barlow Condensed", "IBM Plex Mono", sans-serif'}`; x.fillText(op.s, x0 + (v.W / 2) * k, y0 + op.y * k); }
+    else { x.font = `${op.peso} ${op.size * k}px ${etqFam(op.mono)}`; x.textAlign = op.align === "left" ? "left" : "center"; x.fillText(op.s, x0 + (op.x ?? v.W / 2) * k, y0 + op.y * k); }
   });
   x.restore();
 }
@@ -3214,7 +3235,7 @@ function hojaSVG(g, celdas, cfg){
     s += `<g transform="translate(${r(ox)} ${r(oy)}) scale(${r(k)})">`;
     v.ops.forEach(op => {
       if (op.t === "rect") s += `<rect x="${r(op.x)}" y="${r(op.y)}" width="${r(op.w)}" height="${r(op.h)}" fill="#000"/>`;
-      else s += `<text x="${v.W / 2}" y="${op.y}" text-anchor="middle" dominant-baseline="text-before-edge" font-family="${op.mono ? "IBM Plex Mono, monospace" : "Barlow Condensed, sans-serif"}" font-weight="${op.peso}" font-size="${op.size}" fill="#000">${e(op.s)}</text>`;
+      else s += `<text x="${r(op.x ?? v.W / 2)}" y="${op.y}" text-anchor="${op.align === "left" ? "start" : "middle"}" dominant-baseline="text-before-edge" font-family="${op.mono ? "IBM Plex Mono, monospace" : "Barlow Condensed, sans-serif"}" font-weight="${op.peso}" font-size="${op.size}" fill="#000">${e(op.s)}</text>`;
     });
     s += "</g>";
     if (cfg.guia === "punteada") s += `<rect x="${r(cx)}" y="${r(cy)}" width="${r(g.w)}" height="${r(g.h)}" fill="none" stroke="#9a9a9a" stroke-width="0.15" stroke-dasharray="1.2 1.2"/>`;
@@ -3256,10 +3277,10 @@ function pdfVectorial(hojas, g, cfg){
       const iw = g.w - 2*g.pad, k = iw / v.W, ih = v.H * k, ox = cx + g.pad, oy = cy + (g.h - ih) / 2;
       v.ops.forEach(op => {
         if (op.t === "rect"){ c += `${f((ox + op.x * k) * MM)} ${f(Y(oy + (op.y + op.h) * k))} ${f(op.w * k * MM)} ${f(op.h * k * MM)} re f\n`; return; }
-        const size = op.size * k * MM, disp = (v.W - 20) * k * MM, raw = ancho(op.s, op.mono) / 1000 * size;
+        const size = op.size * k * MM, disp = (op.maxw || v.W - 20) * k * MM, raw = ancho(op.s, op.mono) / 1000 * size;
         const tz = Math.min(op.mono ? 100 : 86, 100 * disp / Math.max(raw, 0.01)), w = raw * tz / 100;
-        const xc = (ox + v.W / 2 * k) * MM, base = Y(oy + op.y * k) - size * (op.mono ? 0.76 : 0.80);
-        c += `BT /${op.mono ? "F2" : "F1"} ${f(size)} Tf ${f(tz)} Tz ${f(xc - w / 2)} ${f(base)} Td ${pdfStr(op.s)} Tj ET\n`;
+        const xa = (ox + (op.x ?? v.W / 2) * k) * MM, base = Y(oy + op.y * k) - size * (op.mono ? 0.76 : 0.80);
+        c += `BT /${op.mono ? "F2" : "F1"} ${f(size)} Tf ${f(tz)} Tz ${f(op.align === "left" ? xa : xa - w / 2)} ${f(base)} Td ${pdfStr(op.s)} Tj ET\n`;
       });
       if (cfg.guia === "punteada") c += `q 0 0 0 0.45 K ${f(0.15 * MM)} w [${f(1.2 * MM)} ${f(1.2 * MM)}] 0 d ${f(cx * MM)} ${f(Y(cy + g.h))} ${f(g.w * MM)} ${f(g.h * MM)} re S Q\n`;
     });
@@ -3493,11 +3514,12 @@ function etiquetasSeccion(){
       });
       $e("#etqOpts").onclick = () => {
         const muestra = prod(hojaLista()[0]?.id) || S.productos.find(q => codEtq(q)) || ETQ_MUESTRA();
-        popup("Qué sale en la etiqueta", `<div class="etqpop"><div class="recibo-wrap" id="eoPrev"></div><div class="ckl ckpop">`
+        popup("Qué sale en la etiqueta", `<div class="etqpop"><div class="segn" id="eoDis" role="group" aria-label="Diseño">${ETQ_DISENOS.map(([v, t]) => `<button type="button" data-v="${v}" aria-pressed="${(o.diseno || "grande") === v}">${t}</button>`).join("")}</div><div class="recibo-wrap" id="eoPrev"></div><div class="ckl ckpop">`
           + ETQ_CAMPOS.map(([k, t]) => `<label class="ck"><input type="checkbox" data-etqk="${k}"${o[k] ? " checked" : ""}><span>${t}</span></label>`).join("")
           + `</div><button type="button" class="btn primary block" data-popclose>Listo</button></div>`, (pe) => {
           const ver = () => { const w = pe.querySelector("#eoPrev"); w.innerHTML = ""; const cv = etiquetaCanvas(muestra, o); cv.style.maxWidth = "100%"; w.appendChild(cv); };
           pe.querySelector(".ckl").addEventListener("change", (e) => { const i = e.target.closest("[data-etqk]"); if (!i) return; o[i.dataset.etqk] = i.checked; ver(); cfgSet({ etq: { ...o } }); cache.clear(); pintarHoja(); });
+          pe.querySelector("#eoDis").addEventListener("click", (e) => { const b = e.target.closest("[data-v]"); if (!b) return; o.diseno = b.dataset.v; pe.querySelectorAll("#eoDis [data-v]").forEach(x => x.setAttribute("aria-pressed", x === b)); ver(); cfgSet({ etq: { ...o } }); cache.clear(); pintarHoja(); });
           ver();
         });
       };
